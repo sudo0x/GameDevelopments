@@ -23,16 +23,16 @@ Game direction: a moody dark-fantasy farm on a cursed island. See [03_2026-11-03
 
 ```mermaid
 flowchart LR
-    A[Buy seeds] --> B[Till soil]
-    B --> C[Plant]
-    C --> D[Water]
-    D --> E[Sleep: next day]
-    E --> F{Crop ready?}
-    F -- No --> D
-    F -- Yes --> G[Harvest]
-    G --> H[Put in shipping box]
-    H --> I[Money paid overnight]
-    I --> A
+	A[Buy seeds] --> B[Till soil]
+	B --> C[Plant]
+	C --> D[Water]
+	D --> E[Sleep: next day]
+	E --> F{Crop ready?}
+	F -- No --> D
+	F -- Yes --> G[Harvest]
+	G --> H[Put in shipping box]
+	H --> I[Money paid overnight]
+	I --> A
 ```
 
 ## In scope
@@ -75,11 +75,11 @@ Cleansing the curse and unlocking land (Layer 2), crafting, building, combat, NP
 
 Each step ends with something you can run in Godot and see working.
 
-1. **Project setup:** folders, pixel settings, input keys
-2. **Player movement:** a colored square that walks around a test map
-3. **Farm grid:** a TileMap with grass, a farmable area and the cursed border, plus a highlight on the targeted tile
-4. **Tools: till and plant:** switch tools, till soil, plant seeds
-5. **Water and day cycle:** watering, house door to sleep, day counter, crops grow overnight
+1. ✅ **Project setup:** folders, pixel settings, input keys
+2. ✅ **Player movement:** the hooded farmer walks around a test map (8-way movement, 4 facing poses, camera follow)
+3. ✅ **Farm grid:** a TileMap with grass, a farmable area and the cursed border, plus a highlight on the targeted tile
+4. ✅ **Tools: till and plant:** switch tools, till soil, plant seeds (crops use a drawn placeholder until crop art exists)
+5. ✅ **Water and day cycle:** watering, house door to sleep (with a fade), day counter, crops grow overnight
 6. **Harvest and inventory:** pick crops, track counts, HUD
 7. **Shipping box and shop:** sell crops, earn money, buy seeds
 8. **Save / load:** keep progress between sessions

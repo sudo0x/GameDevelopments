@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CropData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/crop_data.gd" id="1_crop"]
+[ext_resource type="Texture2D" path="res://assets/crops/radish_stages.png" id="2_stages"]
+
+[resource]
+script = ExtResource("1_crop")
+id = &"radish"
+display_name = "Radish"
+days_to_grow = 3
+seed_price = 10
+sell_price = 25
+stages_texture = ExtResource("2_stages")
+color = Color(0.78, 0.25, 0.35, 1)

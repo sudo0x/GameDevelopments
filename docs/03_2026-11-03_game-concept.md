@@ -4,7 +4,7 @@
 
 ## Change of direction
 
-The original plan was a Stardew-like farm with a twist decided later. After seeing the dark-fantasy style reference (`assets/style_reference.png`), the direction changed to:
+The original plan was a Stardew-like farm with a twist decided later. After seeing the dark-fantasy style reference (`art_source/style_reference.png`), the direction changed to:
 
 > **A moody dark-fantasy farming game where farming heals a cursed island.**
 

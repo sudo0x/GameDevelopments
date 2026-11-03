@@ -18,9 +18,9 @@ flowchart LR
 
 1. **Style reference first.** Generate prompt **S1** several times and pick the one you like most. This decides the look of the whole game.
 2. **Attach that image to every later prompt** and keep the sentence "Match the style of the attached reference exactly." This is the main trick for consistency.
-3. **Downscale.** GPT outputs large images (about 1024px). They must be shrunk to the real size (e.g. 32×32) with **nearest neighbor** scaling, never smooth scaling. Claude can write a script for this.
-4. **Clean up.** AI pixel art isn't on a perfect grid. Fix stray pixels and colors in **Pixelorama** (free, made with Godot) or **Aseprite** (about $20).
-5. **Save** using the file names in the tables below.
+3. **Save the original** from ChatGPT into `art_source/` using the file names in the tables below (for example `art_source/player/player_directions.png`). Godot ignores this folder.
+4. **Downscale.** GPT draws each art pixel as a block of about 10×10 screen pixels. `tools/pixelize.gd` finds each sprite, measures the block size and samples one color per art pixel, then saves the real-size result into `assets/`. Claude runs it.
+5. **Clean up** if needed. Fix stray pixels and colors in **Pixelorama** (free, made with Godot) or **Aseprite** (about $20).
 
 **Tips:**
 - One asset per image gives the best results. Sheets of many items come out messy.
@@ -41,7 +41,7 @@ Transparent background. No text. Single object, centered, filling most of the im
 
 ## S1: Style reference (chosen)
 
-Saved as `assets/style_reference.png`. Attach it to every asset prompt. This is the prompt that produced it:
+Saved as `art_source/style_reference.png`. Attach it to every asset prompt. This is the prompt that produced it:
 
 ```
 Pixel art game scene for a 2D top-down farming game, 3/4 top-down view.
@@ -66,26 +66,45 @@ For every prompt below, send **one message** in this order:
 3. "Match the style of the attached reference exactly."
 4. Attach your chosen **S1 image**
 
-### Tiles (32×32, must repeat seamlessly)
+### Ground textures (128×128 = a 4×4 block of tiles, must repeat seamlessly)
 
-| File | Prompt |
+**Lesson from the grass (2026-11-03):** asking for a single 32×32 tile loses detail, because ChatGPT's own shrink turned the grass tufts into noise. A **large seamless texture** shrunk to 128×128 by `tools/pixelize.gd` keeps the detail and repeats cleanly. The game picks the right 32×32 piece of the 128×128 texture from each tile's position, so neighbors always line up.
+
+Ground prompt (style block without "transparent background" and "single object"):
+
+```
+Pixel art game texture for a 2D top-down farming game, seen from above.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, neutral daylight (not night, no glow).
+No text, no border, no grid lines.
+
+A square seamless tileable ground texture: [DESCRIPTION]. Fill the whole image
+edge to edge. The left edge must match the right edge and the top must match the
+bottom, so it repeats without visible seams.
+
+Match the style of the attached reference exactly.
+```
+
+Save the original in `art_source/tiles/`. Claude shrinks it to `assets/tiles/` with `--height 128 --frame-w 128 --frame-h 128`.
+
+| File | [DESCRIPTION] |
 |---|---|
-| `tiles/grass_1.png` | A single seamless tileable grass ground tile, short green grass with tiny variation. Fill the whole square, edges must tile seamlessly. Not transparent. |
-| `tiles/grass_2.png` | Same grass tile with a few tiny flowers, seamless tileable. Not transparent. |
-| `tiles/soil_dry.png` | A seamless tileable tilled farm soil tile, light brown with plowed rows, dry. Not transparent. |
-| `tiles/soil_wet.png` | The same tilled soil tile but watered: darker, wetter brown. Same rows. Not transparent. |
-| `tiles/cursed_ground.png` | A seamless tileable cursed ground tile: dark purple-black dead grass with thin bright purple cracks (flat color, no glow effect). Fill the whole square, edges must tile seamlessly. Not transparent. |
-| `tiles/path.png` | A seamless tileable dirt path tile, packed light dirt with small pebbles. Not transparent. |
+| `tiles/grass_master.png` ✅ done → `assets/tiles/grass.png` | short dark green grass with small tufts |
+| `tiles/soil_dry_master.png` ✅ done → `assets/tiles/soil_dry.png` | tilled farm soil, brown earth with plowed rows running left to right, dry |
+| `tiles/soil_wet_master.png` ✅ done → `assets/tiles/soil_wet.png` | **in the same ChatGPT chat as dry soil:** "Now make the exact same soil texture, but watered: darker, wetter brown, same rows, same layout." |
+| `tiles/cursed_ground_master.png` ✅ done → `assets/tiles/cursed_ground.png` | cursed ground: dark purple-black dead grass with thin bright purple cracks (flat color, no glow effect) |
+| `tiles/path_master.png` | packed light dirt path with small pebbles |
 
 ### Crops (32×32 each stage)
 
-Generate each crop as **one image with its stages in a horizontal row**, then split it. Ask for "equal spacing, same ground line".
+Generate each crop as **one image with its 4 stages in a horizontal row**. Draw **only the plant, no soil**: the soil is a separate tile. Claude shrinks it with `--height 20 --frame-w 32 --frame-h 32` (the ripe stage is about 20 art pixels tall) and sets `stages_texture` in `data/crops/<crop>.tres`.
 
-| File | Prompt |
+| File | Stage descriptions (1–4) |
 |---|---|
-| `crops/radish_stages.png` | Growth stages of a radish crop in a horizontal row, 4 stages: seed in soil, small sprout, leafy plant, ripe radish with red top showing. Equal spacing, same ground line. |
-| `crops/carrot_stages.png` | Growth stages of a carrot crop, 4 stages: seed, sprout, leafy plant, ripe carrot with orange top showing. Equal spacing, same ground line. |
-| `crops/pumpkin_stages.png` | Growth stages of a pumpkin crop, 4 stages: seed, sprout, vine with flower, large ripe orange pumpkin. Equal spacing, same ground line. |
+| `crops/radish_stages.png` ✅ done → `assets/crops/radish_stages.png` | tiny planted seed bump; small two-leaf sprout; leafy young plant; ripe radish with its red top showing and full leaves |
+| `crops/carrot_stages.png` ✅ done → `assets/crops/carrot_stages.png` (frames 32×40) | tiny planted seed bump; small two-leaf sprout; leafy young plant with feathery leaves; ripe carrot with its orange top showing and tall feathery leaves |
+| `crops/pumpkin_stages.png` ✅ done → `assets/crops/pumpkin_stages.png` (frames 40×32) | tiny planted seed bump; small two-leaf sprout; a short vine with big leaves and a yellow flower; a ripe orange pumpkin with a short vine and leaves |
 
 ### Items and icons (32×32)
 
@@ -106,7 +125,7 @@ Generate each crop as **one image with its stages in a horizontal row**, then sp
 
 | File | Size | Prompt |
 |---|---|---|
-| `objects/house.png` | 96×96 | A small old wooden farmhouse with a dark mossy shingle roof, a door at the front center, one small window. |
+| `objects/house.png` ✅ done → `assets/objects/house.png` | 96×96 | A small old wooden farmhouse with a dark mossy shingle roof, a door at the front center, one small window. |
 | `objects/shipping_box.png` | 32×32 | A wooden shipping crate with an open lid. |
 | `objects/shop_stall.png` | 64×64 | A small wooden market stall with a striped awning and seed bags on the counter. |
 | `objects/tree.png` | 64×96 | A leafy dark green tree with a twisted brown trunk. |
@@ -120,7 +139,7 @@ AI is weak at animation frames, so start with **still poses** in 4 directions. W
 
 | File | Prompt |
 |---|---|
-| `player/player_directions.png` | The hooded farmer from the reference: dark red hooded cloak, brown tunic with a cloth apron, leather boots. Shown in 4 poses in a horizontal row: facing down, facing up, facing left, facing right. Same size and same ground line for each, equal spacing. |
+| `player/player_directions.png` ✅ done → `assets/player/player_idle.png` (4 frames of 48×64) | The hooded farmer from the reference: dark red hooded cloak, brown tunic with a cloth apron, leather boots. Shown in 4 poses in a horizontal row: facing down, facing up, facing left, facing right. Same size and same ground line for each, equal spacing. |
 
 ## Where files go
 

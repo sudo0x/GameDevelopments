@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/player/player_idle.png" id="2_idle"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_feet"]
+size = Vector2(20, 10)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_reach"]
+radius = 14.0
+
+[node name="Player" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_idle")
+offset = Vector2(0, -32)
+hframes = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_feet")
+
+[node name="Reach" type="Area2D" parent="."]
+position = Vector2(0, -5)
+
+[node name="Shape" type="CollisionShape2D" parent="Reach"]
+shape = SubResource("CircleShape2D_reach")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+process_callback = 0
