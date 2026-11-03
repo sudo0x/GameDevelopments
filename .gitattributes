@@ -1,0 +1,4 @@
+# Normalize line endings (Godot uses LF)
+* text=auto eol=lf
+*.png binary
+*.svg text
