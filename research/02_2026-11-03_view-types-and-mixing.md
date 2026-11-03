@@ -1,5 +1,7 @@
 # How many 2D views exist, and can one game mix them?
 
+**Date:** 2026-11-03
+
 ## How many 2D views are there?
 
 There are **4 main ones**, plus a few variations.

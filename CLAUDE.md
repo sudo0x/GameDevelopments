@@ -21,6 +21,12 @@
 - Autoloads (singletons) only for truly global state (e.g. `GameState`, `AudioManager`)
 - Export tunable values with `@export` so they can be tweaked in the editor
 
+## Docs and research notes
+- Name every new doc `NN_YYYY-MM-DD_short-name.md` (next order number in its folder, date created, kebab-case name)
+- Put `**Date:** YYYY-MM-DD` right under the title of each doc
+- Add each new doc to its folder's `README.md` index (number, date, link)
+- Diagrams go in an `images/` subfolder as SVG with hardcoded colors and a white background, so they render on GitHub
+
 ## Working rules
 - Keep changes focused on the requested feature; don't refactor unrelated code
 - Don't open or edit `.godot/`, `.import` files or binary assets
