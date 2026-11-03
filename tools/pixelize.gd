@@ -10,6 +10,7 @@ extends SceneTree
 ##     --in art_source/player/player_directions.png \
 ##     --out assets/player/player_idle.png \
 ##     --height 64 --frame-w 48 --frame-h 64
+##   Optional: --scale 9.70 (source pixels per art pixel) instead of fitting the tallest sprite to --height.
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
@@ -33,10 +34,11 @@ func _init() -> void:
 		return
 
 	# One scale for all sprites, so they keep the same pixel size.
+	# --scale forces an exact art pixel size, to match another sheet (e.g. walk frames to idle poses).
 	var tallest := 0
 	for box: Rect2i in boxes:
 		tallest = max(tallest, box.size.y)
-	var scale := float(tallest) / target_h
+	var scale := float(args["scale"]) if args.has("scale") else float(tallest) / target_h
 	print("sprites: %d, art pixel size: %.2f source px" % [boxes.size(), scale])
 
 	var sheet := Image.create(frame_w * boxes.size(), frame_h, false, Image.FORMAT_RGBA8)

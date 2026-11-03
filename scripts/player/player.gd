@@ -15,7 +15,12 @@ enum Tool { HOE, WATERING_CAN, SEEDS, HAND }
 const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand"]
 
 @export var speed: float = 90.0
-## Walking bob: a small bounce while moving, until real walk animations exist.
+## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
+## A direction without walk art falls back to the idle pose with a small bob.
+@export var walk_down: Texture2D
+@export var walk_up: Texture2D
+@export var walk_side: Texture2D
+@export var walk_fps: float = 8.0
 @export var bob_height: float = 2.0
 @export var steps_per_second: float = 4.0
 
@@ -30,6 +35,7 @@ var _walk_time: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
+@onready var _idle_texture: Texture2D = sprite.texture
 
 
 func _physics_process(delta: float) -> void:
@@ -40,11 +46,33 @@ func _physics_process(delta: float) -> void:
 	if input != Vector2.ZERO:
 		look_direction = input.normalized()
 		facing = _facing_for(input)
-		sprite.frame = facing
 		_walk_time += delta
 	else:
 		_walk_time = 0.0
-	sprite.position.y = -roundf(absf(sin(_walk_time * PI * steps_per_second)) * bob_height)
+	_update_sprite(input != Vector2.ZERO)
+
+
+func _update_sprite(moving: bool) -> void:
+	var walk := _walk_texture_for(facing) if moving else null
+	if walk:
+		sprite.texture = walk
+		sprite.frame = int(_walk_time * walk_fps) % sprite.hframes
+		sprite.flip_h = facing == Facing.RIGHT
+		sprite.position.y = 0.0
+	else:
+		sprite.texture = _idle_texture
+		sprite.frame = facing
+		sprite.flip_h = false
+		sprite.position.y = -roundf(absf(sin(_walk_time * PI * steps_per_second)) * bob_height)
+
+
+func _walk_texture_for(dir: Facing) -> Texture2D:
+	match dir:
+		Facing.DOWN:
+			return walk_down
+		Facing.UP:
+			return walk_up
+	return walk_side
 
 
 func _unhandled_input(event: InputEvent) -> void:

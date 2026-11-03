@@ -1,64 +1,64 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://bm4csvvspowmj"]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
-[ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
-[ext_resource type="Script" path="res://scripts/farm/farm.gd" id="2_farm"]
-[ext_resource type="Script" path="res://scripts/farm/tile_highlight.gd" id="3_highlight"]
+[ext_resource type="Script" uid="uid://d0ervd6xrselr" path="res://scripts/farm/farm.gd" id="2_farm"]
+[ext_resource type="Script" uid="uid://d3g20xh77qtkj" path="res://scripts/farm/tile_highlight.gd" id="3_highlight"]
 [ext_resource type="PackedScene" path="res://scenes/farm/ground.tscn" id="4_ground"]
-[ext_resource type="TileSet" path="res://data/tilesets/ground_tileset.tres" id="5_tiles"]
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="6_hud"]
+[ext_resource type="TileSet" uid="uid://cnq0xev7567av" path="res://data/tilesets/ground_tileset.tres" id="5_tiles"]
+[ext_resource type="Script" uid="uid://qchubhvhgjdn" path="res://scripts/ui/hud.gd" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=1909061381]
 
-[node name="Farm" type="Node2D" parent="."]
+[node name="Farm" type="Node2D" parent="." unique_id=2138284962]
 script = ExtResource("2_farm")
 player_path = NodePath("../World/Player")
 crops_parent_path = NodePath("../World")
 
-[node name="Ground" parent="Farm" instance=ExtResource("4_ground")]
+[node name="Ground" parent="Farm" unique_id=539536092 instance=ExtResource("4_ground")]
 
-[node name="Soil" type="TileMapLayer" parent="Farm"]
+[node name="Soil" type="TileMapLayer" parent="Farm" unique_id=499541455]
 tile_set = ExtResource("5_tiles")
 
-[node name="Highlight" type="Node2D" parent="Farm"]
+[node name="Highlight" type="Node2D" parent="Farm" unique_id=787745376]
 script = ExtResource("3_highlight")
 
-[node name="World" type="Node2D" parent="."]
+[node name="World" type="Node2D" parent="." unique_id=538507869]
 y_sort_enabled = true
 
-[node name="House" parent="World" instance=ExtResource("7_house")]
+[node name="House" parent="World" unique_id=205751083 instance=ExtResource("7_house")]
 position = Vector2(912, 288)
 
-[node name="Player" parent="World" instance=ExtResource("1_player")]
-position = Vector2(912, 330)
+[node name="Player" parent="World" unique_id=1599642464 instance=ExtResource("1_player")]
+position = Vector2(784, 348)
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=781523498]
 script = ExtResource("6_hud")
 player_path = NodePath("../World/Player")
 
-[node name="Hint" type="Label" parent="HUD"]
+[node name="Hint" type="Label" parent="HUD" unique_id=2063141325]
 offset_left = 8.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
 text = "WASD move   1-4 tools   Space use   F door: sleep"
 
-[node name="DayLabel" type="Label" parent="HUD"]
+[node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
 offset_left = 472.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
-horizontal_alignment = 2
 text = "Day 1"
+horizontal_alignment = 2
 
-[node name="ToolLabel" type="Label" parent="HUD"]
+[node name="ToolLabel" type="Label" parent="HUD" unique_id=1879404603]
 offset_left = 8.0
 offset_top = 330.0
 offset_right = 632.0
 offset_bottom = 354.0
 text = "Tool: Hoe"
 
-[node name="Fade" type="ColorRect" parent="HUD"]
+[node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
 offset_right = 640.0
 offset_bottom = 360.0
 mouse_filter = 2

@@ -133,13 +133,47 @@ Generate each crop as **one image with its 4 stages in a horizontal row**. Draw 
 | `objects/rock.png` | 32×32 | A small gray rock. |
 | `objects/fence.png` | 32×32 | A wooden fence segment, horizontal. |
 
-### Player (32×48)
+### Player (frames 48×64)
 
-AI is weak at animation frames, so start with **still poses** in 4 directions. Walking animation comes later (cleanup by hand, or a matching asset pack).
+AI is weak at animation frames, so the still poses came first. The walk animation is generated per direction (see below).
 
 | File | Prompt |
 |---|---|
 | `player/player_directions.png` ✅ done → `assets/player/player_idle.png` (4 frames of 48×64) | The hooded farmer from the reference: dark red hooded cloak, brown tunic with a cloth apron, leather boots. Shown in 4 poses in a horizontal row: facing down, facing up, facing left, facing right. Same size and same ground line for each, equal spacing. |
+
+### Player walk animation (4 frames × 3 directions)
+
+- One image per direction: down, up, side (facing left). Right = left mirrored in Godot.
+- Attach `art_source/player/player_directions.png` and `art_source/style_reference.png`; best done in the same ChatGPT chat as the player.
+- Claude shrinks them at the **same art pixel size as the idle poses** (about 9.7 source pixels per art pixel), so walking and standing frames match.
+
+Walk down prompt (`art_source/player/walk_down.png`) ✅ done → `assets/player/walk_down.png` (shrunk with `--scale 9.70`; frame 3 lifted the same foot as frame 1, so its legs were replaced with frame 1's legs mirrored):
+
+```
+Pixel art game sprite sheet for a 2D top-down farming game, 3/4 top-down view.
+Chunky, clearly visible pixels, no anti-aliasing, no blur. Moody dark-fantasy
+style, muted colors, 3-tone shading, light from the top-left, neutral daylight.
+Transparent background. No text, no shadow.
+
+A 4-frame walking animation of the EXACT same hooded farmer from the attached
+image (dark red hooded cloak, brown tunic, cloth apron, leather boots), walking
+TOWARD the camera (facing down). Frames in one horizontal row with clear empty
+space between them:
+1) left foot stepping forward, right arm slightly forward
+2) feet together under the body (passing pose)
+3) right foot stepping forward, left arm slightly forward
+4) feet together under the body (passing pose)
+The cloak swings slightly with each step.
+
+CRITICAL: every frame must be the same character at the exact same size, same
+pixel size, same colors, same face and hood shape as the attached "facing down"
+pose. Only the legs, arms and cloak edge move. Same ground line for all frames.
+```
+
+- ✅ **Walk up** (`walk_up.png` → `assets/player/walk_up.png`): "walking AWAY from the camera (facing up), seen from behind" and "...as the attached "facing up" pose".
+- ✅ **Walk side** (`walk_side.png` → `assets/player/walk_side.png`): "walking to the LEFT (side view, facing left)", frames 1 and 3 "front leg forward, back leg behind, in a clear stride", and "...as the attached "facing left" pose".
+
+Reject and regenerate if the face or hood changes, a frame has a different size, all frames look the same, or the background isn't transparent.
 
 ## Where files go
 

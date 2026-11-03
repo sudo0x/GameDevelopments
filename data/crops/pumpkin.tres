@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="CropData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CropData" format=3 uid="uid://d02duc8kunrm1"]
 
-[ext_resource type="Script" path="res://scripts/farm/crop_data.gd" id="1_crop"]
-[ext_resource type="Texture2D" path="res://assets/crops/pumpkin_stages.png" id="2_stages"]
+[ext_resource type="Script" uid="uid://b01yi5bnjnwku" path="res://scripts/farm/crop_data.gd" id="1_crop"]
+[ext_resource type="Texture2D" uid="uid://bqcd0hqyg8ekq" path="res://assets/crops/pumpkin_stages.png" id="2_stages"]
 
 [resource]
 script = ExtResource("1_crop")
