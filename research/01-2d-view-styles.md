@@ -4,31 +4,7 @@
 
 ## The 4 main 2D views
 
-```
-SIDE VIEW (platformer)            TOP-DOWN
-+--------------------------+      +--------------------------+
-|              ====        |      |  (T)    +--------+       |
-|   o     ======           |      |         |        |  (T)  |
-|  /|\  .´                 |      |         |   o->  |       |
-|  / \             (E)     |      |  (T)    |        |       |
-|##########################|      |      (E)               (T)|
-+--------------------------+      +--------------------------+
-Camera from the side,             Camera above,
-gravity, jumping                  move in 8 directions
-
-ISOMETRIC                         SINGLE SCREEN (board / UI)
-+--------------------------+      +--------------------------+
-|           /\             |      |  [A][B][A][C][D][B]      |
-|          /__\            |      |  [C][C][C][A][B][D]      |
-|        / |  | \   o      |      |  [D][A][B][D][C][A]      |
-|       /  '--'  \         |      |                          |
-|        \      /          |      |                          |
-+--------------------------+      +--------------------------+
-Diagonal angle,                   No moving camera,
-looks like 3D                     grid or cards
-
-o = player   (E) = enemy   (T) = tree   ==== = platform
-```
+![The 4 main 2D views: side view, top-down, isometric, single screen](images/2d-view-styles.svg)
 
 ## What each view feels like
 
