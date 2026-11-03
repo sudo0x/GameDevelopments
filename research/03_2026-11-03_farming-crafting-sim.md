@@ -28,7 +28,14 @@ All three are **2D** and were made by **very small teams** (Stardew was mostly o
 
 **Forager is the model to study.** It has all these features, but each one is simple, and the loop is fast:
 
-![Core loop: collect, craft, build, unlock land, repeat bigger each time; light combat guards new land](images/farming-sim-core-loop.svg)
+```mermaid
+flowchart LR
+    A[Collect<br/>Trees, rocks, crops] --> B[Craft<br/>Tools, items]
+    B --> C[Build<br/>Farms, machines]
+    C --> D[Unlock land<br/>New area, new stuff]
+    D -. Repeat, bigger each time .-> A
+    E[Light combat<br/>Guards new land] --> D
+```
 
 ## A realistic 6-month version (MVP)
 
