@@ -9,3 +9,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 01 | 2026-11-03 | [2D view styles (camera angles)](01_2026-11-03_2d-view-styles.md) |
 | 02 | 2026-11-03 | [How many 2D views exist, and can one game mix them?](02_2026-11-03_view-types-and-mixing.md) |
 | 03 | 2026-11-03 | [Top-down farming / crafting / survival sim](03_2026-11-03_farming-crafting-sim.md) |
+| 04 | 2026-11-03 | [Pixel art sizes: tiles, sprites and mixing](04_2026-11-03_pixel-art-sizes.md) |
