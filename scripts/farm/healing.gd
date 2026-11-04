@@ -69,6 +69,19 @@ func cleanse(center: Vector2i) -> void:
 	_cleanse_cells(cells, center)
 
 
+## Heals the closest cursed cell within `radius`. Returns false if there's none in range.
+func heal_nearest(center: Vector2i, radius: int) -> bool:
+	var cells := _cursed_cells_around(center, radius)
+	if cells.is_empty():
+		return false
+	var nearest := cells[0]
+	for cell in cells:
+		if Vector2(cell - center).length() < Vector2(nearest - center).length():
+			nearest = cell
+	_cleanse_cells([nearest], nearest)
+	return true
+
+
 ## Whether the purifying hoe would heal this cell.
 func can_purify(cell: Vector2i) -> bool:
 	return GameState.hoe_uses_left > 0 and is_cleansable(cell)

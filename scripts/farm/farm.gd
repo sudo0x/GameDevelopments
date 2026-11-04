@@ -232,7 +232,20 @@ func _on_day_ended() -> void:
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
 	gathering.advance_day(is_tilled)
+	_heal_from_buildings()
 	GameState.farm_state = _to_state()
+
+
+## Each healing building pushes the curse back a little while the player sleeps.
+func _heal_from_buildings() -> void:
+	var healed := 0
+	for cell in builder.placed:
+		var radius: int = builder.placed[cell]["data"].heal_radius
+		if radius > 0 and healing.heal_nearest(cell, radius):
+			healed += 1
+	if healed > 0:
+		var tiles := "1 tile" if healed == 1 else "%d tiles" % healed
+		GameState.notice.emit("Your lanterns healed %s overnight." % tiles)
 
 
 ## Called after the soil dries, so only tilled cells need saving, not watered ones.

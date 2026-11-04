@@ -11,3 +11,4 @@ display_name = "Lantern post"
 scene = ExtResource("2_scene")
 preview_texture = ExtResource("3_texture")
 preview_offset = Vector2(13, -36)
+heal_radius = 4

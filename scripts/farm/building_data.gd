@@ -8,3 +8,5 @@ extends Resource
 ## For the preview before placing: the same art and offset as the scene's sprite.
 @export var preview_texture: Texture2D
 @export var preview_offset: Vector2
+## If above 0, heals the nearest cursed tile within this many tiles each night.
+@export var heal_radius: int = 0
