@@ -27,6 +27,8 @@ right edges of the art so that sections can sit side by side.
 
 ## Well
 
+Saved as `art_source/objects/well.png` ✅ done. Shrink with `--height 64 --frame-w 56 --frame-h 64 --single true`.
+
 ```
 Match the style of the attached reference exactly.
 

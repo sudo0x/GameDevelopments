@@ -10,5 +10,5 @@ id = &"well"
 display_name = "Well"
 scene = ExtResource("2_scene")
 preview_texture = ExtResource("3_texture")
-preview_offset = Vector2(0, -28)
+preview_offset = Vector2(0, -32)
 water_radius = 2

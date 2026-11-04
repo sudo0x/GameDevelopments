@@ -13,4 +13,4 @@ shape = SubResource("Shape_well")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_texture")
-offset = Vector2(0, -28)
+offset = Vector2(0, -32)
