@@ -82,7 +82,7 @@ flowchart LR
 | Layer | Goal | Plan doc |
 |---|---|---|
 | 1 | Farming loop in the dark-fantasy style | [01_2026-11-03_layer-1-farming.md](01_2026-11-03_layer-1-farming.md) |
-| 2 | Cursed tiles, cleansing, unlocking new land | To write |
+| 2 | Cursed tiles, cleansing, unlocking new land | [04_2026-11-04_layer-2-curse.md](04_2026-11-04_layer-2-curse.md) |
 | 3 | Gathering (trees, rocks), crafting recipes | To write |
 | 4 | Building structures | To write |
 | 5 | Enemies, weapons, combat | To write |
