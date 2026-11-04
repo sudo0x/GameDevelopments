@@ -33,6 +33,7 @@ The user is usually away from the code, and answers with short replies.
 - **Every problem fixed goes in `docs/16_...` (fixes log)**, newest first, briefly: the problem as the user saw it, the fix and whether it was code, art, data or a setting, and how other developers often solve it. The user compares fixes to learn. Features still go in the build notes
 - **Decisions go in `docs/17_...` (decisions log)**, with the reason. Before doing something that goes against one (for example "move the house"), point to it and explain why, then do what the user decides and update the row
 - The user plays on the computer and reports problems with screenshots; testing on a real phone waits for release step 1. **Every finding goes in the playtest's findings table** (`docs/19_...`) with its kind and status, as well as the fixes or decisions log
+- **Keep chats short:** a long chat gets slower, because the whole history is read again on every reply. Start a new chat after a few steps; this file is the handoff. Use few tool calls and short replies, and skip re-reading what is already known
 - One step at a time. At the end of a step, say what changed, what was tested, what wasn't, and what art comes next
 - **Commit and push only when asked.** The user normally replies "Commit, start step N", or "Commit and push". "Start step N" alone doesn't mean commit
 - Run `tests/run_all.sh` before every commit. After anything random, like creatures, run it 3 times. Report failures honestly, and never call something done or passing unless it just was
@@ -74,8 +75,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (after 5fb8141: Layer 6 step 6 finished, with the knob, pause and "!" icons and fences that turn; then a check that every doc is current)
-- **Next:** see the roadmap at the top (the playtest, `docs/19_...`; then release step 1, the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
+- Last updated: 2026-11-05 (after 6251eaf: playtest session 1 in progress, findings 8 to 12 fixed)
+- **Next (start here tomorrow):** the user starts a **New Game** for playtest session 1 and tries the 2 free holy water. Ask them to report anything unclear, especially whether a new player would know what the holy water is for, and that crops go in the shipping box (finding 4). If it is unclear, suggest a fix (for example first-day hints), log it in `docs/19_...`, and let them choose. After session 1: sessions 2 to 7, then release step 1 (the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now
