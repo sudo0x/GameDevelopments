@@ -15,6 +15,11 @@ enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD, SWORD }
 const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build", "Sword"]
 ## In the same order as Facing.
 const FACING_DIRECTIONS: Array[Vector2] = [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT]
+## After being hit, nothing can hurt the player for this long.
+const SAFE_SECONDS := 1.0
+const KNOCKBACK_SPEED := 200.0
+## How quickly a knockback dies away, in speed per second.
+const KNOCKBACK_FADE := 900.0
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -36,6 +41,8 @@ var seed_index := 0
 var building_index := 0
 
 var _walk_time: float = 0.0
+var _safe_left := 0.0
+var _knockback := Vector2.ZERO
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
@@ -47,8 +54,10 @@ var _walk_time: float = 0.0
 
 func _physics_process(delta: float) -> void:
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = input * speed
+	velocity = input * speed + _knockback
+	_knockback = _knockback.move_toward(Vector2.ZERO, KNOCKBACK_FADE * delta)
 	move_and_slide()
+	_update_safe_time(delta)
 
 	if input != Vector2.ZERO:
 		look_direction = input.normalized()
@@ -57,6 +66,13 @@ func _physics_process(delta: float) -> void:
 	else:
 		_walk_time = 0.0
 	_update_sprite(input != Vector2.ZERO)
+
+
+## Blinks while the player can't be hurt, so they can see they're safe for a moment.
+func _update_safe_time(delta: float) -> void:
+	_safe_left = maxf(_safe_left - delta, 0.0)
+	var blink_off := _safe_left > 0.0 and int(_safe_left * 12.0) % 2 == 0
+	sprite.modulate.a = 0.35 if blink_off else 1.0
 
 
 func _update_sprite(moving: bool) -> void:
@@ -97,6 +113,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		tool_used.emit(tool)
 	if event.is_action_pressed("interact"):
 		_interact()
+
+
+## Called by creatures on contact. Does nothing during the short safe time after a hit,
+## or while the day is changing.
+func hurt(amount: int, direction: Vector2) -> void:
+	if _safe_left > 0.0 or GameState.day_changing:
+		return
+	_safe_left = SAFE_SECONDS
+	_knockback = direction * KNOCKBACK_SPEED
+	GameState.take_damage(amount)
 
 
 ## Sends the player home. Physics interpolation is reset so they jump there instead of sliding.

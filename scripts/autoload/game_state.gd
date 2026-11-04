@@ -73,6 +73,8 @@ var has_sword := false
 var hoe_uses_left := 0
 ## Health left today. Full every morning, and the game only saves in the morning, so it isn't saved.
 var hearts: int = BALANCE.max_hearts
+## True during the fade between days, when nothing can hurt the player.
+var day_changing := false
 ## How much of the cursed land is healed, 0–100. Farm keeps it up to date; it isn't saved.
 var healed_percent := 0.0
 ## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.

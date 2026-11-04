@@ -95,9 +95,12 @@ func _fade_to_next_day(while_black: Callable) -> void:
 	if _sleeping:
 		return
 	_sleeping = true
+	GameState.day_changing = true
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS)
 	tween.tween_callback(while_black)
 	tween.tween_interval(0.3)
 	tween.tween_property(fade, "color:a", 0.0, FADE_SECONDS)
-	tween.tween_callback(func() -> void: _sleeping = false)
+	tween.tween_callback(func() -> void:
+		_sleeping = false
+		GameState.day_changing = false)

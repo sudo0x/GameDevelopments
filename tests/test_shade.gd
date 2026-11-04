@@ -54,7 +54,8 @@ func _run() -> void:
 	check("still wandering with the player far away", shade.state == WANDER)
 	check("never on the curse", not on_curse)
 
-	# Chasing.
+	# Chasing. Fighting has its own test, so the player can't be hurt here.
+	player._safe_left = 9999.0
 	player.global_position = shade.global_position + Vector2(-90, 0)
 	await wait(2)
 	check("sees a close player", shade.state == CHASE)
@@ -84,7 +85,7 @@ func _run() -> void:
 	gs.has_sword = true
 	player.sword.swing(Vector2.LEFT)
 	await wait(20)
-	check("a sword swing is harmless for now", is_instance_valid(shade))
+	check("a single hit doesn't defeat it", is_instance_valid(shade) and shade.health >= 1)
 
 	# Giving up.
 	player.global_position = Vector2(500, 400)

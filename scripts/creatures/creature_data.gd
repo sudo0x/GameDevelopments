@@ -5,6 +5,10 @@ extends Resource
 @export var id: StringName
 @export var display_name: String
 @export var texture: Texture2D
+## Sword hits it takes to defeat, at 1 damage each.
+@export var max_health: int = 2
+## Hearts it takes from the player on contact.
+@export var damage: int = 1
 @export var wander_speed: float = 20.0
 @export var chase_speed: float = 55.0
 ## It wanders this far from where it started.
