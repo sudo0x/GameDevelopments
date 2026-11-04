@@ -83,7 +83,7 @@ Each step ends with something you can run in Godot and see working.
 6. ✅ **Harvest and inventory:** pick crops, track counts, HUD
 7. ✅ **Shipping box and shop:** sell crops, earn money, buy seeds
 8. ✅ **Save / load:** keep progress between sessions
-9. **Mood lighting:** darken the scene and add lantern light
+9. ✅ **Mood lighting:** darken the scene and add lantern light
 
 ## Project structure
 

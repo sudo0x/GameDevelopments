@@ -28,9 +28,9 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 1 step 8 done: save and load)
-- **Next:** Layer 1 step 9: mood lighting (needs lantern post art; give the user the prompt first)
-- Layer 1 progress: steps 1–8 done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load); the plan doc marks each with ✅
+- Last updated: 2026-11-04 (Layer 1 complete: step 9 mood lighting done)
+- **Next:** the user plays through Layer 1 by hand; then write the Layer 2 plan (the curse and cleansing, see the concept doc). There's no plan doc for it yet
+- Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
 ### How the game works now
@@ -44,15 +44,16 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, rows built from `GameState.CROPS`) → `GameState.buy_seed(crop)`
 - **Save/load**: `GameState.end_day()` calls `save_game()` last; `_ready()` calls `load_game()`, so the game always resumes in the morning and anything done after the last sleep is lost. File: `user://save.cfg` (ConfigFile, `SAVE_VERSION`; missing, unreadable or other-version files start a new game). Farm writes `GameState.farm_state` (tilled cells, crops) at the end of `_on_day_ended` and rebuilds from it in `_ready`. Not saved: player position, watered soil (dry at save time), `shipped` (paid before saving). There's no New Game button yet; to start over, delete the file
+- **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners)
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
 - **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then what's shipping overnight), tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
-- **Main scene**: Main → Farm (Ground instance, Soil, Highlight), World (y-sorted: House at (912, 288), ShippingBox, ShopStall, Player, crops), HUD (with ShopMenu)
+- **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
-- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall
-- Next: lantern post (step 9), then item icons (harvested crops, seed packets, coin) and tool icons (prompts in the art doc)
+- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post
+- Next: item icons (harvested crops, seed packets, coin) and tool icons, to replace HUD text; tree, rock, fence for decoration (prompts in the art doc)
 - **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** (on the Mac, the only file) into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
-- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`)
+- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`)
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
 
@@ -65,6 +66,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ### Known issues / later
 - Hard square edge between grass and cursed ground (edge transition tiles later)
+- `project.godot`: Godot itself moves the `2d/snap/snap_2d_transforms_to_pixel` line when it runs; harmless, `git restore project.godot` before committing
 - Standing "facing right" pose is separate art, slightly different from the mirrored walk side
 
 ### Git

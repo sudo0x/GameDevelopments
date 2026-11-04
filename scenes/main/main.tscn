@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://qchubhvhgjdn" path="res://scripts/ui/hud.gd" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shipping_box.tscn" id="box_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
@@ -26,6 +27,9 @@ tile_set = ExtResource("5_tiles")
 [node name="Highlight" type="Node2D" parent="Farm" unique_id=787745376]
 script = ExtResource("3_highlight")
 
+[node name="Mood" type="CanvasModulate" parent="." unique_id=1918340275]
+color = Color(0.72, 0.7, 0.82, 1)
+
 [node name="World" type="Node2D" parent="." unique_id=538507869]
 y_sort_enabled = true
 
@@ -37,6 +41,18 @@ position = Vector2(848, 368)
 
 [node name="ShopStall" parent="World" unique_id=1309958217 instance=ExtResource("stall_scene")]
 position = Vector2(352, 352)
+
+[node name="LanternDoor" parent="World" unique_id=1266094713 instance=ExtResource("lantern_scene")]
+position = Vector2(872, 336)
+
+[node name="LanternStall" parent="World" unique_id=1475520186 instance=ExtResource("lantern_scene")]
+position = Vector2(400, 344)
+
+[node name="LanternSouthWest" parent="World" unique_id=1039827441 instance=ExtResource("lantern_scene")]
+position = Vector2(400, 624)
+
+[node name="LanternSouthEast" parent="World" unique_id=1853360172 instance=ExtResource("lantern_scene")]
+position = Vector2(816, 624)
 
 [node name="Player" parent="World" unique_id=1599642464 instance=ExtResource("1_player")]
 position = Vector2(784, 348)

@@ -8,7 +8,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 
 ## Status
 
-**Early prototype.** Layer 1 (basic farming) is in progress, and the art is in.
+**Early prototype.** Layer 1 (basic farming) is playable from start to finish.
 
 | | Feature |
 |---|---|
@@ -17,10 +17,10 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 | ✅ | Till soil, plant seeds, water crops |
 | ✅ | Day cycle: sleep at the house, watered crops grow overnight |
 | ✅ | 3 crops: radish (3 days), carrot (5 days), pumpkin (8 days) |
-| ⏳ | Harvesting, inventory and money (next) |
-| ⏳ | Shipping box and seed shop |
-| ⏳ | Save and load |
-| ⏳ | Mood lighting (dusk and glowing lanterns) |
+| ✅ | Harvesting, inventory and money |
+| ✅ | Shipping box (paid overnight) and seed shop |
+| ✅ | Saving at the end of each day |
+| ✅ | Mood lighting with lantern posts |
 
 ## Roadmap
 
@@ -49,9 +49,9 @@ Targets: **Android first**, then **Steam**.
 | 1 | Hoe: till grass into soil |
 | 2 | Watering can |
 | 3 | Seeds (Q / E to change the seed type) |
-| 4 | Hand (harvest, coming soon) |
+| 4 | Hand (harvest ripe crops) |
 | Space / left click | Use the tool on the highlighted tile |
-| F | Interact (house door: sleep until the next day) |
+| F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds) |
 
 ## Project structure
 
