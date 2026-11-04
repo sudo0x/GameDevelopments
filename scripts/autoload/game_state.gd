@@ -182,7 +182,7 @@ func craft(recipe: RecipeData) -> bool:
 		RecipeData.Result.HOLY_WATER:
 			holy_water += recipe.result_amount
 		RecipeData.Result.BUILDING:
-			buildings[recipe.building.id] = building_count(recipe.building) + recipe.result_amount
+			add_building(recipe.building, recipe.result_amount)
 		RecipeData.Result.PURIFYING_HOE:
 			has_purifying_hoe = true
 			hoe_uses_left = BALANCE.hoe_daily_uses
@@ -253,6 +253,11 @@ func buy_holy_water() -> bool:
 	holy_water += 1
 	inventory_changed.emit()
 	return true
+
+
+func add_building(building: BuildingData, amount: int = 1) -> void:
+	buildings[building.id] = building_count(building) + amount
+	inventory_changed.emit()
 
 
 ## Removes one crafted building. Returns false if there are none left.

@@ -21,6 +21,22 @@ func place(cell: Vector2i, building: BuildingData) -> void:
 		_spawn(cell, building)
 
 
+## Takes a placed building back into the bag, so a mistake costs nothing.
+func pick_up(cell: Vector2i) -> void:
+	var entry := placed[cell]
+	placed.erase(cell)
+	entry["node"].queue_free()
+	GameState.add_building(entry["data"])
+	GameState.notice.emit("Picked up: %s" % entry["data"].display_name)
+
+
+## Text for the HUD when the player faces this cell, or empty if nothing's built there.
+func status(cell: Vector2i) -> String:
+	if not placed.has(cell):
+		return ""
+	return "%s: press 4, then Space to pick up." % placed[cell]["data"].display_name
+
+
 func to_state() -> Array[Dictionary]:
 	var saved: Array[Dictionary] = []
 	for cell in placed:

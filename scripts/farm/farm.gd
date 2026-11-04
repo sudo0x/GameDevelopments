@@ -115,7 +115,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.SEEDS:
 			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
-			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell)
+			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
 			return GameState.holy_water > 0 and not healing.cleansable_cells(cell).is_empty()
 		Player.Tool.BUILD:
@@ -154,7 +154,9 @@ func _update_build_preview() -> void:
 
 
 func _update_target_status() -> void:
-	var status := crop_status(target_cell) if crops.has(target_cell) else gathering.status(target_cell)
+	var status := crop_status(target_cell)
+	if status.is_empty():
+		status = gathering.status(target_cell) + builder.status(target_cell)
 	if status != _target_status:
 		_target_status = status
 		target_status_changed.emit(status)
@@ -212,6 +214,8 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.HAND:
 			if crops.has(target_cell):
 				harvest(target_cell)
+			elif builder.placed.has(target_cell):
+				builder.pick_up(target_cell)
 			else:
 				gathering.hit(target_cell)
 		Player.Tool.HOLY_WATER:
