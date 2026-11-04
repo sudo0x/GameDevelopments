@@ -8,12 +8,11 @@ signal defeated(creature: Creature)
 
 enum State { WANDER, CHASE }
 
-const FLOAT_HEIGHT := 3.0
 const FLOAT_SPEED := 3.0
 ## How long it rests between wandering moves, at most.
 const MAX_REST_SECONDS := 2.0
-## It hurts the player when this close: just past where the two bodies touch.
-const TOUCH_RANGE := 24.0
+## It hurts the player when this much past the edge of its body, just past where they touch.
+const TOUCH_GAP := 16.0
 const KNOCKBACK_SPEED := 180.0
 ## How quickly a knockback dies away, in speed per second.
 const KNOCKBACK_FADE := 900.0
@@ -42,6 +41,10 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
 	sprite.texture = data.texture
 	sprite.offset = Vector2(0, -data.texture.get_height() / 2.0)
+	var circle := CircleShape2D.new()
+	circle.radius = data.body_radius
+	$Shape.shape = circle
+	$Shape.position.y = -data.body_radius
 
 
 func _physics_process(delta: float) -> void:
@@ -64,7 +67,7 @@ func take_hit(amount: int, direction: Vector2) -> void:
 		return
 	health -= amount
 	state = State.CHASE
-	_knockback = direction * KNOCKBACK_SPEED
+	_knockback = direction * KNOCKBACK_SPEED * data.knockback_scale
 	_flash()
 	if health <= 0:
 		_defeat()
@@ -83,7 +86,7 @@ func _update_state() -> void:
 func _touch_player() -> void:
 	if _knockback != Vector2.ZERO:
 		return
-	if global_position.distance_to(_player.global_position) < TOUCH_RANGE:
+	if global_position.distance_to(_player.global_position) < data.body_radius + TOUCH_GAP:
 		_player.hurt(data.damage, global_position.direction_to(_player.global_position))
 
 
@@ -144,6 +147,6 @@ func _wander_velocity(delta: float) -> Vector2:
 
 func _update_look(delta: float) -> void:
 	_float_time += delta * FLOAT_SPEED
-	sprite.position.y = -FLOAT_HEIGHT + sin(_float_time) * FLOAT_HEIGHT
+	sprite.position.y = -data.float_height + sin(_float_time) * data.float_height
 	if absf(velocity.x) > 1.0:
 		sprite.flip_h = velocity.x > 0.0

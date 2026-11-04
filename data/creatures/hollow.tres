@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CreatureData" format=3]
+
+[ext_resource type="Script" path="res://scripts/creatures/creature_data.gd" id="1_data"]
+[ext_resource type="Texture2D" path="res://assets/objects/hollow.png" id="2_texture"]
+[ext_resource type="Resource" path="res://data/materials/curse_shard.tres" id="3_drop"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"hollow"
+display_name = "Hollow"
+texture = ExtResource("2_texture")
+max_health = 4
+damage = 2
+drop = ExtResource("3_drop")
+drop_amount = 3
+float_height = 0.0
+body_radius = 14.0
+knockback_scale = 0.35
+min_cell_x = 52
+wander_speed = 14.0
+chase_speed = 38.0
+wander_radius = 48.0
+chase_range = 130.0
+lose_range = 190.0

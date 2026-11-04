@@ -9,6 +9,14 @@ extends Resource
 @export var max_health: int = 2
 ## Hearts it takes from the player on contact.
 @export var damage: int = 1
+## How high it bobs: 0 for something heavy that walks.
+@export var float_height: float = 3.0
+## Radius of its body, in pixels.
+@export var body_radius: float = 8.0
+## How far a hit pushes it: 1 is normal, less for something heavy.
+@export var knockback_scale: float = 1.0
+## It only appears at this column of the map or further east.
+@export var min_cell_x: int = 0
 ## What it leaves behind when defeated.
 @export var drop: MaterialData
 @export var drop_amount: int = 1

@@ -4,7 +4,11 @@ extends Node
 ## they're never saved, and every morning starts fresh.
 
 const CREATURE_SCENE := preload("res://scenes/creatures/creature.tscn")
-const SHADE: CreatureData = preload("res://data/creatures/shade.tres")
+## Toughest first: the first one allowed at a cell is the one that appears there.
+const CREATURES: Array[CreatureData] = [
+	preload("res://data/creatures/hollow.tres"),
+	preload("res://data/creatures/shade.tres"),
+]
 ## They never appear closer than this to the player, in pixels.
 const MIN_PLAYER_DISTANCE := 224.0
 ## Or closer than this to each other, so they don't arrive as a crowd.
@@ -52,7 +56,15 @@ func spawn_for_today() -> void:
 		var at := _world_position(cell)
 		if _far_from_all(at, taken):
 			taken.append(at)
-			_spawn(at)
+			_spawn(at, creature_for(cell))
+
+
+## Creatures get stronger toward the east, closer to the cursed heart.
+func creature_for(cell: Vector2i) -> CreatureData:
+	for data in CREATURES:
+		if cell.x >= data.min_cell_x:
+			return data
+	return CREATURES[CREATURES.size() - 1]
 
 
 func clear() -> void:
@@ -64,7 +76,6 @@ func clear() -> void:
 
 ## Clean cells beside the curse that the player can walk to, away from lanterns and the player.
 func spawn_cells() -> Array[Vector2i]:
-	var ground := _farm.ground
 	var cells: Array[Vector2i] = []
 	for cell in _reachable_cells():
 		if _touches_curse(cell) and _farm.is_farmable(cell) and not _in_light(_world_position(cell)):
@@ -123,9 +134,9 @@ func _shuffle(cells: Array[Vector2i], rng: RandomNumberGenerator) -> void:
 		cells[j] = swap
 
 
-func _spawn(at: Vector2) -> void:
+func _spawn(at: Vector2, data: CreatureData) -> void:
 	var creature: Creature = CREATURE_SCENE.instantiate()
-	creature.data = SHADE
+	creature.data = data
 	creature.position = _parent.to_local(at)
 	_parent.add_child(creature)
 	creatures.append(creature)

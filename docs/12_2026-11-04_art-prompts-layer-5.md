@@ -43,7 +43,7 @@ in flat color, and thin bright purple cracks. Eerie but small, not gory.
 
 ## Hollow
 
-One image, floated in code like the shade. It should look heavier and more dangerous.
+Saved as `art_source/objects/hollow.png` ✅ done. Shrink with `--height 72 --frame-w 76 --frame-h 72 --single true`. It's one image, and it walks instead of floating.
 
 ```
 Match the style of the attached reference exactly.
