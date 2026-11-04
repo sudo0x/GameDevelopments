@@ -15,7 +15,7 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 | How are sound files found? | By name, in `assets/audio/effects/` and `music/` | You can add sounds without code changes |
 | Sounds before files exist? | Everything wired now, silent until files arrive | Code and sounds can be done separately, in any order |
 | Where do the effects come from? | Made by a script (`tools/make_sounds.gd`), from waves | No license, no waiting, matches the retro pixel style. Replace any one later by saving a file with its name |
-| Music? | From the user: a CC0 track, a composer, or a paid AI plan | A script can't write good music |
+| Music? | From the user: a CC0 track, a composer, or a paid AI plan. Claude doesn't generate it, but can make a placeholder drone if asked | A script can make effects well, but not music that stays pleasant on a loop. Full answer in `docs/18_...`, "Can Claude generate the music too?" |
 | Which sound matters most? | `cleanse` | The concept says healing must look and sound satisfying |
 
 ## Which objects can be moved (2026-11-04)
