@@ -35,6 +35,7 @@ var _cell_query := PhysicsShapeQueryParameters2D.new()
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
 @onready var healing: Healing = $Healing
+@onready var gathering: Gathering = $Gathering
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
@@ -47,6 +48,7 @@ func _ready() -> void:
 	_cell_query.shape = shape
 	_cell_query.exclude = [player.get_rid()]
 	player.tool_used.connect(_on_tool_used)
+	healing.land_healed.connect(gathering.reveal)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
 	_restore(GameState.farm_state)
@@ -91,7 +93,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.SEEDS:
 			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
-			return crops.has(cell) and crops[cell].is_ripe()
+			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell)
 		Player.Tool.HOLY_WATER:
 			return GameState.holy_water > 0 and not healing.cleansable_cells(cell).is_empty()
 	return false
@@ -120,7 +122,7 @@ func harvest(cell: Vector2i) -> void:
 
 
 func _update_target_status() -> void:
-	var status := crop_status(target_cell)
+	var status := crop_status(target_cell) if crops.has(target_cell) else gathering.status(target_cell)
 	if status != _target_status:
 		_target_status = status
 		target_status_changed.emit(status)
@@ -169,7 +171,10 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
 		Player.Tool.HAND:
-			harvest(target_cell)
+			if crops.has(target_cell):
+				harvest(target_cell)
+			else:
+				gathering.hit(target_cell)
 		Player.Tool.HOLY_WATER:
 			healing.cleanse(target_cell)
 
@@ -199,6 +204,7 @@ func _to_state() -> Dictionary:
 
 func _restore(state: Dictionary) -> void:
 	healing.restore(state.get("cleansed", []), state.get("shrine", false))
+	gathering.populate(ground, crops_parent, player)
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)
 	for saved: Dictionary in state.get("crops", []):

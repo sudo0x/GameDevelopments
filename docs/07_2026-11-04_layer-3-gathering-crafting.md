@@ -61,7 +61,7 @@ Each step ends with something you can run in Godot and see working.
 
 1. ✅ **Cleanup:** move healing out of `farm.gd`, move prices and finds into Resources, make saving crash-safe
 2. ✅ **Materials and inventory:** wood and stone in `GameState`, plus the bag screen on key I
-3. **Trees and rocks:** hit them with the hand tool to gather (needs art)
+3. ✅ **Trees and rocks:** hit them with the hand tool to gather
 4. **Regrowth:** gathered trees and rocks come back after a few days, and their state is saved
 5. **Workbench:** the object and its crafting menu, with `RecipeData` (needs art)
 6. **Craft holy water:** the first recipe, using crops and stone
@@ -70,11 +70,9 @@ Each step ends with something you can run in Godot and see working.
 
 ## Art needed
 
-No art is needed for steps 1 and 2. The code uses colored placeholders until each image is ready.
-
 | Step | Art |
 |---|---|
-| 3 | Tree, tree stump, rock, small rubble |
+| 3 | ✅ Tree, tree stump, rock, small rubble |
 | 5 | Workbench |
 
 The prompts come with the step that needs them.
@@ -83,5 +81,5 @@ The prompts come with the step that needs them.
 
 - **Step 1 changes working code:** that's what `tests/run_all.sh` is for. Run it after each small change, so a mistake is easy to find.
 - **Unknown holy water balance:** recipes are priced against it, and it hasn't been played yet. Step 8 is there for this, and it needs real play, not only tests.
-- **Trees hiding the player:** tall objects must Y-sort correctly, or the player will draw on top of them.
+- **Trees hiding the player:** solved by fading a tree while the player stands behind it.
 - **Old saves:** new save fields need default values, and moving code must not change the save format.

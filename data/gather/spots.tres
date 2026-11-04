@@ -1,0 +1,85 @@
+[gd_resource type="Resource" script_class="GatherSpotTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/gather_spot_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://scripts/farm/gather_spot.gd" id="2_spot"]
+[ext_resource type="Resource" path="res://data/gather/tree.tres" id="tree"]
+[ext_resource type="Resource" path="res://data/gather/rock.tres" id="rock"]
+
+[sub_resource type="Resource" id="spot_1"]
+script = ExtResource("2_spot")
+cell = Vector2i(8, 16)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_2"]
+script = ExtResource("2_spot")
+cell = Vector2i(27, 20)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_3"]
+script = ExtResource("2_spot")
+cell = Vector2i(31, 9)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_4"]
+script = ExtResource("2_spot")
+cell = Vector2i(22, 6)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_5"]
+script = ExtResource("2_spot")
+cell = Vector2i(14, 7)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_6"]
+script = ExtResource("2_spot")
+cell = Vector2i(44, 12)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_7"]
+script = ExtResource("2_spot")
+cell = Vector2i(49, 15)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_8"]
+script = ExtResource("2_spot")
+cell = Vector2i(60, 10)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_9"]
+script = ExtResource("2_spot")
+cell = Vector2i(66, 7)
+data = ExtResource("tree")
+
+[sub_resource type="Resource" id="spot_10"]
+script = ExtResource("2_spot")
+cell = Vector2i(13, 20)
+data = ExtResource("rock")
+
+[sub_resource type="Resource" id="spot_11"]
+script = ExtResource("2_spot")
+cell = Vector2i(30, 17)
+data = ExtResource("rock")
+
+[sub_resource type="Resource" id="spot_12"]
+script = ExtResource("2_spot")
+cell = Vector2i(18, 7)
+data = ExtResource("rock")
+
+[sub_resource type="Resource" id="spot_13"]
+script = ExtResource("2_spot")
+cell = Vector2i(40, 7)
+data = ExtResource("rock")
+
+[sub_resource type="Resource" id="spot_14"]
+script = ExtResource("2_spot")
+cell = Vector2i(52, 20)
+data = ExtResource("rock")
+
+[sub_resource type="Resource" id="spot_15"]
+script = ExtResource("2_spot")
+cell = Vector2i(62, 14)
+data = ExtResource("rock")
+
+[resource]
+script = ExtResource("1_table")
+spots = Array[ExtResource("2_spot")]([SubResource("spot_1"), SubResource("spot_2"), SubResource("spot_3"), SubResource("spot_4"), SubResource("spot_5"), SubResource("spot_6"), SubResource("spot_7"), SubResource("spot_8"), SubResource("spot_9"), SubResource("spot_10"), SubResource("spot_11"), SubResource("spot_12"), SubResource("spot_13"), SubResource("spot_14"), SubResource("spot_15")])

@@ -11,6 +11,7 @@ extends SceneTree
 ##     --out assets/player/player_idle.png \
 ##     --height 64 --frame-w 48 --frame-h 64
 ##   Optional: --scale 9.70 (source pixels per art pixel) instead of fitting the tallest sprite to --height.
+##   Optional: --single true keeps everything as one sprite, for art made of separate pieces (rubble).
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
@@ -32,6 +33,8 @@ func _init() -> void:
 		push_error("No sprites found")
 		quit(1)
 		return
+	if args.has("single"):
+		boxes = [_merged(boxes)]
 
 	# One scale for all sprites, so they keep the same pixel size.
 	# --scale forces an exact art pixel size, to match another sheet (e.g. walk frames to idle poses).
@@ -65,6 +68,13 @@ func _init() -> void:
 	sheet.save_png(ProjectSettings.globalize_path("res://" + out_path))
 	print("saved ", out_path, " (", sheet.get_width(), "x", sheet.get_height(), ")")
 	quit()
+
+
+func _merged(boxes: Array[Rect2i]) -> Rect2i:
+	var all := boxes[0]
+	for box in boxes:
+		all = all.merge(box)
+	return all
 
 
 func _parse_args(raw: PackedStringArray) -> Dictionary:

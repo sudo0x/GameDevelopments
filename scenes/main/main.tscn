@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
+[ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
@@ -39,6 +40,9 @@ script = ExtResource("healing_script")
 ground_path = NodePath("../Ground")
 curse_edges_path = NodePath("../CurseEdges")
 shrine_path = NodePath("../../World/Shrine")
+
+[node name="Gathering" type="Node" parent="Farm" unique_id=1610372845]
+script = ExtResource("gathering_script")
 
 [node name="Mood" type="CanvasModulate" parent="." unique_id=1918340275]
 color = Color(0.72, 0.7, 0.82, 1)

@@ -3,6 +3,9 @@ extends Node2D
 ## Everything about healing cursed land: which cells can heal, holy water, the shrine,
 ## buried finds and the progress score. Glimmers and effects are drawn as children of this node.
 
+## Land just healed by the player, not land restored from a save.
+signal land_healed(cells: Array[Vector2i])
+
 const FIND_TABLE: BuriedFindTable = preload("res://data/buried_finds.tres")
 const CLEANSE_EFFECT_SCENE := preload("res://scenes/farm/cleanse_effect.tscn")
 const GLIMMER_SCENE := preload("res://scenes/farm/find_glimmer.tscn")
@@ -76,6 +79,7 @@ func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
 	effect.play(cells, center, ground)
 	curse_edges.refresh(ground)
 	_report_progress()
+	land_healed.emit(cells)
 
 
 func _on_shrine_activated() -> void:
