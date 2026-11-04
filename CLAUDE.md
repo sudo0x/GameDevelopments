@@ -19,10 +19,10 @@ Two plans have their own step numbers, so **always say which plan you mean**: "a
 | 3 | **Areas steps 1 to 10 (woods, marsh, ending)** | `docs/15_...` | **👉 Next: areas step 1, bigger map** |
 | 4 | Layer 6 step 4: Android build | `docs/13_...` | Waiting. Needs the user's phone and setup |
 | 5 | Layer 6 step 5: sound and settings | `docs/13_...` | Waiting |
-| 6 | Layer 6 step 6: polish, including a pause menu | `docs/13_...` | Waiting |
+| 6 | Layer 6 step 6: polish, including a pause menu, joystick knob art, and icons for Use and Act | `docs/13_...` | Waiting |
 | 7 | Layer 6 step 7: balance pass for everything | `docs/13_...` | Waiting. Needs real play, required before release |
 | 8 | Layer 6 step 8: rewarded ads | `docs/13_...` | Waiting. Needs an ad account |
-| 9 | Layer 6 step 9: Google Play release | `docs/13_...` | Waiting. Needs a developer account |
+| 9 | Layer 6 step 9: Google Play release, with the real title and logo | `docs/13_...` | Waiting. Needs a developer account |
 
 Update this table whenever a step finishes. Everything postponed is in the "Still open" table in `docs/13_...`. A ✅ means built and passing automated tests, not tried on a phone or played by a person.
 
