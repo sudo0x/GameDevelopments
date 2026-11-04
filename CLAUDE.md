@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 3 steps 5 and 6 done: workbench and crafting)
-- **Next:** Layer 3 step 7: purifying hoe (second recipe, heals one tile for free 5 times a day). Then step 8: balance pass, which needs the user to really play. The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- Last updated: 2026-11-04 (Layer 3 step 7 done: purifying hoe)
+- **Next:** Layer 3 step 8: balance pass, which needs the user to really play. Known issue to fix there: crafting holy water (2 radishes, worth 50) costs more than buying it (30), though the plan says crafting should be cheaper The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
@@ -52,6 +52,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners). `lantern_light.gd` makes the light flicker
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
 - **Gathering**: `Farm/Gathering` (`scripts/farm/gathering.gd`) places `Gatherable` objects (`scenes/farm/gatherable.tscn`) in `World` from `data/gather/spots.tres`; kinds are `GatherData` in `data/gather/`. Hand tool on one: 3 hits, then material and remains (a stump is solid, rubble isn't). Ones on cursed land stay hidden until `Healing.land_healed`. They fade while the player is behind them. Gathered ones grow back after `regrow_days` nights (`Gathering.advance_day()`), waiting if the cell is tilled; saved as `gathered` in `farm_state`
+- **Purifying hoe**: crafted once (`GameState.has_purifying_hoe`, saved). The Hoe tool on a cursed tile calls `Healing.purify()`, which heals that one tile for one of `hoe_uses_left` (from `hoe_daily_uses`, refilled every morning and on load)
 - **Crafting**: `scenes/farm/workbench.tscn` at (976, 384): F calls `GameState.request_crafting()` → `scenes/ui/crafting_menu.tscn`. Recipes are `RecipeData` (with `RecipeNeed`s: a crop or a material) in `data/recipes/`, listed in `GameState.RECIPES`; `GameState.craft()` checks, spends and gives the result
 - **Menus**: `GameMenu` (`scripts/ui/game_menu.gd`) is the base for the shop, bag and crafting menus: open, close, pause, `close_action`, and a `_refresh()` to override. They share `data/ui/menu_panel.tres`
 - **Materials and bag**: `MaterialData` in `data/materials/`, listed in `GameState.MATERIALS`, counts in `GameState.materials` (saved). `scenes/ui/bag_menu.tscn` on key I shows crops, seeds, holy water and materials; it pauses the game like the shop, and won't open over another menu

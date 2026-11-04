@@ -38,6 +38,7 @@ func _run() -> void:
 	check("crop growth", farm.crops[Vector2i(38, 11)].days_grown == 1)
 	check("soil", farm.is_tilled(Vector2i(20, 12)))
 	check("no materials in an old save", gs.materials.is_empty())
+	check("no purifying hoe in an old save", not gs.has_purifying_hoe)
 	check("nothing gathered in an old save", farm.gathering.to_state().is_empty())
 	check("dug-up find stays gone", not farm.healing._glimmers.has(Vector2i(38, 10)))
 	check("other finds still buried", farm.healing._glimmers.has(Vector2i(42, 15)))

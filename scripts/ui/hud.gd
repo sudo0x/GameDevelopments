@@ -42,6 +42,8 @@ func _refresh() -> void:
 		text += "  |  %s seeds: %d  (Q / E to change)" % [crop.display_name, GameState.seed_count(crop)]
 	if player.tool == Player.Tool.HOLY_WATER:
 		text += ": %d" % GameState.holy_water
+	if player.tool == Player.Tool.HOE and GameState.has_purifying_hoe:
+		text += "  |  Purify left today: %d" % GameState.hoe_uses_left
 	tool_label.text = text
 
 

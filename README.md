@@ -25,6 +25,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 | ✅ | The old farmlands, buried treasure and a healing progress score |
 | ✅ | The old shrine: restore it to heal a huge area |
 | ✅ | Gathering wood and stone, and crafting holy water at the workbench |
+| ✅ | The purifying hoe: a crafted upgrade that heals tiles for free |
 
 ## Roadmap
 
@@ -50,7 +51,7 @@ Targets: **Android first**, then **Steam**.
 | Key | Action |
 |---|---|
 | WASD / arrow keys | Move |
-| 1 | Hoe: till grass into soil |
+| 1 | Hoe: till grass into soil (the crafted purifying hoe also heals cursed tiles) |
 | 2 | Watering can |
 | 3 | Seeds (Q / E to change the seed type) |
 | 4 | Hand (harvest ripe crops, gather from trees and rocks) |

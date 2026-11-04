@@ -36,6 +36,7 @@ const MATERIALS: Array[MaterialData] = [
 
 const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/holy_water.tres"),
+	preload("res://data/recipes/purifying_hoe.tres"),
 ]
 
 var day := 1
@@ -50,6 +51,10 @@ var materials: Dictionary[StringName, int] = {}
 var shipped: Dictionary[StringName, int] = {}
 ## Uses of holy water owned. Each one cleanses a patch of cursed land.
 var holy_water := 0
+## The crafted upgrade: the hoe also heals single cursed tiles, a few times a day.
+var has_purifying_hoe := false
+## Purifying uses left today. Full every morning, so only owning the hoe is saved.
+var hoe_uses_left := 0
 ## How much of the cursed land is healed, 0–100. Farm keeps it up to date; it isn't saved.
 var healed_percent := 0.0
 ## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.
@@ -103,6 +108,7 @@ func end_day() -> void:
 	_pay_shipped()
 	day_ended.emit()
 	day += 1
+	_refill_hoe()
 	day_started.emit()
 	save_game()
 
@@ -131,7 +137,14 @@ func owned(need: RecipeNeed) -> int:
 	return harvest_count(need.crop) if need.crop else material_count(need.material)
 
 
+## Whether this is a one-time recipe the player has already made.
+func already_made(recipe: RecipeData) -> bool:
+	return recipe.result == RecipeData.Result.PURIFYING_HOE and has_purifying_hoe
+
+
 func can_craft(recipe: RecipeData) -> bool:
+	if already_made(recipe):
+		return false
 	for need in recipe.needs:
 		if owned(need) < need.amount:
 			return false
@@ -150,6 +163,9 @@ func craft(recipe: RecipeData) -> bool:
 	match recipe.result:
 		RecipeData.Result.HOLY_WATER:
 			holy_water += recipe.result_amount
+		RecipeData.Result.PURIFYING_HOE:
+			has_purifying_hoe = true
+			hoe_uses_left = BALANCE.hoe_daily_uses
 	inventory_changed.emit()
 	return true
 
@@ -182,6 +198,7 @@ func save_game() -> void:
 	file.set_value("game", "harvest", harvest)
 	file.set_value("game", "materials", materials)
 	file.set_value("game", "holy_water", holy_water)
+	file.set_value("game", "purifying_hoe", has_purifying_hoe)
 	file.set_value("game", "farm", farm_state)
 	var error := file.save(SAVE_TEMP_PATH)
 	if error == OK:
@@ -201,6 +218,8 @@ func load_game() -> void:
 	harvest.assign(file.get_value("game", "harvest", harvest))
 	materials.assign(file.get_value("game", "materials", materials))
 	holy_water = file.get_value("game", "holy_water", holy_water)
+	has_purifying_hoe = file.get_value("game", "purifying_hoe", has_purifying_hoe)
+	_refill_hoe()
 	farm_state = file.get_value("game", "farm", farm_state)
 
 
@@ -210,6 +229,15 @@ func buy_holy_water() -> bool:
 		return false
 	money -= BALANCE.holy_water_price
 	holy_water += 1
+	inventory_changed.emit()
+	return true
+
+
+## Spends one of today's purifying uses. Returns false if there are none left.
+func use_purifying_hoe() -> bool:
+	if not has_purifying_hoe or hoe_uses_left <= 0:
+		return false
+	hoe_uses_left -= 1
 	inventory_changed.emit()
 	return true
 
@@ -241,6 +269,11 @@ func give_find(find: BuriedFind) -> void:
 			seeds[find.crop.id] = seed_count(find.crop) + find.amount
 			notice.emit("You dug up %d %s seeds!" % [find.amount, find.crop.display_name.to_lower()])
 	inventory_changed.emit()
+
+
+func _refill_hoe() -> void:
+	if has_purifying_hoe:
+		hoe_uses_left = BALANCE.hoe_daily_uses
 
 
 func _pay_shipped() -> void:

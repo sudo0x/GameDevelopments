@@ -69,6 +69,17 @@ func cleanse(center: Vector2i) -> void:
 	_cleanse_cells(cells, center)
 
 
+## Whether the purifying hoe would heal this cell.
+func can_purify(cell: Vector2i) -> bool:
+	return GameState.hoe_uses_left > 0 and is_cleansable(cell)
+
+
+## Heals one cell with the purifying hoe.
+func purify(cell: Vector2i) -> void:
+	if is_cleansable(cell) and GameState.use_purifying_hoe():
+		_cleanse_cells([cell], cell)
+
+
 func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
 	for cell in cells:
 		_heal(cell)

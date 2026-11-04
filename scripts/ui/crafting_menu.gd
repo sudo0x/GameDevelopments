@@ -27,7 +27,6 @@ func _add_row(recipe: RecipeData) -> void:
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
-	button.text = "Make"
 	button.pressed.connect(GameState.craft.bind(recipe))
 	row.add_child(label)
 	row.add_child(button)
@@ -39,7 +38,10 @@ func _add_row(recipe: RecipeData) -> void:
 func _refresh() -> void:
 	for i in GameState.RECIPES.size():
 		var recipe := GameState.RECIPES[i]
-		_labels[i].text = "%s\n%s" % [recipe.display_name, _needs_text(recipe)]
+		var made := GameState.already_made(recipe)
+		var details := "Use the hoe on cursed land." if made else _needs_text(recipe)
+		_labels[i].text = "%s\n%s" % [recipe.display_name, details]
+		_buttons[i].text = "Made" if made else "Make"
 		_buttons[i].disabled = not GameState.can_craft(recipe)
 
 

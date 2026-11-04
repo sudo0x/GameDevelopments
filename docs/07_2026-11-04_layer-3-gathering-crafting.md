@@ -65,7 +65,7 @@ Each step ends with something you can run in Godot and see working.
 4. ✅ **Regrowth:** gathered trees and rocks come back after a few days, and their state is saved
 5. ✅ **Workbench:** the object and its crafting menu, with `RecipeData`
 6. ✅ **Craft holy water:** the first recipe, using crops and stone
-7. **Purifying hoe:** the second recipe, and the free daily healing
+7. ✅ **Purifying hoe:** the second recipe, and the free daily healing
 8. **Balance pass:** play the full loop and tune prices, recipes and regrowth
 
 ## Art needed

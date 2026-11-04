@@ -87,7 +87,7 @@ func is_watered(cell: Vector2i) -> bool:
 func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 	match tool:
 		Player.Tool.HOE:
-			return is_farmable(cell) and not is_tilled(cell)
+			return (is_farmable(cell) and not is_tilled(cell)) or healing.can_purify(cell)
 		Player.Tool.WATERING_CAN:
 			return is_tilled(cell) and not is_watered(cell)
 		Player.Tool.SEEDS:
@@ -165,7 +165,10 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		return
 	match tool:
 		Player.Tool.HOE:
-			till(target_cell)
+			if healing.is_cleansable(target_cell):
+				healing.purify(target_cell)
+			else:
+				till(target_cell)
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
 		Player.Tool.SEEDS:
