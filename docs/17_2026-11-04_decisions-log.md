@@ -34,4 +34,4 @@ The Hand tool picks them up and the Build tool places them again, the same as th
 | Question | Decision | Why |
 |---|---|---|
 | Test on a phone now? | Not yet: play on the computer and report problems, phone in Layer 6 step 4 | Problems found on the computer can be fixed now |
-| Areas or Layer 6 first? | **Still open.** The roadmap says areas first; Claude advised playing first, then finishing Layer 6 and adding the areas as an update | Waiting for your answer |
+| Areas or Layer 6 first? | **Layer 6 first**, then the woods and marsh as a free update after release. Order: keep playing, step 5 sound, step 6 polish, step 4 phone, step 7 balance, step 8 ads, step 9 release | Core loop and phone tested before adding content, and release (and income) comes sooner. This replaces the earlier choice of areas before release |

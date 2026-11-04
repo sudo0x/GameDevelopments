@@ -16,15 +16,16 @@ Two plans have their own step numbers, so **always say which plan you mean**: "a
 |---|---|---|---|
 | 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to Layer 6 step 7 |
 | 2 | Layer 6 steps 1 to 3b (title, touch, phone UI, UI art) | `docs/13_...` | ✅ Built. Title logo waits for the real name |
-| 3 | **Areas steps 1 to 10 (woods, marsh, ending)** | `docs/15_...` | **👉 Next: areas step 1, bigger map** |
-| 4 | Layer 6 step 4: Android build | `docs/13_...` | Waiting. Needs the user's phone and setup |
-| 5 | Layer 6 step 5: sound and settings | `docs/13_...` | Waiting |
-| 6 | Layer 6 step 6: polish, including a pause menu, joystick knob art, icons for Use and Act (movable starting objects already ✅) | `docs/13_...` | Waiting |
+| 3 | The user plays on the computer and reports problems; fix them between steps | `docs/16_...`, `17_...` | Ongoing |
+| 4 | **Layer 6 step 5: sound and settings** | `docs/13_...` | **👉 Next** |
+| 5 | Layer 6 step 6: polish, including a pause menu, joystick knob art, icons for Use and Act (movable starting objects already ✅) | `docs/13_...` | Waiting. Needs a few art images |
+| 6 | Layer 6 step 4: Android build, before balance so it's tuned on the real device | `docs/13_...` | Waiting. Needs the user's phone and setup |
 | 7 | Layer 6 step 7: balance pass for everything | `docs/13_...` | Waiting. Needs real play, required before release |
 | 8 | Layer 6 step 8: rewarded ads | `docs/13_...` | Waiting. Needs an ad account |
-| 9 | Layer 6 step 9: Google Play release, with the real title and logo | `docs/13_...` | Waiting. Needs a developer account |
+| 9 | Layer 6 step 9: Google Play release, with the real title and logo | `docs/13_...` | Waiting. Needs a developer account and the real title |
+| 10 | Areas steps 1 to 10 (woods, marsh, ending), as a free update after release | `docs/15_...` | Waiting |
 
-Update this table whenever a step finishes. Everything postponed is in the "Still open" table in `docs/13_...`. A ✅ means built and passing automated tests, not tried on a phone or played by a person.
+The user chose this order on 2026-11-04: finish and release the smaller game first (see `docs/17_...`). Layer 6 steps are done out of number order, so always name the step. Update this table whenever a step finishes. Everything postponed is in the "Still open" table in `docs/13_...`. A ✅ means built and passing automated tests, not tried on a phone or played by a person.
 
 ### How we work
 
@@ -76,7 +77,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ## Current status (keep this updated at the end of each work session)
 - Last updated: 2026-11-04 (after 62ab3b9, soil fixes: the map's objects became movable; see `docs/17_...`)
-- **Next:** see the roadmap at the top. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
+- **Next:** see the roadmap at the top (Layer 6 step 5). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now

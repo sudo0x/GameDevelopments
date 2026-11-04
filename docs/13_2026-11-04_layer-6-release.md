@@ -91,7 +91,7 @@ Work left over from finished steps, and where each piece will be done.
 
 ## Before step 4
 
-The user chose to add areas 3 and 4 before release, so [the woods and marsh plan](15_2026-11-04_areas-woods-marsh.md) comes next, and this layer continues from step 4 after it.
+~~The user chose to add areas 3 and 4 before release.~~ Changed on 2026-11-04: this layer is finished first, and [the woods and marsh plan](15_2026-11-04_areas-woods-marsh.md) comes after release as a free update. The steps run in this order: 5 (sound), 6 (polish), 4 (Android, before balance so numbers are tuned on a phone), 7, 8, 9. Why: see [the decisions log](17_2026-11-04_decisions-log.md).
 
 ## What only you can do
 

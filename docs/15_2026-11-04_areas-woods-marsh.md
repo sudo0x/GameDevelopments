@@ -78,7 +78,7 @@ Each step ends with something you can run in Godot and see working.
 9. **Drowned:** the slowing creature (needs art)
 10. **Area names and ending:** arrival messages, and the ending screen
 
-This plan starts after Layer 6 step 3b, the UI art, so new menus and items get the finished look. After it, Layer 6 continues from step 4, the Android build.
+This plan starts after Layer 6 is finished and the game is released: the woods and marsh come as a free update (changed on 2026-11-04, see [the decisions log](17_2026-11-04_decisions-log.md)). Recheck the numbers here against the balance pass before starting.
 
 ## Art needed
 
