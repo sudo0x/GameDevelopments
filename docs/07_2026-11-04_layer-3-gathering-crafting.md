@@ -36,7 +36,7 @@ Recipes and amounts are starting values, to be tuned once the loop can be played
 
 | Recipe | Needs | Makes |
 |---|---|---|
-| Holy water | 2 radishes, 1 stone | 1 holy water |
+| Holy water | 1 radish, 1 stone | 1 holy water |
 | Purifying hoe | 10 wood, 5 stone | The hoe, once only |
 
 ## In scope

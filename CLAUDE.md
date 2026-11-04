@@ -29,7 +29,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ## Current status (keep this updated at the end of each work session)
 - Last updated: 2026-11-04 (Layer 3 step 7 done: purifying hoe)
-- **Next:** Layer 3 step 8: balance pass, which needs the user to really play. Known issue to fix there: crafting holy water (2 radishes, worth 50) costs more than buying it (30), though the plan says crafting should be cheaper The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- **Next:** Layer 3 step 8: balance pass, which needs the user to really play. Holy water is now 1 radish + 1 stone, so crafting (25 money of radish) beats the shop (30) The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 

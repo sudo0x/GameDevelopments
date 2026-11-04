@@ -45,7 +45,7 @@ func _refresh() -> void:
 		_buttons[i].disabled = not GameState.can_craft(recipe)
 
 
-## Shows what's needed and what the player has, like "2 Radish (0), 1 Stone (3)".
+## Shows what's needed and what the player has, like "1 Radish (0), 1 Stone (3)".
 func _needs_text(recipe: RecipeData) -> String:
 	var parts: PackedStringArray = []
 	for need in recipe.needs:

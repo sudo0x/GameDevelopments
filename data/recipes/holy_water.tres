@@ -8,7 +8,7 @@
 [sub_resource type="Resource" id="need_radish"]
 script = ExtResource("2_need")
 crop = ExtResource("3_radish")
-amount = 2
+amount = 1
 
 [sub_resource type="Resource" id="need_stone"]
 script = ExtResource("2_need")
