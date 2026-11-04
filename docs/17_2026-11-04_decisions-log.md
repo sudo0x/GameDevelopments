@@ -12,6 +12,7 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 |---|---|---|
 | Watered soil edges: squares, light ragged, or full soft? | **Light ragged**, half as deep as the grass edge | Softer than squares, but each watered tile still shows clearly, which matters for knowing what needs water |
 | Tool display on computers? | **A tool bar with icons and number keys**, the same as phones; click to pick | The usual PC farming-game hotbar; reuses the phone's icons, and both layouts now match |
+| Aiming felt clumsy: how to help? | **Smart targeting:** tile ahead first, then the tiles beside it if the tool can't use the one ahead; the cursor shows the result. Not for the Hoe and Build | Usual aim assist in phone and console farming games; the cursor makes it predictable, and tools that create things stay exact so they never till or build in the wrong place |
 | Target highlight: code corners, art cursor, or keep? | **An art cursor** (your choice; Claude had suggested code corners first). Corner brackets only, light so the game tints it red, stretchable for holy water, with a pulse in code. White and red meanings stay | The cursor is what players look at most, so art makes the game feel better. The art requirements keep it to one image that works everywhere |
 
 ## Pause menu and messages (2026-11-04, Layer 6 step 6)

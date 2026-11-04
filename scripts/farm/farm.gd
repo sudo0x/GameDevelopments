@@ -24,6 +24,9 @@ const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
 ## Where a building's base sits, measured from the center of its tile.
 const BUILDING_BASE := Vector2(0, 12)
 
+## Tools that make something where you aim (soil, a building) never guess another tile.
+const EXACT_TOOLS: Array[Player.Tool] = [Player.Tool.HOE, Player.Tool.BUILD]
+
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
 @export var crops_parent_path: NodePath
@@ -83,7 +86,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	target_cell = target_cell_for(player)
+	target_cell = smart_target_for(player)
 	var tile := Vector2(ground.tile_set.tile_size)
 	var rect := Rect2(ground.map_to_local(target_cell) - tile / 2.0, tile)
 	if player.tool == Player.Tool.HOLY_WATER:
@@ -99,6 +102,25 @@ func _physics_process(_delta: float) -> void:
 func target_cell_for(p: Player) -> Vector2i:
 	var feet_cell := ground.local_to_map(ground.to_local(p.global_position + Vector2(0, -4)))
 	return feet_cell + FACING_OFFSETS[p.facing]
+
+
+## Aim assist: the tile ahead if the tool can use it, or else a tile beside that one
+## (the side nearer the player first), so a rock half a tile off doesn't need nudging.
+## The cursor always shows the result, so it's never a surprise.
+func smart_target_for(p: Player) -> Vector2i:
+	var ahead := target_cell_for(p)
+	if p.tool in EXACT_TOOLS or can_use(p.tool, ahead):
+		return ahead
+	var facing: Vector2i = FACING_OFFSETS[p.facing]
+	var side := Vector2i(facing.y, facing.x)
+	var sides: Array[Vector2i] = [ahead + side, ahead - side]
+	var feet := ground.to_local(p.global_position)
+	sides.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return feet.distance_squared_to(ground.map_to_local(a)) < feet.distance_squared_to(ground.map_to_local(b)))
+	for cell in sides:
+		if can_use(p.tool, cell):
+			return cell
+	return ahead
 
 
 ## Any clean grass can be farmed, unless something solid stands on it.
