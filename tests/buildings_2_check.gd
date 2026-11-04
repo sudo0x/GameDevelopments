@@ -23,7 +23,7 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var g: TileMapLayer = farm.ground
 	var cell := Vector2i(16, 12)
-	check("placed building back", farm.builder.placed.has(cell) and farm.builder.placed.size() == 1)
+	check("placed building back", farm.builder.placed.has(cell) and farm.builder.to_state().size() == 1)
 	check("unplaced one kept", gs.building_count(gs.BUILDINGS[0]) == 1)
 	var node: Node2D = farm.builder.placed[cell]["node"]
 	check("in the same place", node.global_position == g.to_global(g.map_to_local(cell) + farm.BUILDING_BASE))

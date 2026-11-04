@@ -334,6 +334,7 @@ func _to_state() -> Dictionary:
 		"shrine": healing.shrine.restored,
 		"gathered": gathering.to_state(),
 		"buildings": builder.to_state(),
+		"starting_objects": builder.starting_left(),
 	}
 
 
@@ -341,6 +342,7 @@ func _restore(state: Dictionary) -> void:
 	healing.restore(state.get("cleansed", []), state.get("shrine", false))
 	gathering.populate(ground, crops_parent, player)
 	gathering.restore(state.get("gathered", []))
+	builder.adopt_starting(state.get("starting_objects"))
 	builder.restore(state.get("buildings", []))
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)

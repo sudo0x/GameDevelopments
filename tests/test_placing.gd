@@ -52,7 +52,7 @@ func _run() -> void:
 	await press("tool_6")
 	await aim_at(player, g, cell)
 	await press("use_tool")
-	check("nothing placed with none crafted", farm.builder.placed.is_empty())
+	check("nothing placed with none crafted", farm.builder.to_state().is_empty())
 
 	gs.buildings[&"lantern_post"] = 2
 	await press("use_tool")
@@ -68,7 +68,7 @@ func _run() -> void:
 	check("the tile is taken", not farm.can_build(cell))
 	check("preview goes red", farm.build_preview.modulate == farm.build_preview.INVALID_COLOR)
 	await press("use_tool")
-	check("can't stack a second", gs.building_count(lantern) == 1 and farm.builder.placed.size() == 1)
+	check("can't stack a second", gs.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
 	check("can't till under it", not farm.can_use(0, cell))
 
 	# It's solid.
@@ -85,7 +85,7 @@ func _run() -> void:
 	await aim_at(player, g, Vector2i(35, 12))
 	check("aiming at the curse", farm.target_cell == Vector2i(35, 12))
 	await press("use_tool")
-	check("no building on the curse", gs.building_count(lantern) == 1 and farm.builder.placed.size() == 1)
+	check("no building on the curse", gs.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
 
 	# Healed land is clean land.
 	gs.holy_water = 1
@@ -97,6 +97,6 @@ func _run() -> void:
 	check("last one used", gs.building_count(lantern) == 0)
 	await aim_at(player, g, Vector2i(20, 15))
 	await press("use_tool")
-	check("none left", farm.builder.placed.size() == 2)
+	check("none left", farm.builder.to_state().size() == 2)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

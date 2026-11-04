@@ -61,7 +61,8 @@ func _run() -> void:
 	check("label changes", hud.tool_label.text == "Tool: Build  |  Fence: 6  (Q / E to change)")
 	await press("seed_prev")
 	await press("seed_prev")
-	check("Q wraps around to the last one", player.selected_building() == gs.BUILDINGS[gs.BUILDINGS.size() - 1])
+	# The map's own kinds (shipping box, workbench, old lantern) are skipped while the bag has none.
+	check("Q wraps around to the last craftable one", player.selected_building().id == &"well")
 	await press("seed_next")
 	await press("seed_next")
 	check("E goes back", player.selected_building() == fence)
@@ -70,7 +71,7 @@ func _run() -> void:
 	var y := 12
 	for x in range(14, 18):
 		farm.builder.place(Vector2i(x, y), fence)
-	check("4 placed", farm.builder.placed.size() == 4 and gs.building_count(fence) == 2)
+	check("4 placed", farm.builder.to_state().size() == 4 and gs.building_count(fence) == 2)
 	var first: Node2D = farm.builder.placed[Vector2i(14, y)]["node"]
 	var second: Node2D = farm.builder.placed[Vector2i(15, y)]["node"]
 	check("exactly one tile apart", second.global_position.x - first.global_position.x == 32.0)

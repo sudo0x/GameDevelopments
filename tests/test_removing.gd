@@ -1,5 +1,5 @@
 extends SceneTree
-## The hand tool picks placed buildings back up, and leaves the map's own objects alone.
+## The hand tool picks placed buildings back up, and leaves the house and shop stall alone.
 var fails := 0
 
 
@@ -74,10 +74,11 @@ func _run() -> void:
 	await press("use_tool")
 	check("can place it again", farm.builder.placed.has(cell) and gs.building_count(lantern) == 0)
 
-	# The map's own objects can't be picked up.
-	var own: Node2D = main.get_node("World/LanternDoor")
-	var own_cell: Vector2i = g.local_to_map(g.to_local(own.global_position + Vector2(0, -4)))
-	check("the map's lanterns stay", not farm.can_use(3, own_cell))
+	# The map's lanterns can move now (test_moving.gd); the house and shop stall can't.
+	for path in ["House", "ShopStall"]:
+		var own: Node2D = main.get_node("World/" + path)
+		var own_cell: Vector2i = g.local_to_map(g.to_local(own.global_position) - Vector2(0, 12))
+		check(path + " stays", not farm.can_use(3, own_cell))
 
 	# Picking up is saved.
 	farm.builder.pick_up(cell)

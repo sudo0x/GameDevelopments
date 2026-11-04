@@ -1,8 +1,12 @@
 class_name Builder
 extends Node
 ## Places buildings in the world and remembers them for the save file.
+## The map's own shipping box, workbench and lantern posts count as placed buildings too,
+## so they can be picked up and moved. The house and shop stall stay fixed.
+## The map's lanterns are "old lantern posts": light, but no healing, as before they could move.
 
 ## What stands on each cell: the BuildingData under "data", and its node under "node".
+## The map's own objects also have their node name under "starting".
 var placed: Dictionary[Vector2i, Dictionary] = {}
 
 var _ground: TileMapLayer
@@ -38,11 +42,38 @@ func status(cell: Vector2i) -> String:
 	return "%s: %s" % [placed[cell]["data"].display_name, how]
 
 
+## Buildings the player placed. The map's own objects are saved by starting_left() instead.
 func to_state() -> Array[Dictionary]:
 	var saved: Array[Dictionary] = []
 	for cell in placed:
-		saved.append({"cell": cell, "id": placed[cell]["data"].id})
+		if not placed[cell].has("starting"):
+			saved.append({"cell": cell, "id": placed[cell]["data"].id})
 	return saved
+
+
+## Names of the map's own objects still where the map put them.
+func starting_left() -> Array[StringName]:
+	var names: Array[StringName] = []
+	for cell in placed:
+		if placed[cell].has("starting"):
+			names.append(placed[cell]["starting"])
+	return names
+
+
+## Takes charge of the map's own movable objects. `left` is starting_left() from the save;
+## null (a new game, or a save from before objects could move) keeps them all.
+func adopt_starting(left: Variant) -> void:
+	for node in _parent.get_children():
+		var building := _building_for(node)
+		if not building:
+			continue
+		if left != null and not (left as Array).has(node.name):
+			# Picked up in an earlier game: if it was placed again, restore() brings it back.
+			_parent.remove_child(node)
+			node.queue_free()
+			continue
+		var cell := _ground.local_to_map(_ground.to_local(_parent.to_global(node.position)) - Farm.BUILDING_BASE)
+		placed[cell] = {"data": building, "node": node, "starting": node.name}
 
 
 func restore(saved: Array) -> void:
@@ -50,6 +81,14 @@ func restore(saved: Array) -> void:
 		var building := GameState.building_by_id(entry["id"])
 		if building:
 			_spawn(entry["cell"], building)
+
+
+## Only starting-only kinds, so the map's lanterns are old ones that don't heal.
+func _building_for(node: Node) -> BuildingData:
+	for building in GameState.BUILDINGS:
+		if building.starting_only and node.scene_file_path == building.scene.resource_path:
+			return building
+	return null
 
 
 func _spawn(cell: Vector2i, building: BuildingData) -> void:

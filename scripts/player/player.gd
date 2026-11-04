@@ -144,7 +144,11 @@ func selected_building() -> BuildingData:
 ## Q and E pick a building, or a kind of holy water, and a seed the rest of the time.
 func _change_selection(step: int) -> void:
 	if tool == Tool.BUILD:
-		building_index = posmod(building_index + step, GameState.BUILDINGS.size())
+		for i in GameState.BUILDINGS.size():
+			building_index = posmod(building_index + step, GameState.BUILDINGS.size())
+			var building := GameState.BUILDINGS[building_index]
+			if not building.starting_only or GameState.building_count(building) > 0:
+				break
 	elif tool == Tool.HOLY_WATER:
 		strong_water = not strong_water
 	else:

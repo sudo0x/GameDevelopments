@@ -45,7 +45,7 @@ flowchart LR
 | **UI art** | A pixel font, a game theme for panels and buttons, item icons, hearts, and art for the touch controls and title |
 | **Android build** | An installable game, tested on a real phone |
 | **Sound** | Music and effects, especially for healing, the first pillar's reward |
-| **Polish** | Pause menu, joystick knob art, icons for Use and Act, queued messages, up-and-down fences, player movement mode, moths, grass wind |
+| **Polish** | Pause menu, joystick knob art, icons for Use and Act, movable starting objects, queued messages, up-and-down fences, player movement mode, moths, grass wind |
 | **Balance** | All numbers from Layers 3 to 5, tuned by real play |
 | **Rewarded ads** | Faster cleansing or a double harvest, and a Remove Ads purchase |
 | **Release** | Store listing, screenshots, privacy policy and AI art disclosure |
@@ -64,7 +64,8 @@ Each step ends with something you can run and see working. ✅ means the code is
 3b. ✅ **UI art:** pixel font, one game theme, panels, buttons, hearts, coin, item icons and touch button art. Only the title logo is left, waiting for the real name
 4. **Android build:** the game running on a real phone, then checking everything in "Still open" (needs setup by you)
 5. **Sound:** music and effects (needs audio)
-6. **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, plus the weak spots listed in the build notes (needs art)
+6. **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, movable starting objects, plus the weak spots listed in the build notes (needs art)
+   - ✅ **Movable starting objects** (asked for after play, built early): the Hand tool picks up the shipping box, workbench and the map's 4 lantern posts, and the Build tool places them again, the same as built objects. Their positions are saved, and old saves keep them where they started. The house and shop stall stay fixed: see [the decisions log](17_2026-11-04_decisions-log.md)
 7. **Balance pass:** play on a real phone and tune everything (needs you to play)
 8. **Rewarded ads:** ads and the Remove Ads purchase (needs accounts)
 9. **Google Play release:** the real title and its logo, closed testing, then the public store (needs you)

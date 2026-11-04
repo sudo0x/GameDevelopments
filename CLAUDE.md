@@ -19,7 +19,7 @@ Two plans have their own step numbers, so **always say which plan you mean**: "a
 | 3 | **Areas steps 1 to 10 (woods, marsh, ending)** | `docs/15_...` | **👉 Next: areas step 1, bigger map** |
 | 4 | Layer 6 step 4: Android build | `docs/13_...` | Waiting. Needs the user's phone and setup |
 | 5 | Layer 6 step 5: sound and settings | `docs/13_...` | Waiting |
-| 6 | Layer 6 step 6: polish, including a pause menu, joystick knob art, and icons for Use and Act | `docs/13_...` | Waiting |
+| 6 | Layer 6 step 6: polish, including a pause menu, joystick knob art, icons for Use and Act (movable starting objects already ✅) | `docs/13_...` | Waiting |
 | 7 | Layer 6 step 7: balance pass for everything | `docs/13_...` | Waiting. Needs real play, required before release |
 | 8 | Layer 6 step 8: rewarded ads | `docs/13_...` | Waiting. Needs an ad account |
 | 9 | Layer 6 step 9: Google Play release, with the real title and logo | `docs/13_...` | Waiting. Needs a developer account |
@@ -32,6 +32,7 @@ The user is usually away from the code, and answers with short replies.
 
 - **Advise, don't just follow.** If a request isn't the best approach (wrong order, a weaker fix, something that fights the design), say so first, suggest the best-practice way, and let the user choose. Doing exactly what was asked when it's a poor idea isn't helping
 - **Every problem fixed goes in `docs/16_...` (fixes log)**, newest first, briefly: the problem as the user saw it, the fix and whether it was code, art, data or a setting, and how other developers often solve it. The user compares fixes to learn. Features still go in the build notes
+- **Decisions go in `docs/17_...` (decisions log)**, with the reason. Before doing something that goes against one (for example "move the house"), point to it and explain why, then do what the user decides and update the row
 - The user plays on the computer and reports problems with screenshots; testing on a real phone waits for Layer 6 step 4
 - One step at a time. At the end of a step, say what changed, what was tested, what wasn't, and what art comes next
 - **Commit and push only when asked.** The user normally replies "Commit, start step N", or "Commit and push". "Start step N" alone doesn't mean commit
@@ -74,7 +75,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (after a7bfa96: fixes from the user's play, soil back to grass and soft field edges; see `docs/16_...`)
+- Last updated: 2026-11-04 (after 62ab3b9, soil fixes: the map's objects became movable; see `docs/17_...`)
 - **Next:** see the roadmap at the top. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
@@ -97,7 +98,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners). `lantern_light.gd` makes the light flicker
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
 - **Gathering**: `Farm/Gathering` (`scripts/farm/gathering.gd`) places `Gatherable` objects (`scenes/farm/gatherable.tscn`) in `World` from `data/gather/spots.tres`; kinds are `GatherData` in `data/gather/`. Hand tool on one: 3 hits, then material and remains (a stump is solid, rubble isn't). Ones on cursed land stay hidden until `Healing.land_healed`. They fade while the player is behind them. Gathered ones grow back after `regrow_days` nights (`Gathering.advance_day()`), waiting if the cell is tilled; saved as `gathered` in `farm_state`
-- **Buildings**: `BuildingData` in `data/buildings/`, listed in `GameState.BUILDINGS`; crafted ones not yet placed are counted in `GameState.buildings` (saved). `Farm.can_build()` needs clean grass with nothing on it, and its query also sees interact areas and the player. `Farm/BuildPreview` shows the selected building on the target tile, green or red. `Farm/Builder` places them in `World` and saves them as `buildings` in `farm_state` (cell and id). The Hand tool picks placed ones back up; the map's own lanterns stay. A placed building with `heal_radius` above 0 (lantern: 4) heals the nearest cursed tile each night through `Healing.heal_nearest()`. One with `water_radius` above 0 (well: 2, a 5×5 area) waters tilled soil each morning and after loading, in `Farm._water_from_buildings()`
+- **Buildings**: `BuildingData` in `data/buildings/`, listed in `GameState.BUILDINGS`; crafted ones not yet placed are counted in `GameState.buildings` (saved). `Farm.can_build()` needs clean grass with nothing on it, and its query also sees interact areas and the player. `Farm/BuildPreview` shows the selected building on the target tile, green or red. `Farm/Builder` places them in `World` and saves them as `buildings` in `farm_state` (cell and id). The Hand tool picks placed ones back up. The map's own shipping box, workbench and 4 lantern posts are adopted by `Builder.adopt_starting()` at startup (BuildingData with `starting_only`, which the Build tool skips while none are in the bag; map lanterns are `old_lantern_post`, no healing), so they move the same way; saved as `starting_objects` (names still in place; missing = all stay). House and shop stall are fixed (`docs/17_...`). `GameState.BUILDINGS` is a `var` filled with `load()`, because preloading the box and workbench from GameState is a load loop. A placed building with `heal_radius` above 0 (lantern: 4) heals the nearest cursed tile each night through `Healing.heal_nearest()`. One with `water_radius` above 0 (well: 2, a 5×5 area) waters tilled soil each morning and after loading, in `Farm._water_from_buildings()`
 - **Sword**: crafted once (`GameState.has_sword`, saved). `scenes/player/sword.tscn` is a child of Player: `Sword.swing(direction)` sweeps one image through an arc, and mid-swing calls `take_hit(damage, direction)` on anything in its Hitbox with that method. Any new Area2D on the player must also be excluded in `Farm._build_query`
 - **Creatures**: `CreatureData` in `data/creatures/`; `Creature` (`scenes/creatures/creature.tscn`) is a CharacterBody2D with states WANDER and CHASE, floated in code, found in `World`. It's on collision layer 2, uses `motion_mode` Floating (the Grounded default made it ride the player like a platform), and finds the player through the `player` group. `_avoid_light()` keeps it `lantern_safe_radius` from anything in the `lantern_light` group (map and placed lanterns). `take_hit()` flashes, knocks back and defeats it; touching calls `Player.hurt()`, which has a 1 second safe time and does nothing while `GameState.day_changing`. `Farm`'s queries use mask 1, so creatures don't block tiles; the sword's Hitbox uses mask 3
 - **Spawning**: `Farm/Spawner` (`CreatureSpawner`) clears creatures on `day_ended`, and on `day_started` and load adds `count_for_today()` of them (from `creature_first_day`, more as land heals, capped) on reachable clean cells beside the curse, away from light and the player. `creature_for()` picks hollows from column 52 east, and shades elsewhere. Random but seeded by the day. Tests that sit near the curse's edge past day 3 can be hit, so set `player._safe_left` high there
@@ -164,7 +165,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Export tunable values with `@export` so they can be tweaked in the editor
 
 ## Docs and research notes
-- `docs/16_...` is the fixes log (see "How we work")
+- `docs/16_...` is the fixes log and `docs/17_...` the decisions log (see "How we work")
 - Name every new doc `NN_YYYY-MM-DD_short-name.md` (next order number in its folder, date created, kebab-case name)
 - Put `**Date:** YYYY-MM-DD` right under the title of each doc
 - Add each new doc to its folder's `README.md` index (number, date, link)

@@ -50,10 +50,16 @@ const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/strong_holy_water.tres"),
 ]
 
-const BUILDINGS: Array[BuildingData] = [
-	preload("res://data/buildings/lantern_post.tres"),
-	preload("res://data/buildings/fence.tres"),
-	preload("res://data/buildings/well.tres"),
+## Loaded when the game starts, not preloaded: the shipping box and workbench scripts use
+## GameState, so preloading them here would be a loop and leave them half loaded.
+## Treat it as a constant.
+var BUILDINGS: Array[BuildingData] = [
+	load("res://data/buildings/lantern_post.tres"),
+	load("res://data/buildings/fence.tres"),
+	load("res://data/buildings/well.tres"),
+	load("res://data/buildings/shipping_box.tres"),
+	load("res://data/buildings/workbench.tres"),
+	load("res://data/buildings/old_lantern_post.tres"),
 ]
 
 var day := 1
