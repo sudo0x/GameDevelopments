@@ -23,7 +23,9 @@ func _run() -> void:
 	check("shipping empty", gs.shipped.is_empty())
 	check("dictionary keys still StringName", typeof(gs.seeds.keys()[0]) == TYPE_STRING_NAME)
 	check("tilled empty cell", farm.is_tilled(Vector2i(20, 12)) and not farm.crops.has(Vector2i(20, 12)))
-	check("soil dry", not farm.is_watered(Vector2i(20, 12)) and not farm.is_watered(Vector2i(14, 10)))
+	# save_1_play's water() re-tilled this cell after night 3 turned it to grass, so 1 night.
+	check("empty soil's nights kept", farm.soil_idle.get(Vector2i(20, 12), 0) == 1)
+	check("soil dry",not farm.is_watered(Vector2i(20, 12)) and not farm.is_watered(Vector2i(14, 10)))
 	check("4 crops back", farm.crops.size() == 4)
 	var radish: Node = farm.crops[Vector2i(14, 10)]
 	var carrot: Node = farm.crops[Vector2i(15, 10)]

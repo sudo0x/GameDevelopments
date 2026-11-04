@@ -21,6 +21,8 @@ extends Resource
 @export var lantern_safe_radius: float = 96.0
 ## Hearts of damage one sword hit does.
 @export var sword_damage: int = 1
+## Tilled soil with no crop turns back into grass after this many nights.
+@export var soil_idle_nights: int = 3
 ## Hearts the player starts each day with.
 @export var max_hearts: int = 5
 ## How much of their money the player loses when they faint, in percent.

@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
 [ext_resource type="Script" path="res://scripts/creatures/creature_spawner.gd" id="spawner_script"]
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
+[ext_resource type="Script" path="res://scripts/farm/soil_edges.gd" id="soil_edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
@@ -36,6 +37,9 @@ crops_parent_path = NodePath("../World")
 
 [node name="Soil" type="TileMapLayer" parent="Farm" unique_id=499541455]
 tile_set = ExtResource("5_tiles")
+
+[node name="SoilEdges" type="Node2D" parent="Farm"]
+script = ExtResource("soil_edges_script")
 
 [node name="CurseEdges" type="Node2D" parent="Farm" unique_id=1387645021]
 script = ExtResource("edges_script")

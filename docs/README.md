@@ -21,3 +21,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 13 | 2026-11-04 | [Layer 6 plan: mobile and release](13_2026-11-04_layer-6-release.md) |
 | 14 | 2026-11-04 | [Art prompts: Layer 6](14_2026-11-04_art-prompts-layer-6.md) |
 | 15 | 2026-11-04 | [Areas plan: Whispering Woods and Sunken Marsh](15_2026-11-04_areas-woods-marsh.md) |
+| 16 | 2026-11-04 | [Fixes log: problems found and how they were fixed](16_2026-11-04_fixes-log.md) |

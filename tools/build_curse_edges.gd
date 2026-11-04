@@ -1,16 +1,20 @@
 extends SceneTree
-## Builds assets/tiles/curse_edge.png from the cursed ground texture: ragged pieces of curse
-## that CurseEdges draws over clean tiles, so the border isn't a straight line along the grid.
+## Builds the edge atlases that TileEdges draws, so borders aren't straight lines along the grid:
+## curse_edge.png (curse over clean tiles, for CurseEdges) and grass_edge.png (grass over
+## tilled soil, for SoilEdges), each from its ground texture.
 ##
 ## Usage:
 ##   godot --headless --path <project> --script tools/build_curse_edges.gd
-##   then run --import so Godot picks up the new image.
+##   then run --import so Godot picks up the new images.
 ##
-## Layout: one row per direction (CurseEdges.SIDES, then its corners), one column per
-## 32×32 piece of the texture, so the curse's pattern lines up with the tile next to it.
+## Layout: one row per direction (TileEdges.SIDES, then its corners), one column per
+## 32×32 piece of the texture, so the pattern lines up with the tile next to it.
 
-const SOURCE := "res://assets/tiles/cursed_ground.png"
-const OUTPUT := "res://assets/tiles/curse_edge.png"
+## Source texture → atlas to write.
+const ATLASES := {
+	"res://assets/tiles/cursed_ground.png": "res://assets/tiles/curse_edge.png",
+	"res://assets/tiles/grass.png": "res://assets/tiles/grass_edge.png",
+}
 const TILE := 32
 const TEXTURE_TILES := 4
 const TEXTURE_SIZE := TILE * TEXTURE_TILES
@@ -22,16 +26,21 @@ const FRINGE := 4
 
 
 func _init() -> void:
-	var source := Image.load_from_file(ProjectSettings.globalize_path(SOURCE))
+	for source_path: String in ATLASES:
+		_build(source_path, ATLASES[source_path])
+	quit()
+
+
+func _build(source_path: String, output: String) -> void:
+	var source := Image.load_from_file(ProjectSettings.globalize_path(source_path))
 	source.convert(Image.FORMAT_RGBA8)
 	var pieces := TEXTURE_TILES * TEXTURE_TILES
 	var atlas := Image.create(pieces * TILE, DIRECTIONS * TILE, false, Image.FORMAT_RGBA8)
 	for direction in DIRECTIONS:
 		for piece in pieces:
 			_draw_piece(source, atlas, direction, piece)
-	atlas.save_png(ProjectSettings.globalize_path(OUTPUT))
-	print("saved ", OUTPUT, " ", atlas.get_size())
-	quit()
+	atlas.save_png(ProjectSettings.globalize_path(output))
+	print("saved ", output, " ", atlas.get_size())
 
 
 func _draw_piece(source: Image, atlas: Image, direction: int, piece: int) -> void:

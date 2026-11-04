@@ -32,6 +32,8 @@ var target_cell := Vector2i.ZERO
 ## Planted crops by cell.
 var crops: Dictionary[Vector2i, Crop] = {}
 var _target_status := ""
+## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
+var soil_idle: Dictionary[Vector2i, int] = {}
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
 ## The same, but it also sees interact areas and the player, to keep them clear of buildings.
@@ -39,6 +41,7 @@ var _build_query := PhysicsShapeQueryParameters2D.new()
 
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
+@onready var soil_edges: SoilEdges = $SoilEdges
 @onready var healing: Healing = $Healing
 @onready var gathering: Gathering = $Gathering
 @onready var build_preview: BuildPreview = $BuildPreview
@@ -65,6 +68,8 @@ func _ready() -> void:
 	_build_query.exclude = [player.get_node("Reach").get_rid(), player.get_node("Sword/Hitbox").get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	healing.land_healed.connect(gathering.reveal)
+	# Healed land beside a field is new grass, so the field's edge changes.
+	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: _refresh_soil_edges())
 	builder.setup(ground, crops_parent)
 	spawner.setup(self, crops_parent, player)
 	GameState.day_ended.connect(spawner.clear)
@@ -119,7 +124,10 @@ func can_build(cell: Vector2i) -> bool:
 func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 	match tool:
 		Player.Tool.HOE:
-			return (is_farmable(cell) and not is_tilled(cell)) or healing.can_purify(cell)
+			# Empty soil can be hoed back into grass.
+			if is_tilled(cell):
+				return not crops.has(cell)
+			return is_farmable(cell) or healing.can_purify(cell)
 		Player.Tool.WATERING_CAN:
 			return is_tilled(cell) and not is_watered(cell)
 		Player.Tool.SEEDS:
@@ -136,6 +144,12 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 
 func till(cell: Vector2i) -> void:
 	soil.set_cell(cell, Source.SOIL_DRY, texture_coords(cell))
+
+
+## Turns soil back into grass. The caller refreshes the soil edges.
+func untill(cell: Vector2i) -> void:
+	soil.erase_cell(cell)
+	soil_idle.erase(cell)
 
 
 func water(cell: Vector2i) -> void:
@@ -167,6 +181,8 @@ func _update_build_preview() -> void:
 func _update_target_status() -> void:
 	var status := crop_status(target_cell)
 	if status.is_empty():
+		status = soil_status(target_cell)
+	if status.is_empty():
 		status = gathering.status(target_cell) + builder.status(target_cell)
 	if status != _target_status:
 		_target_status = status
@@ -180,6 +196,18 @@ func crop_status(cell: Vector2i) -> String:
 	var crop := crops[cell]
 	if crop.is_ripe():
 		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the glove, then Use.")]
+	return _growing_status(cell, crop)
+
+
+## Empty soil quietly turns back into grass, so say when.
+func soil_status(cell: Vector2i) -> String:
+	if not is_tilled(cell) or crops.has(cell):
+		return ""
+	var left := maxi(GameState.BALANCE.soil_idle_nights - soil_idle.get(cell, 0), 1)
+	return "Empty soil: grass returns in %d %s." % [left, "night" if left == 1 else "nights"]
+
+
+func _growing_status(cell: Vector2i, crop: Crop) -> String:
 	var progress := "%s: %d of %d days" % [crop.data.display_name, crop.days_grown, crop.data.days_to_grow]
 	if is_watered(cell):
 		return progress + ", watered. Sleep to grow."
@@ -216,8 +244,11 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.HOE:
 			if healing.is_cleansable(target_cell):
 				healing.purify(target_cell)
+			elif is_tilled(target_cell):
+				untill(target_cell)
 			else:
 				till(target_cell)
+			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
 		Player.Tool.SEEDS:
@@ -235,17 +266,35 @@ func _on_tool_used(tool: Player.Tool) -> void:
 			builder.place(target_cell, player.selected_building())
 
 
-## Overnight: watered crops grow one day, then all soil dries.
+## Overnight: watered crops grow one day, empty soil slowly turns back into grass,
+## then all soil dries.
 func _on_day_ended() -> void:
 	for cell in crops:
 		if is_watered(cell):
 			crops[cell].grow_one_day()
+	_age_empty_soil()
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
 	gathering.advance_day(is_tilled)
 	_heal_from_buildings()
 	_water_from_buildings()
 	GameState.farm_state = _to_state()
+
+
+## Without this, every tile ever tilled would stay soil for good.
+func _age_empty_soil() -> void:
+	for cell in soil.get_used_cells():
+		if crops.has(cell):
+			soil_idle.erase(cell)
+			continue
+		soil_idle[cell] = soil_idle.get(cell, 0) + 1
+		if soil_idle[cell] >= GameState.BALANCE.soil_idle_nights:
+			untill(cell)
+	_refresh_soil_edges()
+
+
+func _refresh_soil_edges() -> void:
+	soil_edges.refresh(ground, soil)
 
 
 ## Wells water nearby soil for the new day. Also runs after loading, because watered soil
@@ -280,6 +329,7 @@ func _to_state() -> Dictionary:
 	return {
 		"cleansed": healing.cleansed.duplicate(),
 		"tilled": soil.get_used_cells(),
+		"soil_idle": soil_idle.duplicate(),
 		"crops": saved_crops,
 		"shrine": healing.shrine.restored,
 		"gathered": gathering.to_state(),
@@ -294,12 +344,15 @@ func _restore(state: Dictionary) -> void:
 	builder.restore(state.get("buildings", []))
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)
+	# Saves from before this existed count all their soil as freshly used.
+	soil_idle.assign(state.get("soil_idle", {}))
 	for saved: Dictionary in state.get("crops", []):
 		var data := GameState.crop_by_id(saved["id"])
 		if data:
 			_add_crop(saved["cell"], data).set_days_grown(saved["days"])
 	# Last, because restoring the soil above leaves it all dry.
 	_water_from_buildings()
+	_refresh_soil_edges()
 
 
 func _limit_camera() -> void:

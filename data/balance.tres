@@ -14,6 +14,7 @@ creature_heal_percent_each = 5.0
 creature_max_count = 6
 lantern_safe_radius = 96.0
 sword_damage = 1
+soil_idle_nights = 3
 max_hearts = 5
 faint_money_percent = 10
 shrine_cost = 3

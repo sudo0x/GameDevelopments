@@ -45,7 +45,7 @@ flowchart LR
 | **UI art** | A pixel font, a game theme for panels and buttons, item icons, hearts, and art for the touch controls and title |
 | **Android build** | An installable game, tested on a real phone |
 | **Sound** | Music and effects, especially for healing, the first pillar's reward |
-| **Polish** | Pause menu, joystick knob art, icons for Use and Act, queued messages, up-and-down fences, player movement mode, soil edges, moths, grass wind |
+| **Polish** | Pause menu, joystick knob art, icons for Use and Act, queued messages, up-and-down fences, player movement mode, moths, grass wind |
 | **Balance** | All numbers from Layers 3 to 5, tuned by real play |
 | **Rewarded ads** | Faster cleansing or a double harvest, and a Remove Ads purchase |
 | **Release** | Store listing, screenshots, privacy policy and AI art disclosure |
@@ -85,7 +85,6 @@ Work left over from finished steps, and where each piece will be done.
 | Speed on a cheap phone | New | Step 4 |
 | Settings, such as sound volume | Step 1 | Step 5 |
 | A way back to the title without closing the game | Step 1 | Step 6 |
-| Running the tests on Windows | Layer 3 onward | Before step 4, on the Windows computer |
 | Balance for Layers 3, 4 and 5, all postponed | Layers 3 to 5 | Step 7 |
 | The game's real title | Step 1 | Before step 9 |
 
