@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 2 step 2 done: holy water)
-- **Next:** Layer 2 step 3: healing effect, then step 4 (farm on clean land) and step 5 (save cleansed land). Until step 5, healed land is lost on reload while the holy water spent stays spent. The user chose not to play Layer 1 by hand, so it's only covered by automated tests
+- Last updated: 2026-11-04 (Layer 2 step 3 done: healing effect)
+- **Next:** Layer 2 step 4 (farm on clean land), then step 5 (save cleansed land). Until step 5, healed land is lost on reload while the holy water spent stays spent. The user chose not to play Layer 1 by hand, so it's only covered by automated tests
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
@@ -41,7 +41,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Farm** (`scripts/farm/farm.gd`, node `Main/Farm` with Ground, Soil, Highlight): farm area `Rect2i(13, 9, 12, 10)`; target cell = tile in front of the feet; `can_use(tool, cell)` drives the highlight (white = usable, red = not) and `_on_tool_used`. Tilled = a Soil layer cell; watered = SOIL_WET source. `crops: Dictionary[Vector2i, Crop]`, crop nodes go in the y-sorted `World`. Hand tool on a ripe crop calls `harvest(cell)`; the soil stays tilled so the cell can be replanted
 - **Crops**: `CropData` resources in `data/crops/` (radish 3 days, carrot 5, pumpkin 8; seed and sell prices set), listed in `GameState.CROPS`. `Crop` (`scenes/farm/crop.tscn`): `days_grown`, stage = days × 3 / days_to_grow, `is_ripe()`. Frames: radish 32×32, carrot 32×40, pumpkin 40×32 (kept at real pixel size; the sprite offsets by texture height)
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
-- **Cleansing**: `GameState.holy_water`, bought at the stall for `HOLY_WATER_PRICE`. `Farm.cleanse(center)` heals the cursed cells in a 3×3 patch (`CLEANSE_RADIUS`), costs one use, and costs nothing if there's nothing to heal; `is_cleansable()` protects the outer ring
+- **Cleansing**: `GameState.holy_water`, bought at the stall for `HOLY_WATER_PRICE`. `Farm.cleanse(center)` heals the cursed cells in a 3×3 patch (`CLEANSE_RADIUS`), costs one use, and costs nothing if there's nothing to heal; `is_cleansable()` protects the outer ring. The land heals at once; `scenes/farm/cleanse_effect.tscn` (`CleanseEffect.play()`) only draws the old tiles fading out from the center, with a light flash and sparkles, then frees itself. It sizes itself from the cells, so it also suits a large cleanse
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, seed rows built from `GameState.CROPS`, then holy water) → `GameState.buy_seed(crop)` / `buy_holy_water()`
 - **Save/load**: `GameState.end_day()` calls `save_game()` last; `_ready()` calls `load_game()`, so the game always resumes in the morning and anything done after the last sleep is lost. File: `user://save.cfg` (ConfigFile, `SAVE_VERSION`; missing, unreadable or other-version files start a new game). Farm writes `GameState.farm_state` (tilled cells, crops) at the end of `_on_day_ended` and rebuilds from it in `_ready`. Not saved: player position, watered soil (dry at save time), `shipped` (paid before saving). There's no New Game button yet; to start over, delete the file
@@ -60,7 +60,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ### Testing
 - Headless checks: `--headless --path . --script <test.gd>` with a `SceneTree` script that instantiates `res://scenes/main/main.tscn` and simulates input (`Input.action_press`, or `Input.parse_input_event(InputEventAction)` for `_unhandled_input`). Use `--fixed-fps 60` when timing matters (fades)
-- Test scripts can't reference autoloads by name (compiled first); use `root.get_node("GameState")`
+- Test scripts can't reference autoloads by name (compiled first); use `root.get_node("GameState")`. This also rules out `class_name`s whose scripts use autoloads (`n is CleanseEffect` fails to compile); check `scene_file_path` instead. A failed test script never quits, so run tests with a time limit
 - Screenshots: run without `--headless`, save `root.get_texture().get_image()` after ~30 frames, then look at the PNG
 - Run `--headless --import` after adding new images or scripts
 - Tests that call `end_day()` write the save, so never run them against the user's real save. Point the home folder somewhere temporary first: on Mac run Godot with `HOME=<temp dir>`; on Windows set `APPDATA=<temp dir>` (not tried yet). Check with `OS.get_user_data_dir()`

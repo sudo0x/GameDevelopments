@@ -17,6 +17,7 @@ const FACING_OFFSETS := {
 }
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
+const CLEANSE_EFFECT_SCENE := preload("res://scenes/farm/cleanse_effect.tscn")
 
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 const CLEANSE_RADIUS := 1
@@ -126,6 +127,9 @@ func cleanse(center: Vector2i) -> void:
 		return
 	for cell in cells:
 		ground.set_cell(cell, Source.GRASS, texture_coords(cell))
+	var effect: CleanseEffect = CLEANSE_EFFECT_SCENE.instantiate()
+	add_child(effect)
+	effect.play(cells, center, ground)
 
 
 ## Picks the crop. The soil stays tilled, so the cell can be planted again.

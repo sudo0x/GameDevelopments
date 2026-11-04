@@ -1,0 +1,45 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/cleanse_effect.gd" id="1_effect"]
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_glow"]
+gradient = SubResource("Gradient_glow")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_sparkle"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 0.95, 0.65, 1, 0.75, 1, 0.6, 1, 0.75, 1, 0.6, 0)
+
+[node name="CleanseEffect" type="Node2D"]
+script = ExtResource("1_effect")
+
+[node name="Light" type="PointLight2D" parent="."]
+color = Color(0.85, 1, 0.65, 1)
+energy = 0.0
+texture = SubResource("Texture_glow")
+
+[node name="Sparkles" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 32
+lifetime = 0.9
+one_shot = true
+local_coords = true
+explosiveness = 0.5
+emission_shape = 3
+emission_rect_extents = Vector2(48, 48)
+direction = Vector2(0, -1)
+spread = 15.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 15.0
+initial_velocity_max = 40.0
+scale_amount_min = 2.0
+scale_amount_max = 3.0
+color_ramp = SubResource("Gradient_sparkle")
