@@ -7,6 +7,8 @@ signal inventory_changed
 signal sleep_requested
 ## Something (the shop stall) asked to open the shop. The shop menu opens.
 signal shop_requested
+## A short message for the player, such as what they just dug up.
+signal notice(text: String)
 ## The day is over: crops grow, soil dries. Shipped crops are paid just before this.
 signal day_ended
 signal day_started
@@ -33,6 +35,8 @@ var harvest: Dictionary[StringName, int] = {}
 var shipped: Dictionary[StringName, int] = {}
 ## Uses of holy water owned. Each one cleanses a patch of cursed land.
 var holy_water := 0
+## How much of the cursed land is healed, 0–100. Farm keeps it up to date; it isn't saved.
+var healed_percent := 0.0
 ## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.
 var farm_state: Dictionary = {}
 
@@ -157,6 +161,28 @@ func use_holy_water() -> bool:
 	holy_water -= 1
 	inventory_changed.emit()
 	return true
+
+
+func set_healed_percent(percent: float) -> void:
+	healed_percent = percent
+	inventory_changed.emit()
+
+
+## Gives the player what was buried. See Farm.BURIED_FINDS for the format.
+func give_find(find: Dictionary) -> void:
+	var amount: int = find["amount"]
+	match find["kind"]:
+		"money":
+			money += amount
+			notice.emit("You dug up %d money!" % amount)
+		"holy_water":
+			holy_water += amount
+			notice.emit("You dug up %d holy water!" % amount)
+		"seeds":
+			var crop := crop_by_id(find["crop"])
+			seeds[crop.id] = seed_count(crop) + amount
+			notice.emit("You dug up %d %s seeds!" % [amount, crop.display_name.to_lower()])
+	inventory_changed.emit()
 
 
 func _pay_shipped() -> void:

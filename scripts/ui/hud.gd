@@ -1,17 +1,21 @@
 extends CanvasLayer
-## Shows the day, money, inventory and the selected tool and seed, and fades to black when sleeping.
+## Shows the day, money, inventory, healing progress and the selected tool and seed,
+## shows short notices, and fades to black when sleeping.
 
 const FADE_SECONDS := 0.6
+const NOTICE_SECONDS := 3.0
 
 @export var player_path: NodePath
 
 var _sleeping := false
+var _notice_tween: Tween
 
 @onready var player: Player = get_node(player_path)
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
 @onready var money_label: Label = $MoneyLabel
 @onready var inventory_label: Label = $InventoryLabel
+@onready var notice_label: Label = $NoticeLabel
 @onready var fade: ColorRect = $Fade
 
 
@@ -20,6 +24,7 @@ func _ready() -> void:
 	GameState.inventory_changed.connect(_refresh)
 	GameState.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
+	GameState.notice.connect(_show_notice)
 	_refresh()
 
 
@@ -45,7 +50,18 @@ func _inventory_text() -> String:
 		lines.append("Shipping: %d overnight" % GameState.shipped_value())
 	if GameState.holy_water > 0:
 		lines.append("Holy water: %d" % GameState.holy_water)
+	lines.append("Island healed: %.1f%%" % GameState.healed_percent)
 	return "\n".join(lines)
+
+
+func _show_notice(text: String) -> void:
+	notice_label.text = text
+	notice_label.modulate.a = 1.0
+	if _notice_tween:
+		_notice_tween.kill()
+	_notice_tween = create_tween()
+	_notice_tween.tween_interval(NOTICE_SECONDS)
+	_notice_tween.tween_property(notice_label, "modulate:a", 0.0, 0.5)
 
 
 ## Fade out, end the day while the screen is black, fade back in.

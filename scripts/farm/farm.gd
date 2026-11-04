@@ -18,9 +18,23 @@ const FACING_OFFSETS := {
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
 const CLEANSE_EFFECT_SCENE := preload("res://scenes/farm/cleanse_effect.tscn")
+const GLIMMER_SCENE := preload("res://scenes/farm/find_glimmer.tscn")
 
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 const CLEANSE_RADIUS := 1
+
+## Treasure under cursed cells, marked by a faint glimmer. Healing the cell digs it up.
+## Finds aren't saved: a find is gone once its cell is in `cleansed`.
+const BURIED_FINDS: Dictionary[Vector2i, Dictionary] = {
+	Vector2i(38, 10): {"kind": "money", "amount": 40},
+	Vector2i(42, 15): {"kind": "seeds", "crop": &"radish", "amount": 5},
+	Vector2i(45, 8): {"kind": "holy_water", "amount": 2},
+	Vector2i(47, 12): {"kind": "seeds", "crop": &"carrot", "amount": 3},
+	Vector2i(53, 11): {"kind": "money", "amount": 80},
+	Vector2i(55, 14): {"kind": "seeds", "crop": &"pumpkin", "amount": 2},
+	Vector2i(63, 8): {"kind": "holy_water", "amount": 2},
+	Vector2i(64, 18): {"kind": "money", "amount": 120},
+}
 
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
@@ -31,6 +45,10 @@ var target_cell := Vector2i.ZERO
 var crops: Dictionary[Vector2i, Crop] = {}
 ## Cells healed so far. ground.tscn always starts cursed, so these are what gets saved.
 var cleansed: Array[Vector2i] = []
+## How many cells could ever be healed.
+var _cursed_total := 0
+## The glimmer over each find not dug up yet.
+var _glimmers: Dictionary[Vector2i, Node2D] = {}
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
 
@@ -50,7 +68,10 @@ func _ready() -> void:
 	player.tool_used.connect(_on_tool_used)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
+	_cursed_total = ground.get_used_cells_by_id(Source.CURSED).filter(is_cleansable).size()
 	_restore(GameState.farm_state)
+	_add_glimmers()
+	_report_progress()
 
 
 func _physics_process(_delta: float) -> void:
@@ -133,9 +154,12 @@ func cleanse(center: Vector2i) -> void:
 		return
 	for cell in cells:
 		_heal(cell)
+		if BURIED_FINDS.has(cell):
+			_dig_up(cell)
 	var effect: CleanseEffect = CLEANSE_EFFECT_SCENE.instantiate()
 	add_child(effect)
 	effect.play(cells, center, ground)
+	_report_progress()
 
 
 ## Picks the crop. The soil stays tilled, so the cell can be planted again.
@@ -149,6 +173,25 @@ func harvest(cell: Vector2i) -> void:
 func _heal(cell: Vector2i) -> void:
 	ground.set_cell(cell, Source.GRASS, texture_coords(cell))
 	cleansed.append(cell)
+
+
+func _dig_up(cell: Vector2i) -> void:
+	GameState.give_find(BURIED_FINDS[cell])
+	_glimmers[cell].queue_free()
+	_glimmers.erase(cell)
+
+
+func _add_glimmers() -> void:
+	for cell in BURIED_FINDS:
+		if not cleansed.has(cell):
+			var glimmer: Node2D = GLIMMER_SCENE.instantiate()
+			glimmer.position = ground.map_to_local(cell)
+			add_child(glimmer)
+			_glimmers[cell] = glimmer
+
+
+func _report_progress() -> void:
+	GameState.set_healed_percent(100.0 * cleansed.size() / _cursed_total)
 
 
 func _has_solid_object(cell: Vector2i) -> bool:

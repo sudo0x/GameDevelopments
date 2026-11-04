@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 2 step 5 done: save cleansed land)
-- **Next:** Layer 2 step 6 (progress and buried finds). The user chose not to play Layer 1 by hand, so it's only covered by automated tests
+- Last updated: 2026-11-04 (Layer 2 step 6 done: progress and finds)
+- **Next:** Layer 2 step 7: old shrine in the clearing at (69, 12). It needs art, so give the user the prompts first (cursed and restored versions, in a new Layer 2 art doc). The user chose not to play Layer 1 by hand, so it's only covered by automated tests
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
@@ -42,12 +42,13 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Crops**: `CropData` resources in `data/crops/` (radish 3 days, carrot 5, pumpkin 8; seed and sell prices set), listed in `GameState.CROPS`. `Crop` (`scenes/farm/crop.tscn`): `days_grown`, stage = days × 3 / days_to_grow, `is_ripe()`. Frames: radish 32×32, carrot 32×40, pumpkin 40×32 (kept at real pixel size; the sprite offsets by texture height)
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
 - **Cleansing**: `GameState.holy_water`, bought at the stall for `HOLY_WATER_PRICE`. `Farm.cleanse(center)` heals the cursed cells in a 3×3 patch (`CLEANSE_RADIUS`), costs one use, and costs nothing if there's nothing to heal; `is_cleansable()` protects the outer ring. The land heals at once; `scenes/farm/cleanse_effect.tscn` (`CleanseEffect.play()`) only draws the old tiles fading out from the center, with a light flash and sparkles, then frees itself. It sizes itself from the cells, so it also suits a large cleanse
+- **Finds and progress**: `Farm.BURIED_FINDS` maps cursed cells to rewards (money, seeds, holy water), each marked by `scenes/farm/find_glimmer.tscn`. `cleanse()` digs them up through `GameState.give_find()`, which sends `notice` to the HUD's NoticeLabel. A find is gone once its cell is in `cleansed`, so finds need no save data. `GameState.healed_percent` comes from `Farm._report_progress()`, shown on the HUD, and isn't saved either
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, seed rows built from `GameState.CROPS`, then holy water) → `GameState.buy_seed(crop)` / `buy_holy_water()`
 - **Save/load**: `GameState.end_day()` calls `save_game()` last; `_ready()` calls `load_game()`, so the game always resumes in the morning and anything done after the last sleep is lost. File: `user://save.cfg` (ConfigFile, `SAVE_VERSION`; missing, unreadable or other-version files start a new game). Farm writes `GameState.farm_state` (cleansed cells, tilled cells, crops) at the end of `_on_day_ended` and rebuilds from it in `_ready`. Not saved: player position, watered soil (dry at save time), `shipped` (paid before saving). There's no New Game button yet; to start over, delete the file
 - **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners)
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
-- **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then what's shipping overnight), tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
+- **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then shipping, holy water and island healed %), notice label, tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
