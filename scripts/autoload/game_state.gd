@@ -79,6 +79,13 @@ func crop_by_id(id: StringName) -> CropData:
 	return null
 
 
+func building_by_id(id: StringName) -> BuildingData:
+	for building in BUILDINGS:
+		if building.id == id:
+			return building
+	return null
+
+
 func seed_count(crop: CropData) -> int:
 	return seeds.get(crop.id, 0)
 
@@ -244,6 +251,15 @@ func buy_holy_water() -> bool:
 		return false
 	money -= BALANCE.holy_water_price
 	holy_water += 1
+	inventory_changed.emit()
+	return true
+
+
+## Removes one crafted building. Returns false if there are none left.
+func use_building(building: BuildingData) -> bool:
+	if building_count(building) <= 0:
+		return false
+	buildings[building.id] -= 1
 	inventory_changed.emit()
 	return true
 

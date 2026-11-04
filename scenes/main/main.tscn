@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
+[ext_resource type="Script" path="res://scripts/farm/builder.gd" id="builder_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
@@ -46,6 +47,9 @@ shrine_path = NodePath("../../World/Shrine")
 
 [node name="Gathering" type="Node" parent="Farm" unique_id=1610372845]
 script = ExtResource("gathering_script")
+
+[node name="Builder" type="Node" parent="Farm" unique_id=1928450167]
+script = ExtResource("builder_script")
 
 [node name="BuildPreview" type="Sprite2D" parent="Farm" unique_id=1349270856]
 visible = false

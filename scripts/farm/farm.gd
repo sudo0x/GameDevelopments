@@ -42,6 +42,7 @@ var _build_query := PhysicsShapeQueryParameters2D.new()
 @onready var healing: Healing = $Healing
 @onready var gathering: Gathering = $Gathering
 @onready var build_preview: BuildPreview = $BuildPreview
+@onready var builder: Builder = $Builder
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
@@ -60,6 +61,7 @@ func _ready() -> void:
 	_build_query.exclude = [player.get_node("Reach").get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	healing.land_healed.connect(gathering.reveal)
+	builder.setup(ground, crops_parent)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
 	_restore(GameState.farm_state)
@@ -214,6 +216,8 @@ func _on_tool_used(tool: Player.Tool) -> void:
 				gathering.hit(target_cell)
 		Player.Tool.HOLY_WATER:
 			healing.cleanse(target_cell)
+		Player.Tool.BUILD:
+			builder.place(target_cell, player.selected_building())
 
 
 ## Overnight: watered crops grow one day, then all soil dries.
@@ -238,6 +242,7 @@ func _to_state() -> Dictionary:
 		"crops": saved_crops,
 		"shrine": healing.shrine.restored,
 		"gathered": gathering.to_state(),
+		"buildings": builder.to_state(),
 	}
 
 
@@ -245,6 +250,7 @@ func _restore(state: Dictionary) -> void:
 	healing.restore(state.get("cleansed", []), state.get("shrine", false))
 	gathering.populate(ground, crops_parent, player)
 	gathering.restore(state.get("gathered", []))
+	builder.restore(state.get("buildings", []))
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)
 	for saved: Dictionary in state.get("crops", []):

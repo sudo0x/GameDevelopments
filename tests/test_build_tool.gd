@@ -84,10 +84,6 @@ func _run() -> void:
 	check("preview on the target tile", preview.position == g.map_to_local(open_cell) + farm.BUILDING_BASE)
 	check("label counts it", hud.tool_label.text.contains("Lantern post: 1"))
 
-	# Nothing else changes: this step only previews.
-	await press("use_tool")
-	check("Space doesn't place yet", gs.building_count(lantern) == 1)
-
 	# Q and E pick buildings here, and seeds elsewhere.
 	await press("seed_next")
 	check("seed unchanged while building", player.seed_index == 0)

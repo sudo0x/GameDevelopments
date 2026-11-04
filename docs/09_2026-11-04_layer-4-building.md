@@ -62,7 +62,7 @@ Enemies and weapons (Layer 5), buildings you walk inside, upgrading buildings, t
 Each step ends with something you can run in Godot and see working.
 
 1. ✅ **Build tool:** key 6, picking a building, and the live preview
-2. **Placing and saving:** buildings go on clean land and survive a restart
+2. ✅ **Placing and saving:** buildings go on clean land and survive a restart
 3. **Removing:** the hand tool picks a building back up
 4. **Lantern post:** the first real building, healing the curse each night
 5. **Fence:** a simple building for decoration (needs art)
