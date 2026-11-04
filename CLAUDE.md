@@ -11,6 +11,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 |---|---|---|
 | Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `/Applications/Godot.app/Contents/MacOS/Godot` |
 | Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | `~/Game Assets/` (one 1254×1254 PNG per image, already transparent; no separate master) |
+| Save file (not in git, so each machine has its own farm) | `%APPDATA%\Godot\app_userdata\Farm Game (working title)\save.cfg` | `~/Library/Application Support/Godot/app_userdata/Farm Game (working title)/save.cfg` |
 | `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | Works (`gh` is logged in as `sudo0x`) |
 
 - GitHub is the only link between the machines, so unpushed work is invisible on the other one
@@ -27,9 +28,9 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 1 step 7 done: shipping box and seed shop)
-- **Next:** Layer 1 step 8: save/load (must include `GameState.shipped`). After that: step 9 (mood lighting, needs lantern post art)
-- Layer 1 progress: steps 1–7 done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop); the plan doc marks each with ✅
+- Last updated: 2026-11-04 (Layer 1 step 8 done: save and load)
+- **Next:** Layer 1 step 9: mood lighting (needs lantern post art; give the user the prompt first)
+- Layer 1 progress: steps 1–8 done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
 ### How the game works now
@@ -42,6 +43,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, rows built from `GameState.CROPS`) → `GameState.buy_seed(crop)`
+- **Save/load**: `GameState.end_day()` calls `save_game()` last; `_ready()` calls `load_game()`, so the game always resumes in the morning and anything done after the last sleep is lost. File: `user://save.cfg` (ConfigFile, `SAVE_VERSION`; missing, unreadable or other-version files start a new game). Farm writes `GameState.farm_state` (tilled cells, crops) at the end of `_on_day_ended` and rebuilds from it in `_ready`. Not saved: player position, watered soil (dry at save time), `shipped` (paid before saving). There's no New Game button yet; to start over, delete the file
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
 - **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then what's shipping overnight), tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), World (y-sorted: House at (912, 288), ShippingBox, ShopStall, Player, crops), HUD (with ShopMenu)
@@ -59,6 +61,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Test scripts can't reference autoloads by name (compiled first); use `root.get_node("GameState")`
 - Screenshots: run without `--headless`, save `root.get_texture().get_image()` after ~30 frames, then look at the PNG
 - Run `--headless --import` after adding new images or scripts
+- Tests that call `end_day()` write the save, so never run them against the user's real save. Point the home folder somewhere temporary first: on Mac run Godot with `HOME=<temp dir>`; on Windows set `APPDATA=<temp dir>` (not tried yet). Check with `OS.get_user_data_dir()`
 
 ### Known issues / later
 - Hard square edge between grass and cursed ground (edge transition tiles later)

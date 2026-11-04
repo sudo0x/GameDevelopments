@@ -27,9 +27,12 @@ func is_ripe() -> bool:
 
 
 func grow_one_day() -> void:
-	if is_ripe():
-		return
-	days_grown += 1
+	if not is_ripe():
+		set_days_grown(days_grown + 1)
+
+
+func set_days_grown(days: int) -> void:
+	days_grown = days
 	@warning_ignore("integer_division")
 	stage = days_grown * (STAGES - 1) / data.days_to_grow
 

@@ -1,6 +1,6 @@
 extends Node
 ## Global game data: day, money and inventory. Registered as the GameState autoload.
-## Saving and loading come in Layer 1 step 8.
+## Saves at the end of each day and loads on start, so a game always resumes in the morning.
 
 signal inventory_changed
 ## Something (the house door) asked to sleep. The HUD fades out and calls end_day().
@@ -10,6 +10,10 @@ signal shop_requested
 ## The day is over: crops grow, soil dries. Shipped crops are paid just before this.
 signal day_ended
 signal day_started
+
+const SAVE_PATH := "user://save.cfg"
+## Raise this when the save layout changes. Saves with another version are ignored.
+const SAVE_VERSION := 1
 
 const CROPS: Array[CropData] = [
 	preload("res://data/crops/radish.tres"),
@@ -25,6 +29,19 @@ var seeds: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin
 var harvest: Dictionary[StringName, int] = {}
 ## Crops in the shipping box by crop id, paid when the day ends.
 var shipped: Dictionary[StringName, int] = {}
+## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.
+var farm_state: Dictionary = {}
+
+
+func _ready() -> void:
+	load_game()
+
+
+func crop_by_id(id: StringName) -> CropData:
+	for crop in CROPS:
+		if crop.id == id:
+			return crop
+	return null
 
 
 func seed_count(crop: CropData) -> int:
@@ -56,6 +73,7 @@ func end_day() -> void:
 	day_ended.emit()
 	day += 1
 	day_started.emit()
+	save_game()
 
 
 ## Removes one seed. Returns false if there are none left.
@@ -88,6 +106,32 @@ func buy_seed(crop: CropData) -> bool:
 	seeds[crop.id] = seed_count(crop) + 1
 	inventory_changed.emit()
 	return true
+
+
+## The shipping box isn't saved: it's always empty here, because end_day() pays it first.
+func save_game() -> void:
+	var file := ConfigFile.new()
+	file.set_value("game", "version", SAVE_VERSION)
+	file.set_value("game", "day", day)
+	file.set_value("game", "money", money)
+	file.set_value("game", "seeds", seeds)
+	file.set_value("game", "harvest", harvest)
+	file.set_value("game", "farm", farm_state)
+	var error := file.save(SAVE_PATH)
+	if error != OK:
+		push_error("Couldn't save the game: %s" % error_string(error))
+
+
+## Keeps the new-game values if there's no save, or it can't be read.
+func load_game() -> void:
+	var file := ConfigFile.new()
+	if file.load(SAVE_PATH) != OK or file.get_value("game", "version", 0) != SAVE_VERSION:
+		return
+	day = file.get_value("game", "day", day)
+	money = file.get_value("game", "money", money)
+	seeds.assign(file.get_value("game", "seeds", seeds))
+	harvest.assign(file.get_value("game", "harvest", harvest))
+	farm_state = file.get_value("game", "farm", farm_state)
 
 
 func _pay_shipped() -> void:

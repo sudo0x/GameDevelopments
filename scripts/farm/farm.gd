@@ -41,6 +41,7 @@ func _ready() -> void:
 	player.tool_used.connect(_on_tool_used)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
+	_restore(GameState.farm_state)
 
 
 func _physics_process(_delta: float) -> void:
@@ -92,11 +93,7 @@ func water(cell: Vector2i) -> void:
 func plant(cell: Vector2i, data: CropData) -> void:
 	if not GameState.use_seed(data):
 		return
-	var crop: Crop = CROP_SCENE.instantiate()
-	crop.data = data
-	crop.position = crops_parent.to_local(ground.to_global(ground.map_to_local(cell))) + Vector2(0, 12)
-	crops_parent.add_child(crop)
-	crops[cell] = crop
+	_add_crop(cell, data)
 
 
 ## Picks the crop. The soil stays tilled, so the cell can be planted again.
@@ -105,6 +102,15 @@ func harvest(cell: Vector2i) -> void:
 	GameState.add_harvest(crop.data)
 	crops.erase(cell)
 	crop.queue_free()
+
+
+func _add_crop(cell: Vector2i, data: CropData) -> Crop:
+	var crop: Crop = CROP_SCENE.instantiate()
+	crop.data = data
+	crop.position = crops_parent.to_local(ground.to_global(ground.map_to_local(cell))) + Vector2(0, 12)
+	crops_parent.add_child(crop)
+	crops[cell] = crop
+	return crop
 
 
 ## Which 32×32 piece of a 128×128 texture a cell uses, so neighbors line up seamlessly.
@@ -133,6 +139,24 @@ func _on_day_ended() -> void:
 			crops[cell].grow_one_day()
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
+	GameState.farm_state = _to_state()
+
+
+## Called after the soil dries, so only tilled cells need saving, not watered ones.
+func _to_state() -> Dictionary:
+	var saved_crops: Array[Dictionary] = []
+	for cell in crops:
+		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown})
+	return {"tilled": soil.get_used_cells(), "crops": saved_crops}
+
+
+func _restore(state: Dictionary) -> void:
+	for cell: Vector2i in state.get("tilled", []):
+		till(cell)
+	for saved: Dictionary in state.get("crops", []):
+		var data := GameState.crop_by_id(saved["id"])
+		if data:
+			_add_crop(saved["cell"], data).set_days_grown(saved["days"])
 
 
 func _limit_camera() -> void:
