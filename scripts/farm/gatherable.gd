@@ -6,6 +6,8 @@ extends StaticBody2D
 var data: GatherData
 var hits_left := 0
 var gathered := false
+## Nights left until it grows back, once gathered.
+var days_until_regrow := 0
 ## Hidden until the cursed land under it heals.
 var revealed := true
 
@@ -40,9 +42,21 @@ func hit() -> bool:
 	_play_shake()
 	if hits_left > 0:
 		return false
-	gathered = true
-	_update_look()
+	set_gathered(data.regrow_days)
 	return true
+
+
+func set_gathered(days_left: int) -> void:
+	gathered = true
+	days_until_regrow = days_left
+	_update_look()
+
+
+func regrow() -> void:
+	gathered = false
+	hits_left = data.hits
+	days_until_regrow = 0
+	_update_look()
 
 
 func _update_look() -> void:

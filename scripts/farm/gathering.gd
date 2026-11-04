@@ -29,6 +29,33 @@ func populate(ground: TileMapLayer, parent: Node2D, player: Node2D) -> void:
 		spots[spot.cell] = gatherable
 
 
+## Overnight: what was gathered gets a day closer to growing back. `is_blocked` says whether
+## a cell is in use, because rubble can be farmed; those wait until the cell is free.
+func advance_day(is_blocked: Callable) -> void:
+	for cell in spots:
+		var gatherable := spots[cell]
+		if not gatherable.gathered:
+			continue
+		gatherable.days_until_regrow = maxi(gatherable.days_until_regrow - 1, 0)
+		if gatherable.days_until_regrow == 0 and not is_blocked.call(cell):
+			gatherable.regrow()
+
+
+## What needs saving: only what's been gathered, since the rest starts whole.
+func to_state() -> Array[Dictionary]:
+	var saved: Array[Dictionary] = []
+	for cell in spots:
+		if spots[cell].gathered:
+			saved.append({"cell": cell, "days": spots[cell].days_until_regrow})
+	return saved
+
+
+func restore(saved: Array) -> void:
+	for entry: Dictionary in saved:
+		if spots.has(entry["cell"]):
+			spots[entry["cell"]].set_gathered(entry["days"])
+
+
 func reveal(cells: Array[Vector2i]) -> void:
 	for cell in cells:
 		if spots.has(cell):
@@ -47,8 +74,15 @@ func hit(cell: Vector2i) -> void:
 		GameState.notice.emit("+%d %s" % [data.amount, data.material.display_name])
 
 
-## Text for the HUD when the player faces this cell, or empty if there's nothing to gather.
+## Text for the HUD when the player faces this cell, or empty if there's nothing to say.
 func status(cell: Vector2i) -> String:
-	if not can_hit(cell):
+	if not spots.has(cell) or not spots[cell].revealed:
 		return ""
-	return "%s: press 4, then Space to gather." % spots[cell].data.display_name
+	var gatherable := spots[cell]
+	var display_name := gatherable.data.display_name
+	if not gatherable.gathered:
+		return "%s: press 4, then Space to gather." % display_name
+	var days := gatherable.days_until_regrow
+	if days == 0:
+		return ""
+	return "%s: grows back in %d %s." % [display_name, days, "day" if days == 1 else "days"]

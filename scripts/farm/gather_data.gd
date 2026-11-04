@@ -12,3 +12,5 @@ extends Resource
 @export var remains_texture: Texture2D
 ## Whether what's left still blocks walking: a stump does, rubble doesn't.
 @export var remains_solid: bool = true
+## Nights until it grows back.
+@export var regrow_days: int = 5

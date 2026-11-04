@@ -14,3 +14,4 @@ hits = 3
 whole_texture = ExtResource("3_whole")
 remains_texture = ExtResource("4_remains")
 remains_solid = true
+regrow_days = 5

@@ -186,6 +186,7 @@ func _on_day_ended() -> void:
 			crops[cell].grow_one_day()
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
+	gathering.advance_day(is_tilled)
 	GameState.farm_state = _to_state()
 
 
@@ -199,12 +200,14 @@ func _to_state() -> Dictionary:
 		"tilled": soil.get_used_cells(),
 		"crops": saved_crops,
 		"shrine": healing.shrine.restored,
+		"gathered": gathering.to_state(),
 	}
 
 
 func _restore(state: Dictionary) -> void:
 	healing.restore(state.get("cleansed", []), state.get("shrine", false))
 	gathering.populate(ground, crops_parent, player)
+	gathering.restore(state.get("gathered", []))
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)
 	for saved: Dictionary in state.get("crops", []):

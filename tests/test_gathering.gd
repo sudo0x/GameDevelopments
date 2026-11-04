@@ -89,7 +89,7 @@ func _run() -> void:
 	check("stump gives nothing", gs.material_count(wood) == 3)
 	await physics_frame
 	await physics_frame
-	check("status gone", hud.crop_status_label.text == "")
+	check("stump says when it returns", hud.crop_status_label.text == "Tree: grows back in 5 days.")
 	check("can't till a stump", not farm.can_use(0, tree_cell))
 	Input.action_press("move_right")
 	for i in 60:
