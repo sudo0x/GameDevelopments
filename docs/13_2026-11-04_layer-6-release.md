@@ -58,7 +58,7 @@ Areas 3 to 6, the cursed heart, the ruined village, new creatures, story, more i
 Each step ends with something you can run and see working.
 
 1. ✅ **Title menu:** Continue, New Game and a working way to start over
-2. **Touch controls:** joystick, tool bar and action buttons (needs art)
+2. ✅ **Touch controls:** joystick, tool bar and action buttons, with text until the tool icons arrive
 3. **Phone UI:** readable text, tappable menus, and icons (needs art)
 4. **Android build:** the game running on a real phone (needs setup by you)
 5. **Sound:** music and effects (needs audio)
@@ -86,7 +86,7 @@ These can't be done by code, so they're listed early.
 
 | Step | Needed |
 |---|---|
-| 2 | Tool icons |
+| 2 | Tool icons, in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md) |
 | 3 | Item icons: crops, seeds, materials, holy water, coin |
 | 5 | Music and sound effects |
 | 9 | Store icon, banner and screenshots |

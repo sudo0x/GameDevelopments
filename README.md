@@ -61,6 +61,7 @@ Targets: **Android first**, then **Steam**.
 | 6 | Build: place crafted buildings on clean land (Q / E to change the building) |
 | 7 | Sword: swing at whatever is in front of you (craft it at the workbench) |
 | Space / left click | Use the tool on the highlighted tile |
+| Touch screens | A joystick, tool bar and buttons appear by themselves |
 | F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; workbench: craft; shrine: restore it) |
 | I | Open the bag |
 

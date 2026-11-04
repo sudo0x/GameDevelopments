@@ -1,0 +1,92 @@
+class_name TouchControls
+extends Node2D
+## On-screen controls for phones. Every button presses a normal input action, so game code
+## works the same with touch and keyboard. Built from the tables below.
+## TouchScreenButton is used because, unlike Button, it works while another finger is down.
+
+const BUTTON_TEXTURE := preload("res://assets/ui/touch_button.png")
+const TEXTURE_SIZE := 64.0
+const SELECTED_COLOR := Color(1.4, 1.2, 0.8)
+const TOOL_BAR_Y := 340.0
+const TOOL_BAR_START_X := 214.0
+const TOOL_SIZE := 34.0
+const TOOL_SPACING := 36.0
+const TOOL_LABELS: Array[String] = ["Hoe", "Water", "Seeds", "Hand", "Holy", "Build", "Sword"]
+## Text, action, center, size.
+const ACTION_BUTTONS: Array[Array] = [
+	["Use", "use_tool", Vector2(596, 296), 68.0],
+	["Act", "interact", Vector2(526, 322), 50.0],
+	["Bag", "inventory", Vector2(526, 262), 42.0],
+	["<", "seed_prev", Vector2(476, 300), 34.0],
+	[">", "seed_next", Vector2(476, 340), 34.0],
+]
+const TOOL_LABEL_TOUCH_Y := 52.0
+const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
+
+@export var player_path: NodePath
+
+## On screens without touch these stay hidden, and the keyboard hints stay on.
+var active := false
+
+var _tool_buttons: Array[TouchScreenButton] = []
+
+@onready var player: Player = get_node(player_path)
+@onready var tool_bar: Node2D = $ToolBar
+@onready var hint: Label = get_parent().get_node("Hint")
+@onready var tool_label: Label = get_parent().get_node("ToolLabel")
+
+
+func _ready() -> void:
+	for i in TOOL_LABELS.size():
+		var at := Vector2(TOOL_BAR_START_X + i * TOOL_SPACING, TOOL_BAR_Y)
+		_tool_buttons.append(_add_button(tool_bar, TOOL_LABELS[i], "tool_%d" % (i + 1), at, TOOL_SIZE))
+	for entry in ACTION_BUTTONS:
+		_add_button(self, entry[0], entry[1], entry[2], entry[3])
+	player.tool_changed.connect(_show_selected_tool)
+	set_active(DisplayServer.is_touchscreen_available())
+
+
+func _process(_delta: float) -> void:
+	# The bar would sit under open menus. F and Bag stay, because they close them.
+	tool_bar.visible = not get_tree().paused
+
+
+func set_active(value: bool) -> void:
+	active = value
+	visible = value
+	hint.visible = not value
+	# The joystick sits where this label normally is.
+	tool_label.position.y = TOOL_LABEL_TOUCH_Y if value else tool_label.position.y
+	if not value:
+		_release_movement()
+	_show_selected_tool()
+
+
+## A hidden joystick can't see its finger lift, so it would keep the player walking.
+func _release_movement() -> void:
+	for action in MOVE_ACTIONS:
+		Input.action_release(action)
+
+
+func _show_selected_tool() -> void:
+	for i in _tool_buttons.size():
+		_tool_buttons[i].modulate = SELECTED_COLOR if i == player.tool else Color.WHITE
+
+
+func _add_button(parent: Node, text: String, action: String, center: Vector2, size: float) -> TouchScreenButton:
+	var button := TouchScreenButton.new()
+	var scale_by := size / TEXTURE_SIZE
+	button.texture_normal = BUTTON_TEXTURE
+	button.action = action
+	button.scale = Vector2(scale_by, scale_by)
+	button.position = center - Vector2(size, size) / 2.0
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 10 if size < 40.0 else 14)
+	label.size = Vector2(size, size)
+	label.scale = Vector2.ONE / scale_by
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	button.add_child(label)
+	parent.add_child(button)
+	return button

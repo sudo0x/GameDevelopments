@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
 [ext_resource type="Script" path="res://scripts/farm/builder.gd" id="builder_script"]
 [ext_resource type="Script" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
+[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="touch_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
@@ -159,6 +160,26 @@ offset_top = 300.0
 offset_right = 600.0
 offset_bottom = 324.0
 horizontal_alignment = 1
+
+[node name="TouchControls" type="Node2D" parent="HUD" unique_id=1639042785]
+process_mode = 3
+script = ExtResource("touch_script")
+player_path = NodePath("../../World/Player")
+
+[node name="Joystick" type="VirtualJoystick" parent="HUD/TouchControls" unique_id=1782935406]
+offset_left = 2.0
+offset_top = 232.0
+offset_right = 130.0
+offset_bottom = 360.0
+joystick_size = 84.0
+tip_size = 34.0
+deadzone_ratio = 0.1
+action_left = &"move_left"
+action_right = &"move_right"
+action_up = &"move_up"
+action_down = &"move_down"
+
+[node name="ToolBar" type="Node2D" parent="HUD/TouchControls" unique_id=1208467359]
 
 [node name="ShopMenu" parent="HUD" unique_id=1582206743 instance=ExtResource("shop_menu_scene")]
 
