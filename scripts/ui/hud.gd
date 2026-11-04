@@ -15,7 +15,7 @@ var _notice_tween: Tween
 @onready var farm: Farm = get_node(farm_path)
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
-@onready var money_label: Label = $MoneyLabel
+@onready var money_label: Label = $MoneyRow/MoneyLabel
 @onready var status_label: Label = $StatusLabel
 @onready var notice_label: Label = $NoticeLabel
 @onready var crop_status_label: Label = $CropStatusLabel
@@ -35,7 +35,7 @@ func _ready() -> void:
 
 func _refresh() -> void:
 	day_label.text = "Day %d" % GameState.day
-	money_label.text = "Money: %d" % GameState.money
+	money_label.text = str(GameState.money)
 	status_label.text = _status_text()
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:

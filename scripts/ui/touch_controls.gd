@@ -16,11 +16,12 @@ const TOOL_BAR_START_X := 214.0
 const TOOL_SIZE := 34.0
 const TOOL_SPACING := 36.0
 const TOOL_COUNT := 7
-## Text, action, center, size.
+## Text, action, center, size. A button with no text shows BAG_ICON.
+const BAG_ICON := preload("res://assets/ui/bag.png")
 const ACTION_BUTTONS: Array[Array] = [
 	["Use", "use_tool", Vector2(596, 296), 68.0],
 	["Act", "interact", Vector2(526, 322), 50.0],
-	["Bag", "inventory", Vector2(526, 262), 42.0],
+	["", "inventory", Vector2(526, 262), 42.0],
 	["<", "seed_prev", Vector2(476, 300), 34.0],
 	[">", "seed_next", Vector2(476, 340), 34.0],
 ]
@@ -47,13 +48,17 @@ func _ready() -> void:
 		_add_icon(button, _tool_icon(i))
 		_tool_buttons.append(button)
 	for entry in ACTION_BUTTONS:
-		_add_button(self, entry[0], entry[1], entry[2], entry[3])
+		# Only Act and Bag stay under a menu: they're what close it.
+		var keep_showing: bool = entry[1] != "seed_prev" and entry[1] != "seed_next"
+		var button := _add_button(self if keep_showing else tool_bar, entry[0], entry[1], entry[2], entry[3])
+		if entry[0].is_empty():
+			_add_icon(button, BAG_ICON)
 	player.tool_changed.connect(_show_selected_tool)
 	set_active(DisplayServer.is_touchscreen_available())
 
 
 func _process(_delta: float) -> void:
-	# The bar would sit under open menus. F and Bag stay, because they close them.
+	# Taps would go through an open menu to anything under it.
 	tool_bar.visible = not get_tree().paused
 
 
@@ -112,7 +117,7 @@ func _add_button(parent: Node, text: String, action: String, center: Vector2, si
 		return button
 	var label := Label.new()
 	label.text = text
-	label.add_theme_font_size_override("font_size", 10 if size < 40.0 else 14)
+	label.add_theme_font_size_override("font_size", 16 if size < 40.0 else 24)
 	label.size = Vector2(size, size)
 	label.scale = Vector2.ONE / scale_by
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -140,7 +140,7 @@ func _run() -> void:
 	check("saved", gs.strong_holy_water == 4 and gs.material_count(shard) == 3)
 	var bag: Node = main.get_node("HUD/BagMenu")
 	bag.open()
-	check("bag shows both", bag.items_label.text.contains("Strong holy water: 4") and bag.items_label.text.contains("Curse shard: 3"))
+	check("bag shows both", bag.items_text.contains("Strong holy water: 4") and bag.items_text.contains("Curse shard: 3"))
 	bag.close()
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

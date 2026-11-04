@@ -28,6 +28,7 @@ func _focus_first_button() -> void:
 func _add_row(recipe: RecipeData) -> void:
 	var row := HBoxContainer.new()
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(_icon(recipe.icon))
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()

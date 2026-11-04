@@ -25,7 +25,7 @@ func press(action: String) -> void:
 
 
 func cells(bag: Node) -> Array:
-	return bag.crops_grid.get_children().map(func(n: Label) -> String: return n.text)
+	return bag.crops_grid.get_children().filter(func(n: Node) -> bool: return n is Label).map(func(n: Label) -> String: return n.text)
 
 
 func _initialize() -> void:
@@ -61,7 +61,7 @@ func _run() -> void:
 	var list := cells(bag)
 	print(list)
 	check("crop table", list == ["", "Harvested", "Seeds", "Radish", "0", "10", "Carrot", "7", "5", "Pumpkin", "0", "3"])
-	check("items", bag.items_label.text == "Holy water: 2\nWood: 4\nStone: 2\nCurse shard: 0")
+	check("items", bag.items_text == "Holy water: 2\nWood: 4\nStone: 2\nCurse shard: 0")
 	var pos: Vector2 = player.global_position
 	Input.action_press("move_left")
 	for i in 20:
@@ -69,7 +69,7 @@ func _run() -> void:
 	Input.action_release("move_left")
 	check("player can't move while open", player.global_position == pos)
 	gs.add_material(stone, 1)
-	check("updates while open", bag.items_label.text.contains("Stone: 3"))
+	check("updates while open", bag.items_text.contains("Stone: 3"))
 	await press("inventory")
 	check("I closes", not bag.visible and not paused)
 	await press("inventory")
@@ -80,7 +80,7 @@ func _run() -> void:
 	gs.holy_water = 0
 	gs.add_material(wood, 1)
 	await press("inventory")
-	check("fresh numbers when reopened", bag.items_label.text.contains("Wood: 5"))
+	check("fresh numbers when reopened", bag.items_text.contains("Wood: 5"))
 	await press("inventory")
 
 	# Only one menu at a time.

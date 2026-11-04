@@ -10,8 +10,8 @@ var _buttons: Array[Button] = []
 
 func _ready() -> void:
 	for crop in GameState.CROPS:
-		_add_row(GameState.buy_seed.bind(crop))
-	_add_row(GameState.buy_holy_water)
+		_add_row(GameState.buy_seed.bind(crop), crop.seed_icon)
+	_add_row(GameState.buy_holy_water, HOLY_WATER_ICON)
 	GameState.shop_requested.connect(open)
 	super()
 	_refresh()
@@ -24,8 +24,9 @@ func _focus_first_button() -> void:
 			break
 
 
-func _add_row(buy: Callable) -> void:
+func _add_row(buy: Callable, icon: Texture2D) -> void:
 	var row := HBoxContainer.new()
+	row.add_child(_icon(icon))
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()

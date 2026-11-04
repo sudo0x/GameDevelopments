@@ -1,8 +1,10 @@
 [gd_resource type="Resource" script_class="MaterialData" format=3]
 
 [ext_resource type="Script" path="res://scripts/farm/material_data.gd" id="1_material"]
+[ext_resource type="Texture2D" path="res://assets/items/wood.png" id="icon_0"]
 
 [resource]
 script = ExtResource("1_material")
+icon = ExtResource("icon_0")
 id = &"wood"
 display_name = "Wood"

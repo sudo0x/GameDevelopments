@@ -4,6 +4,8 @@ extends Resource
 
 @export var id: StringName
 @export var display_name: String
+@export var icon: Texture2D
+@export var seed_icon: Texture2D
 @export var days_to_grow: int = 3
 @export var seed_price: int = 10
 @export var sell_price: int = 25

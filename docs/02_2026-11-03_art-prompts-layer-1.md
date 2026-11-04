@@ -128,10 +128,10 @@ Generate each crop as **one image with its 4 stages in a horizontal row**. Draw 
 | `objects/house.png` ✅ done → `assets/objects/house.png` | 96×96 | A small old wooden farmhouse with a dark mossy shingle roof, a door at the front center, one small window. |
 | `objects/shipping_box.png` ✅ done (30×48 in a 40×48 frame, the open lid adds height) | 32×32 | A wooden shipping crate with an open lid. |
 | `objects/shop_stall.png` ✅ done (75×96 in a 96×96 frame) | 64×64 | A small wooden market stall with a striped awning and seed bags on the counter. |
-| `objects/tree.png` | 64×96 | A leafy dark green tree with a twisted brown trunk. |
+| `objects/tree.png` ✅ done in Layer 3 | 64×96 | A leafy dark green tree with a twisted brown trunk. |
 | `objects/lantern_post.png` ✅ done (41×72 in a 48×72 frame) | 32×64 | A wooden post with a hanging iron lantern (unlit; the glow is added in Godot). |
-| `objects/rock.png` | 32×32 | A small gray rock. |
-| `objects/fence.png` | 32×32 | A wooden fence segment, horizontal. |
+| `objects/rock.png` ✅ done in Layer 3 | 32×32 | A small gray rock. |
+| `objects/fence.png` ✅ done in Layer 4 | 32×32 | A wooden fence segment, horizontal. |
 
 ### Player (frames 48×64)
 

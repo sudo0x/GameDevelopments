@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://b01yi5bnjnwku" path="res://scripts/farm/crop_data.gd" id="1_crop"]
 [ext_resource type="Texture2D" uid="uid://sv0rp2kxrpiv" path="res://assets/crops/radish_stages.png" id="2_stages"]
+[ext_resource type="Texture2D" path="res://assets/items/radish.png" id="icon_0"]
+[ext_resource type="Texture2D" path="res://assets/items/seeds_radish.png" id="icon_1"]
 
 [resource]
 script = ExtResource("1_crop")
+seed_icon = ExtResource("icon_1")
+icon = ExtResource("icon_0")
 id = &"radish"
 display_name = "Radish"
 stages_texture = ExtResource("2_stages")

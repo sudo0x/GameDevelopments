@@ -76,7 +76,7 @@ func _run() -> void:
 	await press("use_tool")
 	check("second press harvests nothing", gs.harvest_count(radish) == 1)
 	check("HUD status text", hud.status_label.text.contains("Island healed"))
-	check("HUD money text", hud.money_label.text == "Money: 0")
+	check("HUD money text", hud.money_label.text == "0")
 	print("inventory label:\n" + hud.status_label.text)
 
 	await press("tool_3")

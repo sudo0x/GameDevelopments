@@ -99,7 +99,23 @@ func _run() -> void:
 	bag.open()
 	await process_frame
 	no_keys("bag help", bag.get_node("Margin/Box/Help").text)
-	check("the bag leaves Bag showing", bag.get_global_rect().end.x <= act_left)
+	bag.close()
+	# The fullest bag a player can have.
+	gs.has_sword = true
+	gs.has_purifying_hoe = true
+	gs.strong_holy_water = 99
+	gs.holy_water = 99
+	gs.harvest[&"pumpkin"] = 999
+	for material in gs.MATERIALS:
+		gs.materials[material.id] = 999
+	for building in gs.BUILDINGS:
+		gs.buildings[building.id] = 99
+	bag.open()
+	await process_frame
+	await process_frame
+	print("full bag ", bag.get_global_rect())
+	check("a full bag fits the screen", bag.get_global_rect().size.y <= 360.0 and bag.get_global_rect().position.y >= 0.0)
+	check("a full bag leaves Act showing", bag.get_global_rect().end.x <= act_left)
 	bag.close()
 	gs.has_sword = true
 	craft.open()
@@ -113,6 +129,14 @@ func _run() -> void:
 	check("the workbench leaves Act showing", craft.get_global_rect().end.x <= act_left)
 	craft.close()
 
+	# Nothing tappable sits under a menu, except what closes it.
+	craft.open()
+	await wait(2)
+	var bar: Node2D = controls.get_node("ToolBar")
+	check("tool bar and < > hide under a menu", not bar.visible and bar.get_child_count() == 9)
+	craft.close()
+	await wait(2)
+
 	# Back to a keyboard.
 	controls.set_active(false)
 	await wait(2)
@@ -122,6 +146,7 @@ func _run() -> void:
 	shop.open()
 	await process_frame
 	check("menus too", shop.get_node("Margin/Box/Help").text.contains("Enter"))
+	check("centered again on a computer", is_equal_approx(shop.get_global_rect().get_center().x, 320.0))
 	shop.close()
 
 	# The title screen's buttons.

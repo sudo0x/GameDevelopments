@@ -5,6 +5,7 @@
 [ext_resource type="Resource" path="res://data/materials/wood.tres" id="3_wood"]
 [ext_resource type="Resource" path="res://data/materials/stone.tres" id="4_stone"]
 [ext_resource type="Resource" path="res://data/buildings/well.tres" id="5_building"]
+[ext_resource type="Texture2D" path="res://assets/objects/well.png" id="icon_0"]
 
 [sub_resource type="Resource" id="need_wood"]
 script = ExtResource("2_need")
@@ -18,6 +19,7 @@ amount = 8
 
 [resource]
 script = ExtResource("1_recipe")
+icon = ExtResource("icon_0")
 display_name = "Well"
 needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("need_stone")])
 result = 2

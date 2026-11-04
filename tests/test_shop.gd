@@ -65,7 +65,7 @@ func _run() -> void:
 	gs.end_day()
 	check("paid overnight", gs.money == expected)
 	check("box emptied", gs.shipped.is_empty())
-	check("HUD money", hud.money_label.text == "Money: %d" % expected)
+	check("HUD money", hud.money_label.text == str(expected))
 	check("HUD shipping line gone", not hud.status_label.text.contains("Shipping"))
 	gs.end_day()
 	check("not paid twice", gs.money == expected)

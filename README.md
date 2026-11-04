@@ -81,4 +81,4 @@ Targets: **Android first**, then **Steam**.
 
 ## Art
 
-The pixel art is **AI-generated** (ChatGPT) from the prompts in [the art prompts doc](docs/02_2026-11-03_art-prompts-layer-1.md), then shrunk to its real pixel size with `tools/pixelize.gd` and checked by hand. This will be disclosed on store pages as required.
+The font is [m5x7](https://managore.itch.io/m5x7) by Daniel Linssen (CC0). The pixel art is **AI-generated** (ChatGPT) from the prompts in [the art prompts doc](docs/02_2026-11-03_art-prompts-layer-1.md), then shrunk to its real pixel size with `tools/pixelize.gd` and checked by hand. This will be disclosed on store pages as required.

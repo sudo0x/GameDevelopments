@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://b01yi5bnjnwku" path="res://scripts/farm/crop_data.gd" id="1_crop"]
 [ext_resource type="Texture2D" uid="uid://bqcd0hqyg8ekq" path="res://assets/crops/pumpkin_stages.png" id="2_stages"]
+[ext_resource type="Texture2D" path="res://assets/items/pumpkin.png" id="icon_0"]
+[ext_resource type="Texture2D" path="res://assets/items/seeds_pumpkin.png" id="icon_1"]
 
 [resource]
 script = ExtResource("1_crop")
+seed_icon = ExtResource("icon_1")
+icon = ExtResource("icon_0")
 id = &"pumpkin"
 display_name = "Pumpkin"
 days_to_grow = 8

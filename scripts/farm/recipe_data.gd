@@ -5,6 +5,7 @@ extends Resource
 enum Result { HOLY_WATER, PURIFYING_HOE, BUILDING, SWORD, STRONG_HOLY_WATER }
 
 @export var display_name: String
+@export var icon: Texture2D
 @export var needs: Array[RecipeNeed] = []
 @export var result: Result = Result.HOLY_WATER
 @export var result_amount: int = 1

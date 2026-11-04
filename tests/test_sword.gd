@@ -158,7 +158,7 @@ func _run() -> void:
 	check("saved", gs.has_sword)
 	var bag: Node = main.get_node("HUD/BagMenu")
 	bag.open()
-	check("bag shows it", bag.items_label.text.contains("Sword"))
+	check("bag shows it", bag.items_text.contains("Sword"))
 	bag.close()
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

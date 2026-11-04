@@ -87,6 +87,7 @@ flowchart LR
 | 4 ✅ | Building structures | [09_2026-11-04_layer-4-building.md](09_2026-11-04_layer-4-building.md) |
 | 5 ✅ | Enemies, weapons, combat | [11_2026-11-04_layer-5-combat.md](11_2026-11-04_layer-5-combat.md) |
 | 6 | Touch controls, rewarded ads, save polish, store release | [13_2026-11-04_layer-6-release.md](13_2026-11-04_layer-6-release.md) |
+| Areas | Whispering Woods, Sunken Marsh and an ending, built during Layer 6 before the Android build | [15_2026-11-04_areas-woods-marsh.md](15_2026-11-04_areas-woods-marsh.md) |
 
 ## Art direction
 

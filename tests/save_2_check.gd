@@ -37,7 +37,7 @@ func _run() -> void:
 	check("crop sprite shows stage", carrot.sprite.frame == 2 and radish.sprite.frame == 3)
 	check("crop in World", radish.get_parent().name == "World")
 	check("HUD day", hud.day_label.text == "Day 5")
-	check("HUD money", hud.money_label.text == "Money: 200")
+	check("HUD money", hud.money_label.text == "200")
 	farm.harvest(Vector2i(14, 10))
 	check("restored crop harvests", gs.harvest_count(c[0]) == 3)
 	farm.water(Vector2i(15, 10))

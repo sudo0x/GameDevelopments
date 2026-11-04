@@ -119,7 +119,7 @@ func _run() -> void:
 	check("full again in the morning", gs.hoe_uses_left == 5)
 
 	bag.open()
-	check("bag shows it", bag.items_label.text.contains("Purifying hoe: 5 of 5 left today"))
+	check("bag shows it", bag.items_text.contains("Hoe: 5 of 5 left"))
 	bag.close()
 
 	# Saved, with full uses after loading.

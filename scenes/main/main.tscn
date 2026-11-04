@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
 [ext_resource type="Script" path="res://scripts/farm/builder.gd" id="builder_script"]
 [ext_resource type="Script" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
+[ext_resource type="Texture2D" path="res://assets/items/coin.png" id="coin_icon"]
 [ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="touch_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
@@ -125,13 +126,21 @@ offset_bottom = 30.0
 text = "Day 1"
 horizontal_alignment = 2
 
-[node name="MoneyLabel" type="Label" parent="HUD" unique_id=1460275318]
+[node name="MoneyRow" type="HBoxContainer" parent="HUD" unique_id=1460275318]
 offset_left = 472.0
 offset_top = 32.0
 offset_right = 632.0
 offset_bottom = 56.0
-text = "Money: 0"
-horizontal_alignment = 2
+alignment = 2
+
+[node name="Coin" type="TextureRect" parent="HUD/MoneyRow" unique_id=1781245093]
+layout_mode = 2
+texture = ExtResource("coin_icon")
+stretch_mode = 3
+
+[node name="MoneyLabel" type="Label" parent="HUD/MoneyRow" unique_id=1309472865]
+layout_mode = 2
+text = "0"
 
 [node name="StatusLabel" type="Label" parent="HUD" unique_id=1137790264]
 offset_left = 432.0

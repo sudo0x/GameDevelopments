@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://b01yi5bnjnwku" path="res://scripts/farm/crop_data.gd" id="1_crop"]
 [ext_resource type="Texture2D" uid="uid://b3x1gc418jdof" path="res://assets/crops/carrot_stages.png" id="2_stages"]
+[ext_resource type="Texture2D" path="res://assets/items/carrot.png" id="icon_0"]
+[ext_resource type="Texture2D" path="res://assets/items/seeds_carrot.png" id="icon_1"]
 
 [resource]
 script = ExtResource("1_crop")
+seed_icon = ExtResource("icon_1")
+icon = ExtResource("icon_0")
 id = &"carrot"
 display_name = "Carrot"
 days_to_grow = 5

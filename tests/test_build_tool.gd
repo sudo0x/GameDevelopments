@@ -126,7 +126,7 @@ func _run() -> void:
 	# Crafted buildings show in the bag and are saved.
 	var bag: Node = main.get_node("HUD/BagMenu")
 	bag.open()
-	check("bag shows it", bag.items_label.text.contains("Lantern post: 1"))
+	check("bag shows it", bag.items_text.contains("Lantern post: 1"))
 	bag.close()
 	gs.save_game()
 	gs.buildings.clear()
