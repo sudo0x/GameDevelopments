@@ -54,7 +54,7 @@ func _run() -> void:
 	check("no money before sleeping", gs.money == 0)
 	var expected: int = radish.sell_price * 2 + pumpkin.sell_price
 	check("shipped value", gs.shipped_value() == expected)
-	check("HUD shows shipping", hud.inventory_label.text.contains("Shipping: %d" % expected))
+	check("HUD shows shipping", hud.status_label.text.contains("Shipping: %d" % expected))
 	for offset in [Vector2(-30, -2), Vector2(30, -2), Vector2(0, -16)]:
 		gs.harvest[&"carrot"] = 1
 		await stand(player, box.global_position + offset)
@@ -66,7 +66,7 @@ func _run() -> void:
 	check("paid overnight", gs.money == expected)
 	check("box emptied", gs.shipped.is_empty())
 	check("HUD money", hud.money_label.text == "Money: %d" % expected)
-	check("HUD shipping line gone", not hud.inventory_label.text.contains("Shipping"))
+	check("HUD shipping line gone", not hud.status_label.text.contains("Shipping"))
 	gs.end_day()
 	check("not paid twice", gs.money == expected)
 

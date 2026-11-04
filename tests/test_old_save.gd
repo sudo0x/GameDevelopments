@@ -37,6 +37,7 @@ func _run() -> void:
 	check("crops", farm.crops.size() == 2 and farm.crops[Vector2i(38, 11)].data.id == &"carrot")
 	check("crop growth", farm.crops[Vector2i(38, 11)].days_grown == 1)
 	check("soil", farm.is_tilled(Vector2i(20, 12)))
+	check("no materials in an old save", gs.materials.is_empty())
 	check("dug-up find stays gone", not farm.healing._glimmers.has(Vector2i(38, 10)))
 	check("other finds still buried", farm.healing._glimmers.has(Vector2i(42, 15)))
 	print("FAILS: %d" % fails)

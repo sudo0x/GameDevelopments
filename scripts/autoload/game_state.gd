@@ -27,12 +27,19 @@ const CROPS: Array[CropData] = [
 	preload("res://data/crops/pumpkin.tres"),
 ]
 
+const MATERIALS: Array[MaterialData] = [
+	preload("res://data/materials/wood.tres"),
+	preload("res://data/materials/stone.tres"),
+]
+
 var day := 1
 var money := 0
 ## Seed counts by crop id.
 var seeds: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin": 3}
 ## Harvested crop counts by crop id.
 var harvest: Dictionary[StringName, int] = {}
+## Gathered material counts by material id.
+var materials: Dictionary[StringName, int] = {}
 ## Crops in the shipping box by crop id, paid when the day ends.
 var shipped: Dictionary[StringName, int] = {}
 ## Uses of holy water owned. Each one cleanses a patch of cursed land.
@@ -60,6 +67,10 @@ func seed_count(crop: CropData) -> int:
 
 func harvest_count(crop: CropData) -> int:
 	return harvest.get(crop.id, 0)
+
+
+func material_count(material: MaterialData) -> int:
+	return materials.get(material.id, 0)
 
 
 ## What everything in the shipping box will earn overnight.
@@ -100,6 +111,11 @@ func add_harvest(crop: CropData) -> void:
 	inventory_changed.emit()
 
 
+func add_material(material: MaterialData, amount: int) -> void:
+	materials[material.id] = material_count(material) + amount
+	inventory_changed.emit()
+
+
 ## Moves every harvested crop into the shipping box.
 func ship_all() -> void:
 	for id in harvest:
@@ -126,6 +142,7 @@ func save_game() -> void:
 	file.set_value("game", "money", money)
 	file.set_value("game", "seeds", seeds)
 	file.set_value("game", "harvest", harvest)
+	file.set_value("game", "materials", materials)
 	file.set_value("game", "holy_water", holy_water)
 	file.set_value("game", "farm", farm_state)
 	var error := file.save(SAVE_TEMP_PATH)
@@ -144,6 +161,7 @@ func load_game() -> void:
 	money = file.get_value("game", "money", money)
 	seeds.assign(file.get_value("game", "seeds", seeds))
 	harvest.assign(file.get_value("game", "harvest", harvest))
+	materials.assign(file.get_value("game", "materials", materials))
 	holy_water = file.get_value("game", "holy_water", holy_water)
 	farm_state = file.get_value("game", "farm", farm_state)
 

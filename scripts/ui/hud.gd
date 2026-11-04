@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Shows the day, money, inventory, healing progress and the selected tool and seed,
+## Shows the day, money, healing progress and the selected tool and seed,
 ## shows short notices, and fades to black when sleeping.
 
 const FADE_SECONDS := 0.6
@@ -16,7 +16,7 @@ var _notice_tween: Tween
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
 @onready var money_label: Label = $MoneyLabel
-@onready var inventory_label: Label = $InventoryLabel
+@onready var status_label: Label = $StatusLabel
 @onready var notice_label: Label = $NoticeLabel
 @onready var crop_status_label: Label = $CropStatusLabel
 @onready var fade: ColorRect = $Fade
@@ -35,7 +35,7 @@ func _ready() -> void:
 func _refresh() -> void:
 	day_label.text = "Day %d" % GameState.day
 	money_label.text = "Money: %d" % GameState.money
-	inventory_label.text = _inventory_text()
+	status_label.text = _status_text()
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
@@ -45,15 +45,13 @@ func _refresh() -> void:
 	tool_label.text = text
 
 
-## One line per crop: harvested count, then seeds left. Then what's in the shipping box.
-func _inventory_text() -> String:
+## Only what changes often is shown here. The full list is in the bag (key I).
+func _status_text() -> String:
 	var lines: PackedStringArray = []
-	for crop in GameState.CROPS:
-		lines.append("%s: %d  (%d seeds)" % [crop.display_name, GameState.harvest_count(crop), GameState.seed_count(crop)])
-	if not GameState.shipped.is_empty():
-		lines.append("Shipping: %d overnight" % GameState.shipped_value())
 	if GameState.holy_water > 0:
 		lines.append("Holy water: %d" % GameState.holy_water)
+	if not GameState.shipped.is_empty():
+		lines.append("Shipping: %d overnight" % GameState.shipped_value())
 	lines.append("Island healed: %.1f%%" % GameState.healed_percent)
 	return "\n".join(lines)
 

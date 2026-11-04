@@ -32,14 +32,14 @@ func _run() -> void:
 	print("cursed total ", total)
 	check("total sensible", total > 800 and total < 1500)
 	check("starts at 0", gs.healed_percent == 0.0)
-	check("HUD shows 0.0%", hud.inventory_label.text.contains("Island healed: 0.0%"))
+	check("HUD shows 0.0%", hud.status_label.text.contains("Island healed: 0.0%"))
 
 	var far := Vector2i(40, 3)
 	farm.healing.cleanse(far)
 	var n: int = farm.healing.cleansed.size()
 	check("no find, no reward", gs.money == 0 and hud.notice_label.text == "")
 	check("percent moves", is_equal_approx(gs.healed_percent, 100.0 * n / total))
-	check("HUD percent", hud.inventory_label.text.contains("Island healed: %.1f%%" % gs.healed_percent))
+	check("HUD percent", hud.status_label.text.contains("Island healed: %.1f%%" % gs.healed_percent))
 
 	farm.healing.cleanse(Vector2i(38, 10))
 	check("money find", gs.money == 40)

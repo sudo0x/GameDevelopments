@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 3 step 1 done: cleanup)
-- **Next:** Layer 3 step 2: materials and inventory panel (no art needed). Step 3 needs art, so give the user the prompts then. The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- Last updated: 2026-11-04 (Layer 3 step 2 done: materials and bag)
+- **Next:** Layer 3 step 3: trees and rocks. The user has the prompts for the tree, stump, rock and rubble; use placeholders until the art arrives. The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
@@ -51,7 +51,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Save/load**: `GameState.end_day()` calls `save_game()` last; `_ready()` calls `load_game()`, so the game always resumes in the morning and anything done after the last sleep is lost. File: `user://save.cfg` (ConfigFile, `SAVE_VERSION`; missing, unreadable or other-version files start a new game), written through `save.tmp` and a rename so a crash can't damage it. `tests/fixtures/save_v1.cfg` is a real older save that must keep loading: never regenerate it to pass a test. Farm writes `GameState.farm_state` (cleansed cells, tilled cells, crops) at the end of `_on_day_ended` and rebuilds from it in `_ready`. Not saved: player position, watered soil (dry at save time), `shipped` (paid before saving). There's no New Game button yet; to start over, delete the file
 - **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners). `lantern_light.gd` makes the light flicker
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
-- **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then shipping, holy water and island healed %), notice label, tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
+- **Materials and bag**: `MaterialData` in `data/materials/`, listed in `GameState.MATERIALS`, counts in `GameState.materials` (saved). `scenes/ui/bag_menu.tscn` on key I shows crops, seeds, holy water and materials; it pauses the game like the shop, and won't open over another menu
+- **HUD** (`scripts/ui/hud.gd`): hint line, day and money labels, StatusLabel (top right: holy water, shipping, island healed %), crop status and notice labels, tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
@@ -82,7 +83,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Base resolution 640×360 (20×11 tiles of 32px), window 1280×720, stretch mode `canvas_items` (not `viewport`: that made movement jump in 2-pixel steps), integer scaling
 - Texture filter Nearest, 2D transforms snap to pixel
 - Physics interpolation ON (smooth movement on 120 Hz+ monitors with 60 Hz physics); cameras use the physics process callback
-- Input actions (in `project.godot`): `move_up/down/left/right`, `tool_1`–`tool_5`, `seed_prev`, `seed_next`, `use_tool`, `interact`
+- Input actions (in `project.godot`): `move_up/down/left/right`, `tool_1`–`tool_5`, `seed_prev`, `seed_next`, `use_tool`, `interact`, `inventory`
 
 ## Folder layout
 - `scenes/`: `.tscn` scenes by feature (main/, player/, farm/, ui/)

@@ -45,7 +45,7 @@ Recipes and amounts are starting values, to be tuned once the loop can be played
 |---|---|
 | **Code cleanup** | Fixes the weak spots from [the build notes](06_2026-11-04_build-notes.md) before they get harder to fix |
 | **Materials** | Wood and stone, stored and saved like crops |
-| **Inventory panel** | Shows crops, seeds and materials on one screen |
+| **Bag screen** | Shows crops, seeds and materials on one screen |
 | **Trees and rocks** | Solid objects that take a few hits, then regrow |
 | **Workbench** | Opens a crafting menu showing what each recipe needs |
 | **Recipes as data** | `RecipeData` resources, the same way crops work, so a new recipe needs no new code |
@@ -60,7 +60,7 @@ Building (Layer 4), lanterns the player can place (Layer 4), enemies and weapons
 Each step ends with something you can run in Godot and see working.
 
 1. ✅ **Cleanup:** move healing out of `farm.gd`, move prices and finds into Resources, make saving crash-safe
-2. **Materials and inventory:** wood and stone in `GameState`, plus the inventory panel
+2. ✅ **Materials and inventory:** wood and stone in `GameState`, plus the bag screen on key I
 3. **Trees and rocks:** hit them with the hand tool to gather (needs art)
 4. **Regrowth:** gathered trees and rocks come back after a few days, and their state is saved
 5. **Workbench:** the object and its crafting menu, with `RecipeData` (needs art)

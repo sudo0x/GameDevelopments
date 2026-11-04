@@ -59,7 +59,7 @@ func _run() -> void:
 	check("seed row 0 still buys seeds", menu._labels[0].text.begins_with("Radish seeds"))
 	await press("interact")
 	check("shop closed", not menu.visible)
-	check("HUD shows holy water", hud.inventory_label.text.contains("Holy water: 2"))
+	check("HUD shows holy water", hud.status_label.text.contains("Holy water: 2"))
 
 	# Walk to the east edge of the shore, then heal what's ahead.
 	player.global_position = g.to_global(g.map_to_local(Vector2i(33, 13)))

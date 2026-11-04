@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/bag_menu.gd" id="1_bag"]
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.09, 0.07, 0.11, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.3, 0.18, 1)
+
+[node name="BagMenu" type="PanelContainer"]
+process_mode = 3
+visible = false
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("Style_panel")
+script = ExtResource("1_bag")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Box" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Margin/Box"]
+layout_mode = 2
+text = "Bag"
+horizontal_alignment = 1
+
+[node name="Crops" type="GridContainer" parent="Margin/Box"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+columns = 3
+
+[node name="Items" type="Label" parent="Margin/Box"]
+layout_mode = 2
+
+[node name="Help" type="Label" parent="Margin/Box"]
+layout_mode = 2
+text = "I / Esc: close"
+horizontal_alignment = 1

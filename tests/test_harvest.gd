@@ -75,9 +75,9 @@ func _run() -> void:
 	check("soil stays tilled", farm.is_tilled(cell))
 	await press("use_tool")
 	check("second press harvests nothing", gs.harvest_count(radish) == 1)
-	check("HUD inventory text", hud.inventory_label.text.begins_with("Radish: 1  (9 seeds)"))
+	check("HUD status text", hud.status_label.text.contains("Island healed"))
 	check("HUD money text", hud.money_label.text == "Money: 0")
-	print("inventory label:\n" + hud.inventory_label.text)
+	print("inventory label:\n" + hud.status_label.text)
 
 	await press("tool_3")
 	await press("use_tool")

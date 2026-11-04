@@ -56,6 +56,7 @@ Targets: **Android first**, then **Steam**.
 | 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
 | Space / left click | Use the tool on the highlighted tile |
 | F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; shrine: restore it) |
+| I | Open the bag |
 
 ## Project structure
 

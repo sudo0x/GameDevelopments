@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
 [node name="Main" type="Node2D" unique_id=1909061381]
@@ -82,7 +83,7 @@ offset_left = 8.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
-text = "WASD move   1-5 tools   Space use   F door / box / shop"
+text = "WASD move   1-5 tools   Space use   F door / box / shop   I bag"
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
 offset_left = 472.0
@@ -100,7 +101,7 @@ offset_bottom = 56.0
 text = "Money: 0"
 horizontal_alignment = 2
 
-[node name="InventoryLabel" type="Label" parent="HUD" unique_id=1137790264]
+[node name="StatusLabel" type="Label" parent="HUD" unique_id=1137790264]
 offset_left = 432.0
 offset_top = 58.0
 offset_right = 632.0
@@ -129,6 +130,8 @@ offset_bottom = 324.0
 horizontal_alignment = 1
 
 [node name="ShopMenu" parent="HUD" unique_id=1582206743 instance=ExtResource("shop_menu_scene")]
+
+[node name="BagMenu" parent="HUD" unique_id=1742093386 instance=ExtResource("bag_menu_scene")]
 
 [node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
 offset_right = 640.0
