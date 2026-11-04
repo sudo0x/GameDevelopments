@@ -28,6 +28,7 @@ func _ready() -> void:
 	GameState.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
 	GameState.notice.connect(_show_notice)
+	GameState.fainted.connect(_faint)
 	farm.target_status_changed.connect(_show_crop_status)
 	_refresh()
 
@@ -77,12 +78,24 @@ func _show_notice(text: String) -> void:
 
 ## Fade out, end the day while the screen is black, fade back in.
 func _sleep() -> void:
+	_fade_to_next_day(GameState.end_day)
+
+
+## Like sleeping, but the player wakes up at home.
+func _faint(money_lost: int) -> void:
+	_fade_to_next_day(func() -> void:
+		GameState.end_day()
+		player.return_home()
+		GameState.notice.emit("You fainted and woke up at home. You lost %d money." % money_lost))
+
+
+func _fade_to_next_day(while_black: Callable) -> void:
 	if _sleeping:
 		return
 	_sleeping = true
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS)
-	tween.tween_callback(GameState.end_day)
+	tween.tween_callback(while_black)
 	tween.tween_interval(0.3)
 	tween.tween_property(fade, "color:a", 0.0, FADE_SECONDS)
 	tween.tween_callback(func() -> void: _sleeping = false)

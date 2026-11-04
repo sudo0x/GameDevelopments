@@ -11,6 +11,9 @@ signal shop_requested
 signal crafting_requested
 ## A short message for the player, such as what they just dug up.
 signal notice(text: String)
+signal hearts_changed
+## The player ran out of hearts. The HUD fades out, ends the day and sends them home.
+signal fainted(money_lost: int)
 ## The day is over: crops grow, soil dries. Shipped crops are paid just before this.
 signal day_ended
 signal day_started
@@ -66,6 +69,8 @@ var holy_water := 0
 var has_purifying_hoe := false
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
+## Health left today. Full every morning, and the game only saves in the morning, so it isn't saved.
+var hearts: int = BALANCE.max_hearts
 ## How much of the cursed land is healed, 0–100. Farm keeps it up to date; it isn't saved.
 var healed_percent := 0.0
 ## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.
@@ -131,6 +136,7 @@ func end_day() -> void:
 	day_ended.emit()
 	day += 1
 	_refill_hoe()
+	_refill_hearts()
 	day_started.emit()
 	save_game()
 
@@ -309,6 +315,28 @@ func give_find(find: BuriedFind) -> void:
 			seeds[find.crop.id] = seed_count(find.crop) + find.amount
 			notice.emit("You dug up %d %s seeds!" % [find.amount, find.crop.display_name.to_lower()])
 	inventory_changed.emit()
+
+
+## Removes hearts, and faints at zero. Does nothing once the player has already fainted.
+func take_damage(amount: int) -> void:
+	if hearts <= 0:
+		return
+	hearts = maxi(hearts - amount, 0)
+	hearts_changed.emit()
+	if hearts == 0:
+		_faint()
+
+
+func _faint() -> void:
+	var lost: int = money * BALANCE.faint_money_percent / 100
+	money -= lost
+	inventory_changed.emit()
+	fainted.emit(lost)
+
+
+func _refill_hearts() -> void:
+	hearts = BALANCE.max_hearts
+	hearts_changed.emit()
 
 
 func _refill_hoe() -> void:

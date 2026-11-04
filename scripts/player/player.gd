@@ -38,6 +38,8 @@ var _walk_time: float = 0.0
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
 @onready var _idle_texture: Texture2D = sprite.texture
+## Where the player wakes after fainting.
+@onready var _home_position: Vector2 = global_position
 
 
 func _physics_process(delta: float) -> void:
@@ -90,6 +92,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		tool_used.emit(tool)
 	if event.is_action_pressed("interact"):
 		_interact()
+
+
+## Sends the player home. Physics interpolation is reset so they jump there instead of sliding.
+func return_home() -> void:
+	global_position = _home_position
+	reset_physics_interpolation()
 
 
 func selected_seed() -> CropData:

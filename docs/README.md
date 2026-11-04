@@ -16,3 +16,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 08 | 2026-11-04 | [Art prompts: Layer 3](08_2026-11-04_art-prompts-layer-3.md) |
 | 09 | 2026-11-04 | [Layer 4 plan: building](09_2026-11-04_layer-4-building.md) |
 | 10 | 2026-11-04 | [Art prompts: Layer 4](10_2026-11-04_art-prompts-layer-4.md) |
+| 11 | 2026-11-04 | [Layer 5 plan: combat](11_2026-11-04_layer-5-combat.md) |

@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
 [ext_resource type="Script" path="res://scripts/farm/builder.gd" id="builder_script"]
+[ext_resource type="Script" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
@@ -102,6 +103,14 @@ offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
 text = "WASD move   1-6 tools   Space use   F interact   I bag"
+
+[node name="HeartsBar" type="Control" parent="HUD" unique_id=1570426893]
+offset_left = 8.0
+offset_top = 32.0
+offset_right = 96.0
+offset_bottom = 48.0
+mouse_filter = 2
+script = ExtResource("hearts_script")
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
 offset_left = 472.0

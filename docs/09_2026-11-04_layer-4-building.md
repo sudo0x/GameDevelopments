@@ -67,7 +67,7 @@ Each step ends with something you can run in Godot and see working.
 4. ✅ **Lantern post:** the first real building, healing the curse each night
 5. ✅ **Fence:** a simple building for decoration
 6. ✅ **Well:** waters nearby crops each morning
-7. **Balance pass:** play the full game and tune Layers 3 and 4 together
+7. ⏸ **Balance pass:** postponed, and moved to the end of [Layer 5](11_2026-11-04_layer-5-combat.md)
 
 ## Art needed
 
