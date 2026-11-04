@@ -54,6 +54,9 @@ func _ready() -> void:
 	shape.size = Vector2(ground.tile_set.tile_size) - Vector2(4, 4)
 	_cell_query.shape = shape
 	_cell_query.exclude = [player.get_rid()]
+	# Layer 1 only, so a creature passing by doesn't block farming or building.
+	_cell_query.collision_mask = 1
+	_build_query.collision_mask = 1
 	_build_query.shape = shape
 	_build_query.collide_with_areas = true
 	# Without this, the player's own areas would count as something in the way.

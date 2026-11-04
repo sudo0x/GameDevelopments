@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/creatures/creature.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="Shape_base"]
+radius = 8.0
+
+[node name="Creature" type="CharacterBody2D"]
+collision_layer = 2
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+position = Vector2(0, -8)
+shape = SubResource("Shape_base")

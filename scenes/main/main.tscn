@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
+[ext_resource type="PackedScene" path="res://scenes/creatures/creature.tscn" id="creature_scene"]
+[ext_resource type="Resource" path="res://data/creatures/shade.tres" id="shade_data"]
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
@@ -88,6 +90,10 @@ position = Vector2(976, 384)
 
 [node name="Shrine" parent="World" unique_id=1264790358 instance=ExtResource("shrine_scene")]
 position = Vector2(2224, 412)
+
+[node name="Shade" parent="World" unique_id=1205847361 instance=ExtResource("creature_scene")]
+position = Vector2(1072, 528)
+data = ExtResource("shade_data")
 
 [node name="Player" parent="World" unique_id=1599642464 instance=ExtResource("1_player")]
 position = Vector2(784, 348)

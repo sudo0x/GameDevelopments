@@ -24,7 +24,7 @@ handle and a small dark iron crossguard. Handmade and practical, not fancy.
 
 ## Shade
 
-One image: its floating and fading are made in code.
+Saved as `art_source/objects/shade.png` ✅ done. Shrink with `--height 48 --frame-w 36 --frame-h 48 --single true`. It's one image, and its floating is made in code.
 
 ```
 Match the style of the attached reference exactly.
