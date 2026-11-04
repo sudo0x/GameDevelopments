@@ -2,8 +2,22 @@
 
 ## Engine
 - Godot 4.7.2, GDScript, Compatibility renderer (for web and mobile)
-- Executable: `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` (use `--headless` for checks)
-- Platform: Windows dev; targets Android first, then Steam
+- Targets Android first, then Steam
+
+## Two dev machines (Windows and Mac)
+The user works on both, sometimes in separate Claude chats. Neither one is "old": check which machine this chat is on (the Platform line in your environment) and use that row.
+
+| | Windows | Mac (Apple Silicon) |
+|---|---|---|
+| Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `~/Downloads/Godot.app/Contents/MacOS/Godot`, or `/Applications/Godot.app/Contents/MacOS/Godot` if moved |
+| Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | Not confirmed yet (check `~/.codex/visualizations/` first) |
+| `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | No saved GitHub login as of 2026-11-04 (the user needs to run `gh auth login`) |
+
+- GitHub is the only link between the machines, so unpushed work is invisible on the other one
+- Start of a session: run `git pull`, then `--headless --import` (`.godot/` isn't in git, so each machine has its own cache)
+- End of a session: commit, and make sure the work gets pushed before the user switches machines
+- Keep both machines on Godot 4.7.2
+- Keep this file machine-neutral: when something differs between machines, put it in the table above
 
 ## Game
 - Moody dark-fantasy 2D top-down farming game: farming heals a cursed island (concept: `docs/03_2026-11-03_game-concept.md`)
@@ -13,7 +27,7 @@
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (last commit: walk animations, 4b05ef9)
+- Last updated: 2026-11-04 (added Mac as a second dev machine; last gameplay commit: walk animations, 4b05ef9)
 - **Next:** Layer 1 step 6: harvest ripe crops with the hand tool (key 4) into `GameState.harvest`, then a HUD showing money and inventory. After that: step 7 (shipping box + seed shop, needs art), step 8 (save/load), step 9 (mood lighting)
 - Layer 1 progress: steps 1–5 done (setup, player, farm grid, till/plant, water/days); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
@@ -33,7 +47,7 @@
 ### Art
 - Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages
 - Next: item icons (harvested crops, seed packets, coin), tool icons, shipping box, shop stall (prompts in the art doc)
-- **Workflow**: the user generates art in ChatGPT/Codex; files land in `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` (both a `*-master.png` and a small version). Copy the **master** into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
+- **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
 - Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
@@ -49,7 +63,7 @@
 - Standing "facing right" pose is separate art, slightly different from the mirrored walk side
 
 ### Git
-- Branch `development`, remote `sudo0x/GameDevelopments`. Claude's `git push` fails (Windows has the `dancypher` GitHub login saved); commit, then ask the user to run `git push` themselves
+- Branch `development`, remote `sudo0x/GameDevelopments`. Claude's `git push` doesn't work on either machine yet (see "Two dev machines"); commit, then ask the user to run `git push` themselves
 
 ## Display and input
 - Base resolution 640×360 (20×11 tiles of 32px), window 1280×720, stretch mode `canvas_items` (not `viewport`: that made movement jump in 2-pixel steps), integer scaling
@@ -64,7 +78,7 @@
 - `assets/`: tiles/, crops/, items/, tools/, objects/, player/ (game-ready art at real pixel size, don't read)
 - `art_source/`: original AI images from ChatGPT (ignored by Godot via `.gdignore`)
 - `tools/`: dev scripts, ignored by Godot. `build_farm_map.gd` builds the tileset and ground scene. `pixelize.gd` shrinks AI art to real pixel size: `--headless --path . --script tools/pixelize.gd -- --in art_source/... --out assets/... --height 64 --frame-w 48 --frame-h 64`
-- `docs/`: design and build plans; `research/`: research notes
+- `docs/`: design and build plans (ignored by Godot via `.gdignore`); `research/`: research notes
 
 ## Code style
 - GDScript with static typing (`var speed: float = 200.0`, typed function args/returns)
