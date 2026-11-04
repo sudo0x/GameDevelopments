@@ -31,7 +31,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Last updated: 2026-11-04 (Layer 2 complete: step 8 soft edges done)
 - **Next:** write the Layer 3 plan (gathering and crafting, see the concept doc); there's no plan doc for it yet. The user chose not to play Layers 1 and 2 by hand, so they're only covered by automated tests, and holy water prices are untuned
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
-- Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
+- The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now
 - **Player** (`scripts/player/player.gd`, `scenes/player/player.tscn`): 8-way movement, 4 facing poses (`Player.Facing`), feet collision 20×10, `Reach` Area2D. Tools `Player.Tool` (HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER) on keys 1–5, Q/E pick seed (`seed_index` into `GameState.CROPS`). Signals `tool_changed`, `tool_used(tool)`. F calls `interact(player)` on the first overlapping area that has that method
@@ -62,11 +62,12 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
 
 ### Testing
+- **Run `tests/run_all.sh` before every commit** (a few seconds; it uses a temporary home folder, so it never touches the real save, and it fails on any error or warning). Add a test with each new feature: `tests/test_<feature>.gd`, or a `<name>_1_play.gd` and `<name>_2_check.gd` pair for anything that must survive a restart (add pairs to the script). Tried on Mac only so far
 - Headless checks: `--headless --path . --script <test.gd>` with a `SceneTree` script that instantiates `res://scenes/main/main.tscn` and simulates input (`Input.action_press`, or `Input.parse_input_event(InputEventAction)` for `_unhandled_input`). Use `--fixed-fps 60` when timing matters (fades)
 - Test scripts can't reference autoloads by name (compiled first); use `root.get_node("GameState")`. This also rules out `class_name`s whose scripts use autoloads (`n is CleanseEffect` fails to compile); check `scene_file_path` instead. A failed test script never quits, so run tests with a time limit
 - Screenshots: run without `--headless`, save `root.get_texture().get_image()` after ~30 frames, then look at the PNG
 - Run `--headless --import` after adding new images or scripts
-- Tests that call `end_day()` write the save, so never run them against the user's real save. Point the home folder somewhere temporary first: on Mac run Godot with `HOME=<temp dir>`; on Windows set `APPDATA=<temp dir>` (not tried yet). Check with `OS.get_user_data_dir()`
+- Tests that call `end_day()` write the save, so run a single test with a temporary home folder too: `HOME=<temp dir>` on Mac, `APPDATA=<temp dir>` on Windows (not tried yet)
 
 ### Known issues / later
 - `project.godot`: Godot itself moves the `2d/snap/snap_2d_transforms_to_pixel` line when it runs; harmless, `git restore project.godot` before committing
@@ -87,6 +88,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - `data/`: game data (crop definitions, prices)
 - `assets/`: tiles/, crops/, items/, tools/, objects/, player/ (game-ready art at real pixel size, don't read)
 - `art_source/`: original AI images from ChatGPT (ignored by Godot via `.gdignore`)
+- `tests/`: automated tests and `run_all.sh`, ignored by Godot via `.gdignore`
 - `tools/`: dev scripts, ignored by Godot. `build_farm_map.gd` builds the tileset and ground scene. `build_curse_edges.gd` builds the curse edge pieces. `pixelize.gd` shrinks AI art to real pixel size: `--headless --path . --script tools/pixelize.gd -- --in art_source/... --out assets/... --height 64 --frame-w 48 --frame-h 64`
 - `docs/`: design and build plans (ignored by Godot via `.gdignore`); `research/`: research notes
 
@@ -105,6 +107,9 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Only for pictures Mermaid can't draw (game scenes, view styles): SVG in an `images/` subfolder, with hardcoded colors and a white background
 
 ## Working rules
+- The user won't start art on their own: say exactly which art is needed and when, with complete prompts. Keep coding with placeholders meanwhile
+- Use simple English, and say so when you disagree with a choice, instead of only following it
+- The user is learning from this project: after each step, add what was built, where and why to `docs/06_2026-11-04_build-notes.md`, and keep its "Things to do better" table honest
 - Keep changes focused on the requested feature; don't refactor unrelated code
 - Don't open or edit `.godot/`, `.import` files or binary assets
 - Prefer editing `.gd` scripts; edit `.tscn` files only when necessary and keep changes minimal

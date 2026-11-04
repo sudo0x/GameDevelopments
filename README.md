@@ -67,6 +67,7 @@ Targets: **Android first**, then **Steam**.
 | `assets/` | Game-ready pixel art |
 | `art_source/` | Original AI-generated images (not loaded by the game) |
 | `tools/` | Dev scripts: shrinking AI art to real pixel size, building the map |
+| `tests/` | Automated tests; run them all with `tests/run_all.sh` |
 | `docs/` | [Game concept](docs/03_2026-11-03_game-concept.md), [Layer 1 plan](docs/01_2026-11-03_layer-1-farming.md), [art prompts](docs/02_2026-11-03_art-prompts-layer-1.md) |
 | `research/` | Research notes from planning the game |
 
