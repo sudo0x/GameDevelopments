@@ -85,8 +85,8 @@ flowchart LR
 | 2 ✅ | Cursed tiles, cleansing, unlocking new land | [04_2026-11-04_layer-2-curse.md](04_2026-11-04_layer-2-curse.md) |
 | 3 ✅ | Gathering (trees, rocks), crafting recipes | [07_2026-11-04_layer-3-gathering-crafting.md](07_2026-11-04_layer-3-gathering-crafting.md) |
 | 4 ✅ | Building structures | [09_2026-11-04_layer-4-building.md](09_2026-11-04_layer-4-building.md) |
-| 5 | Enemies, weapons, combat | [11_2026-11-04_layer-5-combat.md](11_2026-11-04_layer-5-combat.md) |
-| 6 | Touch controls, rewarded ads, save polish, store release | To write |
+| 5 ✅ | Enemies, weapons, combat | [11_2026-11-04_layer-5-combat.md](11_2026-11-04_layer-5-combat.md) |
+| 6 | Touch controls, rewarded ads, save polish, store release | [13_2026-11-04_layer-6-release.md](13_2026-11-04_layer-6-release.md) |
 
 ## Art direction
 

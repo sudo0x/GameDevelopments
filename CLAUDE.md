@@ -23,13 +23,13 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 ## Game
 - Moody dark-fantasy 2D top-down farming game: farming heals a cursed island (concept: `docs/03_2026-11-03_game-concept.md`)
 - Built in layers: farming → curse/cleansing → collect/craft → build → combat → mobile/release
-- Current layer plan: `docs/11_2026-11-04_layer-5-combat.md`; read it before adding gameplay features (Layers 1 to 4 are finished: `docs/01_...`, `docs/04_...`, `docs/07_...`, `docs/09_...`)
+- Current layer plan: `docs/13_2026-11-04_layer-6-release.md`; read it before adding features (Layers 1 to 5 are finished: `docs/01_...`, `docs/04_...`, `docs/07_...`, `docs/09_...`, `docs/11_...`)
 - Art: AI-generated 32×32 pixel art, prompts in `docs/02_2026-11-03_art-prompts-layer-1.md`; use colored placeholders until an asset exists
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 5 step 8 done: hollow)
-- **Next:** Layer 5 step 9: the balance pass for Layers 3 to 5, which needs real play. After that, Layer 6 (touch controls, ads, release) has no plan doc yet. All balance passes are postponed to Layer 5 step 9. The user postponed the balance passes and doesn't want to playtest for now. Don't keep asking, but mention balance is untested when it matters The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- Last updated: 2026-11-04 (Layers 1 to 5 built; Layer 6 plan written)
+- **Next:** Layer 6 step 1: title menu. The balance pass for Layers 3 to 5 is now Layer 6 step 7, and must happen before release. The user still needs to choose a game title All balance passes are postponed to Layer 5 step 9. The user postponed the balance passes and doesn't want to playtest for now. Don't keep asking, but mention balance is untested when it matters The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
