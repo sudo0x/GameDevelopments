@@ -22,8 +22,6 @@ const CLEANSE_EFFECT_SCENE := preload("res://scenes/farm/cleanse_effect.tscn")
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 const CLEANSE_RADIUS := 1
 
-## Cells where the player may till and plant.
-@export var farm_area := Rect2i(13, 9, 12, 10)
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
 @export var crops_parent_path: NodePath
@@ -31,6 +29,8 @@ const CLEANSE_RADIUS := 1
 var target_cell := Vector2i.ZERO
 ## Planted crops by cell.
 var crops: Dictionary[Vector2i, Crop] = {}
+## Reused to check whether a solid object stands on a cell.
+var _cell_query := PhysicsShapeQueryParameters2D.new()
 
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
@@ -40,8 +40,11 @@ var crops: Dictionary[Vector2i, Crop] = {}
 
 
 func _ready() -> void:
-	var tile := Vector2(ground.tile_set.tile_size)
-	highlight.set_area(Rect2(Vector2(farm_area.position) * tile, Vector2(farm_area.size) * tile))
+	var shape := RectangleShape2D.new()
+	# A little smaller than a tile, so a neighbor's collision doesn't count.
+	shape.size = Vector2(ground.tile_set.tile_size) - Vector2(4, 4)
+	_cell_query.shape = shape
+	_cell_query.exclude = [player.get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
@@ -63,8 +66,9 @@ func target_cell_for(p: Player) -> Vector2i:
 	return feet_cell + FACING_OFFSETS[p.facing]
 
 
+## Any clean grass can be farmed, unless something solid stands on it.
 func is_farmable(cell: Vector2i) -> bool:
-	return farm_area.has_point(cell) and ground.get_cell_source_id(cell) == Source.GRASS
+	return ground.get_cell_source_id(cell) == Source.GRASS and not _has_solid_object(cell)
 
 
 func is_tilled(cell: Vector2i) -> bool:
@@ -138,6 +142,11 @@ func harvest(cell: Vector2i) -> void:
 	GameState.add_harvest(crop.data)
 	crops.erase(cell)
 	crop.queue_free()
+
+
+func _has_solid_object(cell: Vector2i) -> bool:
+	_cell_query.transform = Transform2D(0.0, ground.to_global(ground.map_to_local(cell)))
+	return not get_world_2d().direct_space_state.intersect_shape(_cell_query, 1).is_empty()
 
 
 func _add_crop(cell: Vector2i, data: CropData) -> Crop:
