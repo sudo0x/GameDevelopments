@@ -9,10 +9,10 @@ signal tool_used(tool: Tool)
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
 enum Facing { DOWN, UP, LEFT, RIGHT }
-## Keys 1–4 select these, in this order.
-enum Tool { HOE, WATERING_CAN, SEEDS, HAND }
+## Keys 1–5 select these, in this order.
+enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER }
 
-const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand"]
+const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water"]
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.

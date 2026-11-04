@@ -38,7 +38,7 @@ theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="Margin/Box"]
 layout_mode = 2
-text = "Seed shop"
+text = "Shop"
 horizontal_alignment = 1
 
 [node name="MoneyLabel" type="Label" parent="Margin/Box"]

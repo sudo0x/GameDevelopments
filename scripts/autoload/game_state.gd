@@ -11,6 +11,8 @@ signal shop_requested
 signal day_ended
 signal day_started
 
+const HOLY_WATER_PRICE := 30
+
 const SAVE_PATH := "user://save.cfg"
 ## Raise this when the save layout changes. Saves with another version are ignored.
 const SAVE_VERSION := 1
@@ -29,6 +31,8 @@ var seeds: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin
 var harvest: Dictionary[StringName, int] = {}
 ## Crops in the shipping box by crop id, paid when the day ends.
 var shipped: Dictionary[StringName, int] = {}
+## Uses of holy water owned. Each one cleanses a patch of cursed land.
+var holy_water := 0
 ## The farm's tilled cells and crops. Farm fills it at the end of the day and restores from it on start.
 var farm_state: Dictionary = {}
 
@@ -116,6 +120,7 @@ func save_game() -> void:
 	file.set_value("game", "money", money)
 	file.set_value("game", "seeds", seeds)
 	file.set_value("game", "harvest", harvest)
+	file.set_value("game", "holy_water", holy_water)
 	file.set_value("game", "farm", farm_state)
 	var error := file.save(SAVE_PATH)
 	if error != OK:
@@ -131,7 +136,27 @@ func load_game() -> void:
 	money = file.get_value("game", "money", money)
 	seeds.assign(file.get_value("game", "seeds", seeds))
 	harvest.assign(file.get_value("game", "harvest", harvest))
+	holy_water = file.get_value("game", "holy_water", holy_water)
 	farm_state = file.get_value("game", "farm", farm_state)
+
+
+## Buys one holy water. Returns false if there isn't enough money.
+func buy_holy_water() -> bool:
+	if money < HOLY_WATER_PRICE:
+		return false
+	money -= HOLY_WATER_PRICE
+	holy_water += 1
+	inventory_changed.emit()
+	return true
+
+
+## Removes one holy water. Returns false if there's none left.
+func use_holy_water() -> bool:
+	if holy_water <= 0:
+		return false
+	holy_water -= 1
+	inventory_changed.emit()
+	return true
 
 
 func _pay_shipped() -> void:

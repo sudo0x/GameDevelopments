@@ -1,5 +1,5 @@
 extends PanelContainer
-## The seed shop. One row per crop, built from GameState.CROPS.
+## The shop. One seed row per crop, built from GameState.CROPS, then holy water.
 ## The game pauses while it's open; this node keeps running (process_mode = Always).
 
 var _labels: Array[Label] = []
@@ -11,7 +11,8 @@ var _buttons: Array[Button] = []
 
 func _ready() -> void:
 	for crop in GameState.CROPS:
-		_add_row(crop)
+		_add_row(GameState.buy_seed.bind(crop))
+	_add_row(GameState.buy_holy_water)
 	GameState.shop_requested.connect(open)
 	GameState.inventory_changed.connect(_refresh)
 	_refresh()
@@ -41,12 +42,12 @@ func close() -> void:
 	get_tree().paused = false
 
 
-func _add_row(crop: CropData) -> void:
+func _add_row(buy: Callable) -> void:
 	var row := HBoxContainer.new()
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
-	button.pressed.connect(GameState.buy_seed.bind(crop))
+	button.pressed.connect(buy)
 	row.add_child(label)
 	row.add_child(button)
 	rows.add_child(row)
@@ -59,5 +60,12 @@ func _refresh() -> void:
 	for i in GameState.CROPS.size():
 		var crop := GameState.CROPS[i]
 		_labels[i].text = "%s seeds: %d" % [crop.display_name, GameState.seed_count(crop)]
-		_buttons[i].text = "Buy for %d" % crop.seed_price
-		_buttons[i].disabled = GameState.money < crop.seed_price
+		_set_price(i, crop.seed_price)
+	var last := _labels.size() - 1
+	_labels[last].text = "Holy water: %d" % GameState.holy_water
+	_set_price(last, GameState.HOLY_WATER_PRICE)
+
+
+func _set_price(row: int, price: int) -> void:
+	_buttons[row].text = "Buy for %d" % price
+	_buttons[row].disabled = GameState.money < price

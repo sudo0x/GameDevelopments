@@ -50,6 +50,7 @@ Targets: **Android first**, then **Steam**.
 | 2 | Watering can |
 | 3 | Seeds (Q / E to change the seed type) |
 | 4 | Hand (harvest ripe crops) |
+| 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
 | Space / left click | Use the tool on the highlighted tile |
 | F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds) |
 

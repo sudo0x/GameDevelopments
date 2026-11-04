@@ -66,7 +66,7 @@ offset_left = 8.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
-text = "WASD move   1-4 tools   Space use   F door / box / shop"
+text = "WASD move   1-5 tools   Space use   F door / box / shop"
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
 offset_left = 472.0

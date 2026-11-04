@@ -31,6 +31,8 @@ func _refresh() -> void:
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
 		text += "  |  %s seeds: %d  (Q / E to change)" % [crop.display_name, GameState.seed_count(crop)]
+	if player.tool == Player.Tool.HOLY_WATER:
+		text += ": %d" % GameState.holy_water
 	tool_label.text = text
 
 
@@ -41,6 +43,8 @@ func _inventory_text() -> String:
 		lines.append("%s: %d  (%d seeds)" % [crop.display_name, GameState.harvest_count(crop), GameState.seed_count(crop)])
 	if not GameState.shipped.is_empty():
 		lines.append("Shipping: %d overnight" % GameState.shipped_value())
+	if GameState.holy_water > 0:
+		lines.append("Holy water: %d" % GameState.holy_water)
 	return "\n".join(lines)
 
 

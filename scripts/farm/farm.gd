@@ -18,6 +18,9 @@ const FACING_OFFSETS := {
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
 
+## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
+const CLEANSE_RADIUS := 1
+
 ## Cells where the player may till and plant.
 @export var farm_area := Rect2i(13, 9, 12, 10)
 @export var player_path: NodePath
@@ -47,7 +50,10 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	target_cell = target_cell_for(player)
 	var tile := Vector2(ground.tile_set.tile_size)
-	highlight.show_cell(Rect2(ground.map_to_local(target_cell) - tile / 2.0, tile), can_use(player.tool, target_cell))
+	var rect := Rect2(ground.map_to_local(target_cell) - tile / 2.0, tile)
+	if player.tool == Player.Tool.HOLY_WATER:
+		rect = rect.grow(tile.x * CLEANSE_RADIUS)
+	highlight.show_cell(rect, can_use(player.tool, target_cell))
 
 
 ## The tile in front of the player's feet, in the direction they face.
@@ -68,6 +74,22 @@ func is_watered(cell: Vector2i) -> bool:
 	return soil.get_cell_source_id(cell) == Source.SOIL_WET
 
 
+## The map's outer ring can't be healed: nothing else stops the player walking off the map.
+func is_cleansable(cell: Vector2i) -> bool:
+	return ground.get_cell_source_id(cell) == Source.CURSED and ground.get_used_rect().grow(-1).has_point(cell)
+
+
+## The cells a cleanse centered here would heal.
+func cleansable_cells(center: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for y in range(-CLEANSE_RADIUS, CLEANSE_RADIUS + 1):
+		for x in range(-CLEANSE_RADIUS, CLEANSE_RADIUS + 1):
+			var cell := center + Vector2i(x, y)
+			if is_cleansable(cell):
+				cells.append(cell)
+	return cells
+
+
 ## Whether the tool would do something on this cell (drives the highlight color).
 func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 	match tool:
@@ -79,6 +101,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
 			return crops.has(cell) and crops[cell].is_ripe()
+		Player.Tool.HOLY_WATER:
+			return GameState.holy_water > 0 and not cleansable_cells(cell).is_empty()
 	return false
 
 
@@ -94,6 +118,14 @@ func plant(cell: Vector2i, data: CropData) -> void:
 	if not GameState.use_seed(data):
 		return
 	_add_crop(cell, data)
+
+
+func cleanse(center: Vector2i) -> void:
+	var cells := cleansable_cells(center)
+	if cells.is_empty() or not GameState.use_holy_water():
+		return
+	for cell in cells:
+		ground.set_cell(cell, Source.GRASS, texture_coords(cell))
 
 
 ## Picks the crop. The soil stays tilled, so the cell can be planted again.
@@ -130,6 +162,8 @@ func _on_tool_used(tool: Player.Tool) -> void:
 			plant(target_cell, player.selected_seed())
 		Player.Tool.HAND:
 			harvest(target_cell)
+		Player.Tool.HOLY_WATER:
+			cleanse(target_cell)
 
 
 ## Overnight: watered crops grow one day, then all soil dries.
