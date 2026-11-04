@@ -29,6 +29,7 @@ func _add_row(buy: Callable) -> void:
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
+	button.custom_minimum_size = BUTTON_SIZE
 	button.pressed.connect(buy)
 	row.add_child(label)
 	row.add_child(button)

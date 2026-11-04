@@ -41,7 +41,7 @@ flowchart LR
 |---|---|
 | **Title menu** | Game title, Continue, New Game with a warning. Settings come with sound in step 5, when there's something to set |
 | **Touch controls** | Joystick, tool bar, Use and Interact buttons, shown only on touch screens |
-| **Phone UI** | Bigger text and buttons, icons for items, and menus that work by tapping |
+| **Phone UI** | Touch wording, bigger buttons, tool icons, and menus that work by tapping. Text size and item icons are decided in step 4, once it's on a real phone |
 | **Android build** | An installable game, tested on a real phone |
 | **Sound** | Music and effects, especially for healing, the first pillar's reward |
 | **Polish** | Queued messages, up-and-down fences, player movement mode, soil edges, moths, grass wind |
@@ -59,7 +59,7 @@ Each step ends with something you can run and see working.
 
 1. ✅ **Title menu:** Continue, New Game and a working way to start over
 2. ✅ **Touch controls:** joystick, tool bar and action buttons, with text until the tool icons arrive
-3. **Phone UI:** readable text, tappable menus, and icons (needs art)
+3. ✅ **Phone UI:** touch wording, thumb-sized buttons and tool icons
 4. **Android build:** the game running on a real phone (needs setup by you)
 5. **Sound:** music and effects (needs audio)
 6. **Polish:** the weak spots listed in the build notes
@@ -86,8 +86,8 @@ These can't be done by code, so they're listed early.
 
 | Step | Needed |
 |---|---|
-| 2 | Tool icons, in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md) |
-| 3 | Item icons: crops, seeds, materials, holy water, coin |
+| 2 | ✅ Tool icons, in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md) |
+| 4 | Item icons, only if a real phone shows that words aren't enough |
 | 5 | Music and sound effects |
 | 9 | Store icon, banner and screenshots |
 

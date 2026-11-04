@@ -10,5 +10,7 @@ enum Result { HOLY_WATER, PURIFYING_HOE, BUILDING, SWORD, STRONG_HOLY_WATER }
 @export var result_amount: int = 1
 ## Shown in the crafting menu once a one-time recipe has been made.
 @export var made_text: String
+## The same, for touch screens.
+@export var made_text_touch: String
 ## Which building, for Result.BUILDING.
 @export var building: BuildingData

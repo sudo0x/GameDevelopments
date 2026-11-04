@@ -81,7 +81,7 @@ func status(cell: Vector2i) -> String:
 	var gatherable := spots[cell]
 	var display_name := gatherable.data.display_name
 	if not gatherable.gathered:
-		return "%s: press 4, then Space to gather." % display_name
+		return "%s: %s" % [display_name, GameState.controls("press 4, then Space to gather.", "tap the glove, then Use.")]
 	var days := gatherable.days_until_regrow
 	if days == 0:
 		return ""

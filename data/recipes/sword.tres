@@ -22,3 +22,4 @@ needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("nee
 result = 3
 result_amount = 1
 made_text = "Press 7, then Space to swing."
+made_text_touch = "Tap the sword, then Use to swing."

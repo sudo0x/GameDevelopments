@@ -179,7 +179,7 @@ func crop_status(cell: Vector2i) -> String:
 		return ""
 	var crop := crops[cell]
 	if crop.is_ripe():
-		return "%s is ripe! Press 4 to harvest." % crop.data.display_name
+		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the glove, then Use.")]
 	var progress := "%s: %d of %d days" % [crop.data.display_name, crop.days_grown, crop.data.days_to_grow]
 	if is_watered(cell):
 		return progress + ", watered. Sleep to grow."

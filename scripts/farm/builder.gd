@@ -34,7 +34,8 @@ func pick_up(cell: Vector2i) -> void:
 func status(cell: Vector2i) -> String:
 	if not placed.has(cell):
 		return ""
-	return "%s: press 4, then Space to pick up." % placed[cell]["data"].display_name
+	var how := GameState.controls("press 4, then Space to pick up.", "tap the glove, then Use to pick up.")
+	return "%s: %s" % [placed[cell]["data"].display_name, how]
 
 
 func to_state() -> Array[Dictionary]:

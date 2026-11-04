@@ -5,13 +5,17 @@ extends Node2D
 ## TouchScreenButton is used because, unlike Button, it works while another finger is down.
 
 const BUTTON_TEXTURE := preload("res://assets/ui/touch_button.png")
+## Six tools side by side. The sword has its own image.
+const TOOL_ICONS := preload("res://assets/ui/tool_icons.png")
+const SWORD_ICON := preload("res://assets/objects/sword.png")
+const TOOL_ICON_SIZE := Vector2(36, 32)
 const TEXTURE_SIZE := 64.0
 const SELECTED_COLOR := Color(1.4, 1.2, 0.8)
 const TOOL_BAR_Y := 340.0
 const TOOL_BAR_START_X := 214.0
 const TOOL_SIZE := 34.0
 const TOOL_SPACING := 36.0
-const TOOL_LABELS: Array[String] = ["Hoe", "Water", "Seeds", "Hand", "Holy", "Build", "Sword"]
+const TOOL_COUNT := 7
 ## Text, action, center, size.
 const ACTION_BUTTONS: Array[Array] = [
 	["Use", "use_tool", Vector2(596, 296), 68.0],
@@ -37,9 +41,11 @@ var _tool_buttons: Array[TouchScreenButton] = []
 
 
 func _ready() -> void:
-	for i in TOOL_LABELS.size():
+	for i in TOOL_COUNT:
 		var at := Vector2(TOOL_BAR_START_X + i * TOOL_SPACING, TOOL_BAR_Y)
-		_tool_buttons.append(_add_button(tool_bar, TOOL_LABELS[i], "tool_%d" % (i + 1), at, TOOL_SIZE))
+		var button := _add_button(tool_bar, "", "tool_%d" % (i + 1), at, TOOL_SIZE)
+		_add_icon(button, _tool_icon(i))
+		_tool_buttons.append(button)
 	for entry in ACTION_BUTTONS:
 		_add_button(self, entry[0], entry[1], entry[2], entry[3])
 	player.tool_changed.connect(_show_selected_tool)
@@ -54,12 +60,15 @@ func _process(_delta: float) -> void:
 func set_active(value: bool) -> void:
 	active = value
 	visible = value
+	GameState.touch_mode = value
 	hint.visible = not value
 	# The joystick sits where this label normally is.
 	tool_label.position.y = TOOL_LABEL_TOUCH_Y if value else tool_label.position.y
 	if not value:
 		_release_movement()
 	_show_selected_tool()
+	# Help text on screen depends on the controls in use.
+	GameState.inventory_changed.emit()
 
 
 ## A hidden joystick can't see its finger lift, so it would keep the player walking.
@@ -73,6 +82,24 @@ func _show_selected_tool() -> void:
 		_tool_buttons[i].modulate = SELECTED_COLOR if i == player.tool else Color.WHITE
 
 
+func _tool_icon(index: int) -> Texture2D:
+	if index == TOOL_COUNT - 1:
+		return SWORD_ICON
+	var icon := AtlasTexture.new()
+	icon.atlas = TOOL_ICONS
+	icon.region = Rect2(Vector2(index * TOOL_ICON_SIZE.x, 0), TOOL_ICON_SIZE)
+	return icon
+
+
+func _add_icon(button: TouchScreenButton, icon: Texture2D) -> void:
+	var sprite := Sprite2D.new()
+	sprite.texture = icon
+	sprite.position = Vector2(TEXTURE_SIZE, TEXTURE_SIZE) / 2.0
+	# Fits inside the round button, whatever the art's size.
+	sprite.scale = Vector2.ONE * TEXTURE_SIZE * 0.78 / maxf(icon.get_width(), icon.get_height())
+	button.add_child(sprite)
+
+
 func _add_button(parent: Node, text: String, action: String, center: Vector2, size: float) -> TouchScreenButton:
 	var button := TouchScreenButton.new()
 	var scale_by := size / TEXTURE_SIZE
@@ -80,6 +107,9 @@ func _add_button(parent: Node, text: String, action: String, center: Vector2, si
 	button.action = action
 	button.scale = Vector2(scale_by, scale_by)
 	button.position = center - Vector2(size, size) / 2.0
+	parent.add_child(button)
+	if text.is_empty():
+		return button
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 10 if size < 40.0 else 14)
@@ -88,5 +118,4 @@ func _add_button(parent: Node, text: String, action: String, center: Vector2, si
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	button.add_child(label)
-	parent.add_child(button)
 	return button

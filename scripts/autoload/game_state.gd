@@ -79,6 +79,8 @@ var has_sword := false
 var hoe_uses_left := 0
 ## Health left today. Full every morning, and the game only saves in the morning, so it isn't saved.
 var hearts: int = BALANCE.max_hearts
+## True when the on-screen controls are showing, so help text can name them.
+var touch_mode := false
 ## True during the fade between days, when nothing can hurt the player.
 var day_changing := false
 ## How much of the cursed land is healed, 0–100. Farm keeps it up to date; it isn't saved.
@@ -127,6 +129,11 @@ func shipped_value() -> int:
 	for crop in CROPS:
 		total += shipped.get(crop.id, 0) * crop.sell_price
 	return total
+
+
+## Picks help text for the controls in use, so a phone never says "press Space".
+func controls(keyboard: String, touch: String) -> String:
+	return touch if touch_mode else keyboard
 
 
 func request_sleep() -> void:

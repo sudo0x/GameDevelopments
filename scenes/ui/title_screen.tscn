@@ -52,14 +52,17 @@ text = "Every field you grow pushes the darkness back."
 horizontal_alignment = 1
 
 [node name="Continue" type="Button" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Continue"
 
 [node name="NewGame" type="Button" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "New Game"
 
 [node name="Quit" type="Button" parent="Center/Box"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Quit"
 
@@ -105,9 +108,11 @@ alignment = 1
 theme_override_constants/separation = 12
 
 [node name="Yes" type="Button" parent="Confirm/Margin/Box/Buttons"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "Yes, start over"
 
 [node name="No" type="Button" parent="Confirm/Margin/Box/Buttons"]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 text = "No, keep my farm"

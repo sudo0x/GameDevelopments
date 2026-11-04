@@ -1,6 +1,9 @@
 extends GameMenu
 ## The workbench menu. One row per recipe, built from GameState.RECIPES.
 
+## Narrower than other menus, so the panel leaves the touch buttons showing.
+const MAKE_BUTTON_SIZE := Vector2(60, 36)
+
 var _labels: Array[Label] = []
 var _buttons: Array[Button] = []
 
@@ -28,6 +31,7 @@ func _add_row(recipe: RecipeData) -> void:
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
+	button.custom_minimum_size = MAKE_BUTTON_SIZE
 	button.pressed.connect(GameState.craft.bind(recipe))
 	row.add_child(label)
 	row.add_child(button)
@@ -40,7 +44,7 @@ func _refresh() -> void:
 	for i in GameState.RECIPES.size():
 		var recipe := GameState.RECIPES[i]
 		var made := GameState.already_made(recipe)
-		var details := recipe.made_text if made else _needs_text(recipe)
+		var details := GameState.controls(recipe.made_text, recipe.made_text_touch) if made else _needs_text(recipe)
 		_labels[i].text = "%s\n%s" % [recipe.display_name, details]
 		_buttons[i].text = "Made" if made else "Make"
 		_buttons[i].disabled = not GameState.can_craft(recipe)

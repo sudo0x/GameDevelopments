@@ -22,3 +22,4 @@ needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("nee
 result = 1
 result_amount = 1
 made_text = "Use the hoe on cursed land."
+made_text_touch = "Use the hoe on cursed land."

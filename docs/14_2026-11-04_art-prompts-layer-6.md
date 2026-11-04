@@ -8,7 +8,7 @@ Prompts for Layer 6 art, made with ChatGPT in the same way as [the Layer 1 art](
 
 One image with six icons in a row, because `tools/pixelize.gd` splits a row into frames by the gaps between them. The sword reuses `assets/objects/sword.png`.
 
-Save as `art_source/ui/tool_icons.png`, and shrink with `--height 32 --frame-w 32 --frame-h 32`.
+Saved as `art_source/ui/tool_icons.png` ✅ done. Shrink with `--height 32 --frame-w 36 --frame-h 32`: the watering can is 34 pixels wide.
 
 ```
 Match the style of the attached reference exactly.

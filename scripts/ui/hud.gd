@@ -40,12 +40,12 @@ func _refresh() -> void:
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
-		text += "  |  %s seeds: %d  (Q / E to change)" % [crop.display_name, GameState.seed_count(crop)]
+		text += "  |  %s seeds: %d  %s" % [crop.display_name, GameState.seed_count(crop), _change_hint()]
 	if player.tool == Player.Tool.HOLY_WATER:
 		text = _water_text()
 	if player.tool == Player.Tool.BUILD:
 		var building := player.selected_building()
-		text += "  |  %s: %d  (Q / E to change)" % [building.display_name, GameState.building_count(building)]
+		text += "  |  %s: %d  %s" % [building.display_name, GameState.building_count(building), _change_hint()]
 	if player.tool == Player.Tool.SWORD and not GameState.has_sword:
 		text += "  |  Craft one at the workbench"
 	if player.tool == Player.Tool.HOE and GameState.has_purifying_hoe:
@@ -53,10 +53,14 @@ func _refresh() -> void:
 	tool_label.text = text
 
 
+func _change_hint() -> String:
+	return GameState.controls("(Q / E to change)", "(< > to change)")
+
+
 func _water_text() -> String:
 	if player.strong_water:
-		return "Tool: Strong holy water: %d  (Q / E to change)" % GameState.strong_holy_water
-	var hint := "  (Q / E to change)" if GameState.strong_holy_water > 0 else ""
+		return "Tool: Strong holy water: %d  %s" % [GameState.strong_holy_water, _change_hint()]
+	var hint := "  " + _change_hint() if GameState.strong_holy_water > 0 else ""
 	return "Tool: Holy water: %d%s" % [GameState.holy_water, hint]
 
 

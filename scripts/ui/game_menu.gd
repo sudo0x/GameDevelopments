@@ -3,8 +3,13 @@ extends PanelContainer
 ## What every menu shares: it pauses the game while open, and closes with a key or Esc.
 ## Menus keep running while paused because their scene sets process_mode to Always.
 
+## Big enough for a thumb on a phone.
+const BUTTON_SIZE := Vector2(92, 36)
+
 ## The key that closes this menu, besides Esc.
 @export var close_action: StringName = &"interact"
+@export var keyboard_help: String
+@export var touch_help: String
 
 
 func _ready() -> void:
@@ -19,6 +24,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func open() -> void:
+	$Margin/Box/Help.text = GameState.controls(keyboard_help, touch_help)
 	show()
 	_refresh()
 	get_tree().paused = true
