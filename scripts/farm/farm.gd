@@ -29,6 +29,8 @@ const CLEANSE_RADIUS := 1
 var target_cell := Vector2i.ZERO
 ## Planted crops by cell.
 var crops: Dictionary[Vector2i, Crop] = {}
+## Cells healed so far. ground.tscn always starts cursed, so these are what gets saved.
+var cleansed: Array[Vector2i] = []
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
 
@@ -130,7 +132,7 @@ func cleanse(center: Vector2i) -> void:
 	if cells.is_empty() or not GameState.use_holy_water():
 		return
 	for cell in cells:
-		ground.set_cell(cell, Source.GRASS, texture_coords(cell))
+		_heal(cell)
 	var effect: CleanseEffect = CLEANSE_EFFECT_SCENE.instantiate()
 	add_child(effect)
 	effect.play(cells, center, ground)
@@ -142,6 +144,11 @@ func harvest(cell: Vector2i) -> void:
 	GameState.add_harvest(crop.data)
 	crops.erase(cell)
 	crop.queue_free()
+
+
+func _heal(cell: Vector2i) -> void:
+	ground.set_cell(cell, Source.GRASS, texture_coords(cell))
+	cleansed.append(cell)
 
 
 func _has_solid_object(cell: Vector2i) -> bool:
@@ -194,10 +201,12 @@ func _to_state() -> Dictionary:
 	var saved_crops: Array[Dictionary] = []
 	for cell in crops:
 		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown})
-	return {"tilled": soil.get_used_cells(), "crops": saved_crops}
+	return {"cleansed": cleansed, "tilled": soil.get_used_cells(), "crops": saved_crops}
 
 
 func _restore(state: Dictionary) -> void:
+	for cell: Vector2i in state.get("cleansed", []):
+		_heal(cell)
 	for cell: Vector2i in state.get("tilled", []):
 		till(cell)
 	for saved: Dictionary in state.get("crops", []):
