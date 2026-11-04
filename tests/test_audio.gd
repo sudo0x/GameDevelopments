@@ -66,7 +66,22 @@ func _run() -> void:
 	var title: Node = load("res://scenes/ui/title_screen.tscn").instantiate()
 	root.add_child(title)
 	await process_frame
-	check("title asks for title music, which falls back to the farm track", audio.current_music == &"farm")
+	var has_title: bool = not audio._music_versions(&"title").is_empty()
+	check("title plays its own music, or farm until it exists", audio.current_music == (&"title" if has_title else &"farm"))
+	# Every version of farm plays in turn, and with several, none loops on its own.
+	audio.play_music(&"farm")
+	var tracks: Array = audio._playlist
+	print("farm versions: ", tracks.size())
+	if tracks.size() > 1:
+		check("versions don't loop alone", tracks.all(func(s: AudioStream) -> bool: return not s.get("loop")))
+		var first: AudioStream = audio.current_track()
+		audio._on_music_finished()
+		check("the next version follows", audio.current_track() != first)
+		for i in tracks.size() - 1:
+			audio._on_music_finished()
+		check("and it wraps around", audio.current_track() == first)
+	elif tracks.size() == 1:
+		check("a single version loops", tracks[0].get("loop"))
 	var menu: Node = title.get_node("SettingsMenu")
 	title.get_node("Center/Box/Settings").pressed.emit()
 	await process_frame

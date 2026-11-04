@@ -84,7 +84,7 @@ Work left over from finished steps, and where each piece will be done.
 | The title logo | Step 3b | Step 9 at the latest, once the game has its real name |
 | Joystick knob is still a plain circle, and Use and Act are words | Step 3b | Step 6 |
 | Speed on a cheap phone | New | Step 4 |
-| Music (1 or 2 tracks), and richer `cleanse` and `shrine` sounds than the generated ones | Step 5 | Any time, before release: drop them in `assets/audio/`, see [the sound list](18_2026-11-04_sound-list.md) |
+| Richer `cleanse` and `shrine` sounds than the generated ones (all music is in) | Step 5 | Any time, before release: drop them in `assets/audio/`, see [the sound list](18_2026-11-04_sound-list.md) |
 | Settings from inside the game, not only the title | Step 5 | Step 6, in the pause menu |
 | A way back to the title without closing the game | Step 1 | Step 6 |
 | Balance for Layers 3, 4 and 5, all postponed | Layers 3 to 5 | Step 7 |

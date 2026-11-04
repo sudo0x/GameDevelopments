@@ -15,6 +15,8 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 | How are sound files found? | By name, in `assets/audio/effects/` and `music/` | You can add sounds without code changes |
 | Sounds before files exist? | Everything wired now, silent until files arrive | Code and sounds can be done separately, in any order |
 | Where do the effects come from? | Made by a script (`tools/make_sounds.gd`), from waves | No license, no waiting, matches the retro pixel style. Replace any one later by saving a file with its name |
+| Suno gave two versions of the farm music: which one? | **Both:** `farm.mp3` and `farm_2.mp3` play one after another, starting from a random one. Any music can have more versions this way | Claude can't listen to choose, and rotating tracks keeps hours of farming from getting tiring, as farming games usually do. A music choice in settings would be extra work for little gain (it could go in step 6 if wanted). **To drop a version you dislike, delete its file.** Full advice in `docs/18_...`, "Choosing music" |
+| Title music? | `title.mp3` from the second Suno prompt, looping. Its second version wasn't downloaded | One version is enough for a screen you see briefly |
 | Music? | From the user: a CC0 track, a composer, or a paid AI plan. Claude doesn't generate it, but can make a placeholder drone if asked | A script can make effects well, but not music that stays pleasant on a loop. Full answer in `docs/18_...`, "Can Claude generate the music too?" |
 | Which sound matters most? | `cleanse` | The concept says healing must look and sound satisfying |
 

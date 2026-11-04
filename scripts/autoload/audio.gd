@@ -1,7 +1,8 @@
 extends Node
 ## Plays every sound in the game, and keeps the volume settings.
 ## Game code asks for a sound by name, `Audio.play(&"harvest")`, and this finds the file:
-## assets/audio/effects/<name>.wav (or .ogg) and assets/audio/music/<name>.ogg.
+## assets/audio/effects/<name>.wav (or .ogg) and assets/audio/music/<name>.ogg (or .mp3),
+## plus <name>_2, <name>_3... for extra versions of a music track.
 ## A sound with no file yet plays nothing, so every sound can be wired before it exists.
 ## The full list, with what each one is for, is in docs/18_...
 
@@ -26,6 +27,8 @@ const VOICES := 8
 ## Each effect plays a little higher or lower each time, so repeats don't sound robotic.
 const PITCH_SPREAD := 0.08
 const MUSIC_FADE_SECONDS := 1.0
+## The most versions one kind of music can have: farm, farm_2 ... farm_9.
+const MAX_VERSIONS := 9
 
 ## 0 to 1, saved in settings.cfg.
 var music_volume := 0.8
@@ -38,6 +41,9 @@ var _effects: Dictionary[StringName, AudioStream] = {}
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice := 0
 var _music_player: AudioStreamPlayer
+## The versions of the current music, and which one is playing.
+var _playlist: Array[AudioStream] = []
+var _track := 0
 var _headless := DisplayServer.get_name() == "headless"
 
 
@@ -53,6 +59,7 @@ func _ready() -> void:
 		_voices.append(voice)
 	_music_player = AudioStreamPlayer.new()
 	_music_player.bus = &"Music"
+	_music_player.finished.connect(_on_music_finished)
 	add_child(_music_player)
 	# Every button in the game clicks, without each menu having to ask.
 	get_tree().node_added.connect(_on_node_added)
@@ -75,26 +82,44 @@ func play(id: StringName) -> void:
 		voice.play()
 
 
-## Fades to another track. Asking for the one already playing does nothing.
+## Fades to another kind of music. Asking for the one already playing does nothing.
+## A kind can have several versions (farm, farm_2, farm_3...): they play one after another,
+## starting from a random one, so the music doesn't get tiring. One version just loops.
 func play_music(id: StringName) -> void:
 	assert(MUSIC.has(id), "Unknown music: %s" % id)
-	var stream := _find(MUSIC_FOLDER, id, ["ogg"])
-	if not stream and MUSIC_FALLBACK.has(id):
+	var tracks := _music_versions(id)
+	if tracks.is_empty() and MUSIC_FALLBACK.has(id):
 		id = MUSIC_FALLBACK[id]
-		stream = _find(MUSIC_FOLDER, id, ["ogg"])
+		tracks = _music_versions(id)
 	if id == current_music:
 		return
 	current_music = id
+	_playlist = tracks
+	_track = randi() % tracks.size() if not tracks.is_empty() else 0
 	var tween := create_tween()
 	if _music_player.playing:
 		tween.tween_property(_music_player, "volume_db", -40.0, MUSIC_FADE_SECONDS / 2.0)
-	tween.tween_callback(func() -> void:
-		_music_player.stream = stream
-		_music_player.volume_db = 0.0
-		if stream and not _headless:
-			_music_player.play()
-		else:
-			_music_player.stop())
+	tween.tween_callback(_start_track)
+
+
+## The version playing now, or null with no music.
+func current_track() -> AudioStream:
+	return _playlist[_track] if not _playlist.is_empty() else null
+
+
+func _start_track() -> void:
+	_music_player.stream = current_track()
+	_music_player.volume_db = 0.0
+	if _music_player.stream and not _headless:
+		_music_player.play()
+	else:
+		_music_player.stop()
+
+
+func _on_music_finished() -> void:
+	if _playlist.size() > 1:
+		_track = (_track + 1) % _playlist.size()
+		_start_track()
 
 
 ## Which sounds still have no file, for the sound list doc and for you.
@@ -104,7 +129,7 @@ func missing() -> Array[StringName]:
 		if not _effects[id]:
 			names.append(id)
 	for id in MUSIC:
-		if not _find(MUSIC_FOLDER, id, ["ogg"]):
+		if _music_versions(id).is_empty():
 			names.append(id)
 	return names
 
@@ -146,6 +171,22 @@ func _set_bus(bus_name: StringName, volume: float) -> void:
 	var bus := AudioServer.get_bus_index(bus_name)
 	AudioServer.set_bus_mute(bus, volume <= 0.0)
 	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(volume, 0.0001)))
+
+
+## Every version of one kind of music: <id>, then <id>_2, <id>_3... until one is missing.
+## Looping is set here, so a file straight from Suno or a download needs no import setting.
+func _music_versions(id: StringName) -> Array[AudioStream]:
+	var tracks: Array[AudioStream] = []
+	for version in range(1, MAX_VERSIONS + 1):
+		var file_name := String(id) if version == 1 else "%s_%d" % [id, version]
+		var stream := _find(MUSIC_FOLDER, StringName(file_name), ["ogg", "mp3"])
+		if not stream:
+			break
+		tracks.append(stream)
+	# One version loops by itself; with several, each must end so the next can start.
+	for stream in tracks:
+		stream.set("loop", tracks.size() == 1)
+	return tracks
 
 
 func _find(folder: String, id: StringName, extensions: Array[String]) -> AudioStream:
