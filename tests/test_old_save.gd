@@ -39,6 +39,7 @@ func _run() -> void:
 	check("soil", farm.is_tilled(Vector2i(20, 12)))
 	check("no materials in an old save", gs.materials.is_empty())
 	check("no purifying hoe in an old save", not gs.has_purifying_hoe and not gs.has_sword)
+	check("no strong holy water in an old save", gs.strong_holy_water == 0)
 	check("no buildings in an old save", gs.buildings.is_empty() and farm.builder.placed.is_empty())
 	check("nothing gathered in an old save", farm.gathering.to_state().is_empty())
 	check("dug-up find stays gone", not farm.healing._glimmers.has(Vector2i(38, 10)))

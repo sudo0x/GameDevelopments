@@ -9,6 +9,9 @@ extends Resource
 @export var max_health: int = 2
 ## Hearts it takes from the player on contact.
 @export var damage: int = 1
+## What it leaves behind when defeated.
+@export var drop: MaterialData
+@export var drop_amount: int = 1
 @export var wander_speed: float = 20.0
 @export var chase_speed: float = 55.0
 ## It wanders this far from where it started.

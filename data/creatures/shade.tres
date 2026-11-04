@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/creatures/creature_data.gd" id="1_data"]
 [ext_resource type="Texture2D" path="res://assets/objects/shade.png" id="2_texture"]
+[ext_resource type="Resource" path="res://data/materials/curse_shard.tres" id="3_drop"]
 
 [resource]
 script = ExtResource("1_data")
@@ -10,6 +11,8 @@ display_name = "Shade"
 texture = ExtResource("2_texture")
 max_health = 2
 damage = 1
+drop = ExtResource("3_drop")
+drop_amount = 1
 wander_speed = 20.0
 chase_speed = 55.0
 wander_radius = 64.0

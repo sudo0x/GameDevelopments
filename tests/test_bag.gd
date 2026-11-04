@@ -61,7 +61,7 @@ func _run() -> void:
 	var list := cells(bag)
 	print(list)
 	check("crop table", list == ["", "Harvested", "Seeds", "Radish", "0", "10", "Carrot", "7", "5", "Pumpkin", "0", "3"])
-	check("items", bag.items_label.text == "Holy water: 2\nWood: 4\nStone: 2")
+	check("items", bag.items_label.text == "Holy water: 2\nWood: 4\nStone: 2\nCurse shard: 0")
 	var pos: Vector2 = player.global_position
 	Input.action_press("move_left")
 	for i in 20:

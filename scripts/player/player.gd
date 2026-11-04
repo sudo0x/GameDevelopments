@@ -37,6 +37,8 @@ var look_direction: Vector2 = Vector2.DOWN
 var tool: Tool = Tool.HOE
 ## Index into GameState.CROPS of the seed planted with the Seeds tool.
 var seed_index := 0
+## Whether the Holy water tool uses the strong kind.
+var strong_water := false
 ## Index into GameState.BUILDINGS of the building placed with the Build tool.
 var building_index := 0
 
@@ -139,10 +141,12 @@ func selected_building() -> BuildingData:
 	return GameState.BUILDINGS[building_index]
 
 
-## Q and E pick a building while building, and a seed the rest of the time.
+## Q and E pick a building, or a kind of holy water, and a seed the rest of the time.
 func _change_selection(step: int) -> void:
 	if tool == Tool.BUILD:
 		building_index = posmod(building_index + step, GameState.BUILDINGS.size())
+	elif tool == Tool.HOLY_WATER:
+		strong_water = not strong_water
 	else:
 		seed_index = posmod(seed_index + step, GameState.CROPS.size())
 	tool_changed.emit()

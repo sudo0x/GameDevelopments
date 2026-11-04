@@ -40,3 +40,22 @@ A small floating shadow creature born from cursed land: a ragged dark purple-bla
 wisp with a tattered bottom edge instead of legs, two small pale glowing-looking eyes
 in flat color, and thin bright purple cracks. Eerie but small, not gory.
 ```
+
+## Hollow
+
+One image, floated in code like the shade. It should look heavier and more dangerous.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, 3/4 top-down view.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Realistic proportions, not chibi.
+Transparent background. No text. Single object, centered, filling most of the image.
+
+A large hunched creature born from cursed land: a hollow suit of cracked dark stone
+and dead roots with an empty glowing-looking chest in flat purple color, long heavy
+arms, and thin bright purple cracks across its body. Menacing but not gory.
+```

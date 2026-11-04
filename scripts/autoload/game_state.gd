@@ -35,6 +35,7 @@ const CROPS: Array[CropData] = [
 const MATERIALS: Array[MaterialData] = [
 	preload("res://data/materials/wood.tres"),
 	preload("res://data/materials/stone.tres"),
+	preload("res://data/materials/curse_shard.tres"),
 ]
 
 const RECIPES: Array[RecipeData] = [
@@ -44,6 +45,7 @@ const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/fence.tres"),
 	preload("res://data/recipes/well.tres"),
 	preload("res://data/recipes/sword.tres"),
+	preload("res://data/recipes/strong_holy_water.tres"),
 ]
 
 const BUILDINGS: Array[BuildingData] = [
@@ -68,6 +70,8 @@ var shipped: Dictionary[StringName, int] = {}
 var holy_water := 0
 ## The crafted upgrade: the hoe also heals single cursed tiles, a few times a day.
 var has_purifying_hoe := false
+## Like holy water, but it heals a bigger patch.
+var strong_holy_water := 0
 var has_sword := false
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
@@ -166,6 +170,8 @@ func add_material(material: MaterialData, amount: int) -> void:
 
 ## How much of a recipe's ingredient the player has.
 func owned(need: RecipeNeed) -> int:
+	if need.holy_water:
+		return holy_water
 	return harvest_count(need.crop) if need.crop else material_count(need.material)
 
 
@@ -193,7 +199,9 @@ func craft(recipe: RecipeData) -> bool:
 	if not can_craft(recipe):
 		return false
 	for need in recipe.needs:
-		if need.crop:
+		if need.holy_water:
+			holy_water -= need.amount
+		elif need.crop:
 			harvest[need.crop.id] -= need.amount
 		else:
 			materials[need.material.id] -= need.amount
@@ -207,6 +215,8 @@ func craft(recipe: RecipeData) -> bool:
 			hoe_uses_left = BALANCE.hoe_daily_uses
 		RecipeData.Result.SWORD:
 			has_sword = true
+		RecipeData.Result.STRONG_HOLY_WATER:
+			strong_holy_water += recipe.result_amount
 	inventory_changed.emit()
 	return true
 
@@ -240,6 +250,7 @@ func save_game() -> void:
 	file.set_value("game", "materials", materials)
 	file.set_value("game", "buildings", buildings)
 	file.set_value("game", "holy_water", holy_water)
+	file.set_value("game", "strong_holy_water", strong_holy_water)
 	file.set_value("game", "purifying_hoe", has_purifying_hoe)
 	file.set_value("game", "sword", has_sword)
 	file.set_value("game", "farm", farm_state)
@@ -262,6 +273,7 @@ func load_game() -> void:
 	materials.assign(file.get_value("game", "materials", materials))
 	buildings.assign(file.get_value("game", "buildings", buildings))
 	holy_water = file.get_value("game", "holy_water", holy_water)
+	strong_holy_water = file.get_value("game", "strong_holy_water", strong_holy_water)
 	has_purifying_hoe = file.get_value("game", "purifying_hoe", has_purifying_hoe)
 	has_sword = file.get_value("game", "sword", has_sword)
 	_refill_hoe()
@@ -297,6 +309,14 @@ func use_purifying_hoe() -> bool:
 	if not has_purifying_hoe or hoe_uses_left <= 0:
 		return false
 	hoe_uses_left -= 1
+	inventory_changed.emit()
+	return true
+
+
+func use_strong_holy_water() -> bool:
+	if strong_holy_water <= 0:
+		return false
+	strong_holy_water -= 1
 	inventory_changed.emit()
 	return true
 

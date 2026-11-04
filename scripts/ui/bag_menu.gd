@@ -28,6 +28,8 @@ func _refresh() -> void:
 		_add_cell(str(GameState.harvest_count(crop)))
 		_add_cell(str(GameState.seed_count(crop)))
 	var lines: PackedStringArray = ["Holy water: %d" % GameState.holy_water]
+	if GameState.strong_holy_water > 0:
+		lines.append("Strong holy water: %d" % GameState.strong_holy_water)
 	for material in GameState.MATERIALS:
 		lines.append("%s: %d" % [material.display_name, GameState.material_count(material)])
 	for building in GameState.BUILDINGS:

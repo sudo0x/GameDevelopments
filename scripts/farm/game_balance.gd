@@ -5,6 +5,8 @@ extends Resource
 @export var holy_water_price: int = 30
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 @export var cleanse_radius: int = 1
+## The same for strong holy water: 2 makes a 5×5 patch.
+@export var strong_cleanse_radius: int = 2
 ## Cursed tiles the purifying hoe can heal each day.
 @export var hoe_daily_uses: int = 5
 ## The first day creatures appear, so a new player has time to settle in.

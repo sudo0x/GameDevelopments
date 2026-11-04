@@ -94,6 +94,9 @@ func _flash() -> void:
 
 func _defeat() -> void:
 	defeated.emit(self)
+	if data.drop:
+		GameState.add_material(data.drop, data.drop_amount)
+		GameState.notice.emit("+%d %s" % [data.drop_amount, data.drop.display_name])
 	set_physics_process(false)
 	$Shape.set_deferred("disabled", true)
 	var tween := create_tween()

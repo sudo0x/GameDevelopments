@@ -42,7 +42,7 @@ func _refresh() -> void:
 		var crop := player.selected_seed()
 		text += "  |  %s seeds: %d  (Q / E to change)" % [crop.display_name, GameState.seed_count(crop)]
 	if player.tool == Player.Tool.HOLY_WATER:
-		text += ": %d" % GameState.holy_water
+		text = _water_text()
 	if player.tool == Player.Tool.BUILD:
 		var building := player.selected_building()
 		text += "  |  %s: %d  (Q / E to change)" % [building.display_name, GameState.building_count(building)]
@@ -53,11 +53,20 @@ func _refresh() -> void:
 	tool_label.text = text
 
 
+func _water_text() -> String:
+	if player.strong_water:
+		return "Tool: Strong holy water: %d  (Q / E to change)" % GameState.strong_holy_water
+	var hint := "  (Q / E to change)" if GameState.strong_holy_water > 0 else ""
+	return "Tool: Holy water: %d%s" % [GameState.holy_water, hint]
+
+
 ## Only what changes often is shown here. The full list is in the bag (key I).
 func _status_text() -> String:
 	var lines: PackedStringArray = []
 	if GameState.holy_water > 0:
 		lines.append("Holy water: %d" % GameState.holy_water)
+	if GameState.strong_holy_water > 0:
+		lines.append("Strong holy water: %d" % GameState.strong_holy_water)
 	if not GameState.shipped.is_empty():
 		lines.append("Shipping: %d overnight" % GameState.shipped_value())
 	lines.append("Island healed: %.1f%%" % GameState.healed_percent)

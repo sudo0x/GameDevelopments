@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RecipeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/recipe_data.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/farm/recipe_need.gd" id="2_need"]
+[ext_resource type="Resource" path="res://data/materials/curse_shard.tres" id="3_shard"]
+
+[sub_resource type="Resource" id="need_water"]
+script = ExtResource("2_need")
+holy_water = true
+amount = 1
+
+[sub_resource type="Resource" id="need_shard"]
+script = ExtResource("2_need")
+material = ExtResource("3_shard")
+amount = 2
+
+[resource]
+script = ExtResource("1_recipe")
+display_name = "Strong holy water"
+needs = Array[ExtResource("2_need")]([SubResource("need_water"), SubResource("need_shard")])
+result = 4
+result_amount = 1

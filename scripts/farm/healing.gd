@@ -50,9 +50,14 @@ func is_cleansable(cell: Vector2i) -> bool:
 	return ground.get_cell_source_id(cell) == Farm.Source.CURSED and ground.get_used_rect().grow(-1).has_point(cell)
 
 
+## How many tiles out holy water reaches.
+func radius_for(strong: bool) -> int:
+	return GameState.BALANCE.strong_cleanse_radius if strong else GameState.BALANCE.cleanse_radius
+
+
 ## The cells a cleanse centered here would heal.
-func cleansable_cells(center: Vector2i) -> Array[Vector2i]:
-	var radius := GameState.BALANCE.cleanse_radius
+func cleansable_cells(center: Vector2i, strong: bool = false) -> Array[Vector2i]:
+	var radius := radius_for(strong)
 	var cells: Array[Vector2i] = []
 	for y in range(-radius, radius + 1):
 		for x in range(-radius, radius + 1):
@@ -62,11 +67,13 @@ func cleansable_cells(center: Vector2i) -> Array[Vector2i]:
 	return cells
 
 
-func cleanse(center: Vector2i) -> void:
-	var cells := cleansable_cells(center)
-	if cells.is_empty() or not GameState.use_holy_water():
+func cleanse(center: Vector2i, strong: bool = false) -> void:
+	var cells := cleansable_cells(center, strong)
+	if cells.is_empty():
 		return
-	_cleanse_cells(cells, center)
+	var paid := GameState.use_strong_holy_water() if strong else GameState.use_holy_water()
+	if paid:
+		_cleanse_cells(cells, center)
 
 
 ## Heals the closest cursed cell within `radius`. Returns false if there's none in range.

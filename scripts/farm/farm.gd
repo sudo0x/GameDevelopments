@@ -80,7 +80,7 @@ func _physics_process(_delta: float) -> void:
 	var tile := Vector2(ground.tile_set.tile_size)
 	var rect := Rect2(ground.map_to_local(target_cell) - tile / 2.0, tile)
 	if player.tool == Player.Tool.HOLY_WATER:
-		rect = rect.grow(tile.x * GameState.BALANCE.cleanse_radius)
+		rect = rect.grow(tile.x * healing.radius_for(player.strong_water))
 	highlight.show_cell(rect, can_use(player.tool, target_cell))
 	# The sword works on whatever is in front, not on a tile.
 	highlight.visible = player.tool != Player.Tool.SWORD
@@ -127,7 +127,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.HAND:
 			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
-			return GameState.holy_water > 0 and not healing.cleansable_cells(cell).is_empty()
+			var owned := GameState.strong_holy_water if player.strong_water else GameState.holy_water
+			return owned > 0 and not healing.cleansable_cells(cell, player.strong_water).is_empty()
 		Player.Tool.BUILD:
 			return GameState.building_count(player.selected_building()) > 0 and can_build(cell)
 	return false
@@ -229,7 +230,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 			else:
 				gathering.hit(target_cell)
 		Player.Tool.HOLY_WATER:
-			healing.cleanse(target_cell)
+			healing.cleanse(target_cell, player.strong_water)
 		Player.Tool.BUILD:
 			builder.place(target_cell, player.selected_building())
 

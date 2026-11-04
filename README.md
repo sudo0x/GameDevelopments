@@ -8,7 +8,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 
 ## Status
 
-**Early prototype.** Layer 1 (basic farming) and Layer 2 (the curse) are playable, and Layer 3 (gathering and crafting) is in progress.
+**Early prototype.** Layer 1 (basic farming) and Layer 2 (the curse) are playable, and Layers 3 to 5 (crafting, building and combat) are playable but not balanced yet.
 
 | | Feature |
 |---|---|
@@ -26,6 +26,8 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 | ✅ | The old shrine: restore it to heal a huge area |
 | ✅ | Gathering wood and stone, and crafting holy water at the workbench |
 | ✅ | The purifying hoe: a crafted upgrade that heals tiles for free |
+| ✅ | Buildings: healing lanterns, fences and wells that water your crops |
+| ✅ | Combat: a sword, shades that rise each morning, and safe lantern light |
 
 ## Roadmap
 
@@ -55,7 +57,7 @@ Targets: **Android first**, then **Steam**.
 | 2 | Watering can |
 | 3 | Seeds (Q / E to change the seed type) |
 | 4 | Hand (harvest ripe crops, gather from trees and rocks) |
-| 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
+| 5 | Holy water: heal a 3×3 patch of cursed land, or 5×5 with strong holy water (Q / E to change) |
 | 6 | Build: place crafted buildings on clean land (Q / E to change the building) |
 | 7 | Sword: swing at whatever is in front of you (craft it at the workbench) |
 | Space / left click | Use the tool on the highlighted tile |
