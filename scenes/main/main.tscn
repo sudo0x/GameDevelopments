@@ -69,6 +69,7 @@ position = Vector2(784, 348)
 [node name="HUD" type="CanvasLayer" parent="." unique_id=781523498]
 script = ExtResource("6_hud")
 player_path = NodePath("../World/Player")
+farm_path = NodePath("../Farm")
 
 [node name="Hint" type="Label" parent="HUD" unique_id=2063141325]
 offset_left = 8.0
@@ -106,6 +107,13 @@ offset_top = 330.0
 offset_right = 632.0
 offset_bottom = 354.0
 text = "Tool: Hoe"
+
+[node name="CropStatusLabel" type="Label" parent="HUD" unique_id=1450263987]
+offset_left = 40.0
+offset_top = 276.0
+offset_right = 600.0
+offset_bottom = 300.0
+horizontal_alignment = 1
 
 [node name="NoticeLabel" type="Label" parent="HUD" unique_id=1697204518]
 offset_left = 40.0

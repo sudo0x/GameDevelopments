@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Texture2D" path="res://assets/objects/lantern_post.png" id="1_texture"]
+[ext_resource type="Script" path="res://scripts/farm/lantern_light.gd" id="2_light"]
 
 [sub_resource type="RectangleShape2D" id="Shape_post"]
 size = Vector2(16, 8)
@@ -31,3 +32,4 @@ offset = Vector2(13, -36)
 position = Vector2(24, -32)
 color = Color(1, 0.72, 0.42, 1)
 texture = SubResource("Texture_glow")
+script = ExtResource("2_light")

@@ -6,16 +6,19 @@ const FADE_SECONDS := 0.6
 const NOTICE_SECONDS := 3.0
 
 @export var player_path: NodePath
+@export var farm_path: NodePath
 
 var _sleeping := false
 var _notice_tween: Tween
 
 @onready var player: Player = get_node(player_path)
+@onready var farm: Farm = get_node(farm_path)
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
 @onready var money_label: Label = $MoneyLabel
 @onready var inventory_label: Label = $InventoryLabel
 @onready var notice_label: Label = $NoticeLabel
+@onready var crop_status_label: Label = $CropStatusLabel
 @onready var fade: ColorRect = $Fade
 
 
@@ -25,6 +28,7 @@ func _ready() -> void:
 	GameState.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
 	GameState.notice.connect(_show_notice)
+	farm.target_status_changed.connect(_show_crop_status)
 	_refresh()
 
 
@@ -52,6 +56,10 @@ func _inventory_text() -> String:
 		lines.append("Holy water: %d" % GameState.holy_water)
 	lines.append("Island healed: %.1f%%" % GameState.healed_percent)
 	return "\n".join(lines)
+
+
+func _show_crop_status(text: String) -> void:
+	crop_status_label.text = text
 
 
 func _show_notice(text: String) -> void:

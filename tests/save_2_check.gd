@@ -31,10 +31,10 @@ func _run() -> void:
 	var dry: Node = farm.crops[Vector2i(17, 10)]
 	print("days/stage ", radish.days_grown, "/", radish.stage, " ", carrot.days_grown, "/", carrot.stage, " ", pumpkin.days_grown, "/", pumpkin.stage, " ", dry.days_grown, "/", dry.stage)
 	check("radish ripe", radish.is_ripe() and radish.days_grown == 3)
-	check("carrot growing", carrot.days_grown == 3 and carrot.stage == 1)
+	check("carrot growing", carrot.days_grown == 3 and carrot.stage == 2)
 	check("pumpkin growing", pumpkin.days_grown == 3 and pumpkin.stage == 1)
 	check("unwatered still seed", dry.days_grown == 0 and dry.stage == 0)
-	check("crop sprite shows stage", carrot.sprite.frame == 1 and radish.sprite.frame == 3)
+	check("crop sprite shows stage", carrot.sprite.frame == 2 and radish.sprite.frame == 3)
 	check("crop in World", radish.get_parent().name == "World")
 	check("HUD day", hud.day_label.text == "Day 5")
 	check("HUD money", hud.money_label.text == "Money: 200")

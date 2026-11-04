@@ -4,6 +4,17 @@
 
 Prompts for Layer 2 art, made with ChatGPT in the same way as [the Layer 1 art](02_2026-11-03_art-prompts-layer-1.md). Attach `art_source/style_reference.png` to the first message of each new chat.
 
+## Lit lantern
+
+The original lantern was unlit, so its light had no visible source. Attach `art_source/objects/lantern_post.png` and use this prompt, saved as `art_source/objects/lantern_post_lit.png`. Shrink it into `assets/objects/lantern_post.png` with `--height 72 --frame-w 48 --frame-h 72`. ✅ done
+
+```
+Make the exact same lantern post, with the same shape, size, angle and layout, but
+lit: a small warm orange and yellow flame inside the lantern glass, with the glass
+tinted warm amber. Flat pixel colors only, with no glow or light rays outside the
+lantern. Same pixel art style, same transparent background, no text.
+```
+
 ## Old shrine
 
 Two versions of one object, so the second is made in the same ChatGPT chat as the first.

@@ -33,8 +33,18 @@ func grow_one_day() -> void:
 
 func set_days_grown(days: int) -> void:
 	days_grown = days
+	stage = _stage_for(days)
+
+
+## A sprout shows after the first watered night, so even slow crops look alive. The last
+## stage is kept for the day the crop is ready.
+func _stage_for(days: int) -> int:
+	if days <= 0:
+		return 0
+	if days >= data.days_to_grow:
+		return STAGES - 1
 	@warning_ignore("integer_division")
-	stage = days_grown * (STAGES - 1) / data.days_to_grow
+	return 1 + (days - 1) * (STAGES - 2) / (data.days_to_grow - 1)
 
 
 func _update_look() -> void:

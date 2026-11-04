@@ -3,6 +3,9 @@ extends Node2D
 ## The farm grid: ground and soil tiles, the farmable area, planted crops,
 ## and the tile the player is targeting.
 
+## What the targeted crop needs, or empty text when the player isn't facing one.
+signal target_status_changed(text: String)
+
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 
@@ -54,6 +57,7 @@ var cleansed: Array[Vector2i] = []
 var _cursed_total := 0
 ## The glimmer over each find not dug up yet.
 var _glimmers: Dictionary[Vector2i, Node2D] = {}
+var _target_status := ""
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
 
@@ -90,6 +94,7 @@ func _physics_process(_delta: float) -> void:
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * CLEANSE_RADIUS)
 	highlight.show_cell(rect, can_use(player.tool, target_cell))
+	_update_target_status()
 
 
 ## The tile in front of the player's feet, in the direction they face.
@@ -170,6 +175,26 @@ func harvest(cell: Vector2i) -> void:
 	GameState.add_harvest(crop.data)
 	crops.erase(cell)
 	crop.queue_free()
+
+
+func _update_target_status() -> void:
+	var status := crop_status(target_cell)
+	if status != _target_status:
+		_target_status = status
+		target_status_changed.emit(status)
+
+
+## Tells the player how a crop is doing, because growth is slow and easy to miss.
+func crop_status(cell: Vector2i) -> String:
+	if not crops.has(cell):
+		return ""
+	var crop := crops[cell]
+	if crop.is_ripe():
+		return "%s is ripe! Press 4 to harvest." % crop.data.display_name
+	var progress := "%s: %d of %d days" % [crop.data.display_name, crop.days_grown, crop.data.days_to_grow]
+	if is_watered(cell):
+		return progress + ", watered. Sleep to grow."
+	return progress + ", needs water."
 
 
 func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
