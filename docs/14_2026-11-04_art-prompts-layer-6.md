@@ -205,3 +205,25 @@ viewer: one weathered wooden post in the middle, with its two horizontal rails s
 end-on, reaching the top and bottom edges of the art so that sections can stack in a
 vertical line.
 ```
+
+## Playtest art
+
+Art asked for during [the playtest](19_2026-11-04_playtest.md), after Layer 6 closed.
+
+### Tile cursor (playtest finding 10)
+
+Replaces the plain white or red square around the targeted tile. Send in the same chat as the icons. Save as `art_source/ui/tile_cursor.png`.
+
+Built in so it works in the game: **light, neutral colors** (the game tints the same image red where the tool can't be used), **corners only** with empty sides (it stretches to 3×3 or 5×5 for holy water, like the 9-slice panels), and **thin** (it mustn't hide the tile). The pulse is done in code.
+
+```
+Now make a tile selection cursor in exactly the same style: four separate corner
+brackets in the shape of a square frame, like ⌜ ⌝ ⌞ ⌟, made of pale bone-white
+metal with a dark outline, slightly ornate but thin. The corners sit exactly at the
+four corners of the image, and everything between them is empty and fully
+transparent: no lines along the sides and nothing in the middle, so the frame can be
+stretched to any size. Light, neutral colors so it can be tinted another color.
+Square image, transparent background. No text.
+```
+
+**Status (2026-11-04):** ✅ saved as `art_source/ui/tile_cursor.png` and checked: four separate corners, fully see-through between them. Shrunk at its own pixel size to `assets/ui/tile_cursor.png` (54×54, 12-pixel corners) with `--scale 21.8 --single true --frame-w 54 --frame-h 54`. The frame must match the art exactly (54, not 56), or the 9-slice corners come out uneven.
