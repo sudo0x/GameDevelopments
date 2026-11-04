@@ -10,7 +10,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 | | Windows | Mac (Apple Silicon) |
 |---|---|---|
 | Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `/Applications/Godot.app/Contents/MacOS/Godot` |
-| Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | Not confirmed yet (check `~/.codex/visualizations/` first) |
+| Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | `~/Game Assets/` (one 1254×1254 PNG per image, already transparent; no separate master) |
 | `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | Works (`gh` is logged in as `sudo0x`) |
 
 - GitHub is the only link between the machines, so unpushed work is invisible on the other one
@@ -27,9 +27,9 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 1 step 6 done: harvest and HUD)
-- **Next:** Layer 1 step 7: shipping box + seed shop (needs art). After that: step 8 (save/load), step 9 (mood lighting)
-- Layer 1 progress: steps 1–6 done (setup, player, farm grid, till/plant, water/days, harvest/HUD); the plan doc marks each with ✅
+- Last updated: 2026-11-04 (Layer 1 step 7 done: shipping box and seed shop)
+- **Next:** Layer 1 step 8: save/load (must include `GameState.shipped`). After that: step 9 (mood lighting, needs lantern post art)
+- Layer 1 progress: steps 1–7 done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
 ### How the game works now
@@ -40,15 +40,17 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Farm** (`scripts/farm/farm.gd`, node `Main/Farm` with Ground, Soil, Highlight): farm area `Rect2i(13, 9, 12, 10)`; target cell = tile in front of the feet; `can_use(tool, cell)` drives the highlight (white = usable, red = not) and `_on_tool_used`. Tilled = a Soil layer cell; watered = SOIL_WET source. `crops: Dictionary[Vector2i, Crop]`, crop nodes go in the y-sorted `World`. Hand tool on a ripe crop calls `harvest(cell)`; the soil stays tilled so the cell can be replanted
 - **Crops**: `CropData` resources in `data/crops/` (radish 3 days, carrot 5, pumpkin 8; seed and sell prices set), listed in `GameState.CROPS`. `Crop` (`scenes/farm/crop.tscn`): `days_grown`, stage = days × 3 / days_to_grow, `is_ripe()`. Frames: radish 32×32, carrot 32×40, pumpkin 40×32 (kept at real pixel size; the sprite offsets by texture height)
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
-- **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), signals `inventory_changed`, `sleep_requested`, `day_ended`, `day_started`
-- **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds), tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
-- **Main scene**: Main → Farm (Ground instance, Soil, Highlight), World (y-sorted: House at (912, 288), Player, crops), HUD
+- **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
+- **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, rows built from `GameState.CROPS`) → `GameState.buy_seed(crop)`
+- **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
+- **HUD** (`scripts/ui/hud.gd`): hint line, day, money and inventory labels (top right; one line per crop: harvested count and seeds, then what's shipping overnight), tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
+- **Main scene**: Main → Farm (Ground instance, Soil, Highlight), World (y-sorted: House at (912, 288), ShippingBox, ShopStall, Player, crops), HUD (with ShopMenu)
 
 ### Art
-- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages
-- Next: item icons (harvested crops, seed packets, coin), tool icons, shipping box, shop stall (prompts in the art doc)
-- **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
-- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`
+- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall
+- Next: lantern post (step 9), then item icons (harvested crops, seed packets, coin) and tool icons (prompts in the art doc)
+- **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** (on the Mac, the only file) into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
+- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`)
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
 

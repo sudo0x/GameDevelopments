@@ -34,11 +34,13 @@ func _refresh() -> void:
 	tool_label.text = text
 
 
-## One line per crop: harvested count, then seeds left.
+## One line per crop: harvested count, then seeds left. Then what's in the shipping box.
 func _inventory_text() -> String:
 	var lines: PackedStringArray = []
 	for crop in GameState.CROPS:
 		lines.append("%s: %d  (%d seeds)" % [crop.display_name, GameState.harvest_count(crop), GameState.seed_count(crop)])
+	if not GameState.shipped.is_empty():
+		lines.append("Shipping: %d overnight" % GameState.shipped_value())
 	return "\n".join(lines)
 
 
