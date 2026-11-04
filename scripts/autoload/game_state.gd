@@ -75,7 +75,7 @@ var buildings: Dictionary[StringName, int] = {}
 ## Crops in the shipping box by crop id, paid when the day ends.
 var shipped: Dictionary[StringName, int] = {}
 ## Uses of holy water owned. Each one cleanses a patch of cursed land.
-var holy_water := 0
+var holy_water: int = BALANCE.start_holy_water
 ## The crafted upgrade: the hoe also heals single cursed tiles, a few times a day.
 var has_purifying_hoe := false
 ## Like holy water, but it heals a bigger patch.
@@ -304,7 +304,7 @@ func _reset() -> void:
 	materials.clear()
 	buildings.clear()
 	shipped.clear()
-	holy_water = 0
+	holy_water = BALANCE.start_holy_water
 	strong_holy_water = 0
 	has_purifying_hoe = false
 	has_sword = false

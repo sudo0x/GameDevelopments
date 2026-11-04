@@ -3,6 +3,8 @@ extends Resource
 ## Numbers to tune without touching code. The one instance is data/balance.tres.
 
 @export var holy_water_price: int = 30
+## Holy water in the bag on a new game, so the player can heal on day 1.
+@export var start_holy_water: int = 2
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 @export var cleanse_radius: int = 1
 ## The same for strong holy water: 2 makes a 5×5 patch.

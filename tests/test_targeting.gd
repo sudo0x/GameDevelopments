@@ -62,6 +62,21 @@ func _run() -> void:
 	farm.water(above)
 	check("already watered is skipped", stand.call(c, right, can, Vector2(0, -8)) == below)
 
+	# Sticky facing: a diagonal keeps a facing that still points the way you're walking.
+	var down := 0  # Player.Facing.DOWN
+	var left := 2  # Player.Facing.LEFT
+	var up := 1  # Player.Facing.UP
+	player.facing = down
+	check("facing down, walking down-left: stays down", player._facing_for(Vector2(-1, 1)) == down)
+	check("facing down, walking left: turns left", player._facing_for(Vector2.LEFT) == left)
+	check("facing down, walking up-left: turns, side pose wins", player._facing_for(Vector2(-1, -1)) == left)
+	player.facing = left
+	check("facing left, walking down-left: stays left", player._facing_for(Vector2(-1, 1)) == left)
+	check("facing left, walking up: turns up", player._facing_for(Vector2.UP) == up)
+	check("a joystick slightly off down stays down from down", (func() -> bool:
+		player.facing = down
+		return player._facing_for(Vector2(0.6, 0.8)) == down).call())
+
 	# The game uses it: the cursor and the action follow the assisted tile.
 	stand.call(spot + Vector2i(-1, -1), right, hand)
 	await physics_frame

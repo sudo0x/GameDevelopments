@@ -5,6 +5,7 @@
 [resource]
 script = ExtResource("1_balance")
 holy_water_price = 30
+start_holy_water = 2
 cleanse_radius = 1
 strong_cleanse_radius = 2
 hoe_daily_uses = 5

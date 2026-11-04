@@ -38,6 +38,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	# These checks count holy water from zero; new games start with some (test_title).
+	gs.holy_water = 0
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

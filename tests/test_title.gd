@@ -107,7 +107,7 @@ func _run() -> void:
 	check("day and money", gs.day == 1 and gs.money == 0)
 	check("seeds back", gs.seeds == gs.START_SEEDS)
 	check("crops, materials, buildings", gs.harvest.is_empty() and gs.materials.is_empty() and gs.buildings.is_empty())
-	check("water", gs.holy_water == 0 and gs.strong_holy_water == 0)
+	check("water: the free start amount, 2", gs.holy_water == 2 and gs.holy_water == gs.BALANCE.start_holy_water and gs.strong_holy_water == 0)
 	check("upgrades", not gs.has_sword and not gs.has_purifying_hoe and gs.hoe_uses_left == 0)
 	check("hearts", gs.hearts == 5)
 	check("empty land", current_scene.get_node("Farm").healing.cleansed.is_empty() and gs.healed_percent == 0.0)

@@ -15,6 +15,8 @@ enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD, SWORD }
 const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build", "Sword"]
 ## In the same order as Facing.
 const FACING_DIRECTIONS: Array[Vector2] = [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT]
+## The facing is kept while the walking direction is within 60° of it (cos 60° = 0.5).
+const STICKY_FACING := 0.5
 ## After being hit, nothing can hurt the player for this long.
 const SAFE_SECONDS := 1.0
 const KNOCKBACK_SPEED := 200.0
@@ -165,8 +167,12 @@ func _interact() -> void:
 			return
 
 
-## Diagonals use the side pose (like most top-down games).
+## Sticky facing: keeps the current pose while it still points the way you're walking, so a
+## diagonal doesn't turn you away from what you were facing. Otherwise the closest pose wins,
+## and exact diagonals use the side pose (like most top-down games).
 func _facing_for(dir: Vector2) -> Facing:
+	if FACING_DIRECTIONS[facing].dot(dir.normalized()) > STICKY_FACING:
+		return facing
 	if absf(dir.x) >= absf(dir.y):
 		return Facing.RIGHT if dir.x > 0.0 else Facing.LEFT
 	return Facing.DOWN if dir.y > 0.0 else Facing.UP
