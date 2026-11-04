@@ -43,6 +43,7 @@ var _build_query := PhysicsShapeQueryParameters2D.new()
 @onready var gathering: Gathering = $Gathering
 @onready var build_preview: BuildPreview = $BuildPreview
 @onready var builder: Builder = $Builder
+@onready var spawner: CreatureSpawner = $Spawner
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
@@ -65,9 +66,13 @@ func _ready() -> void:
 	player.tool_used.connect(_on_tool_used)
 	healing.land_healed.connect(gathering.reveal)
 	builder.setup(ground, crops_parent)
+	spawner.setup(self, crops_parent, player)
+	GameState.day_ended.connect(spawner.clear)
+	GameState.day_started.connect(spawner.spawn_for_today)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
 	_restore(GameState.farm_state)
+	spawner.spawn_for_today()
 
 
 func _physics_process(_delta: float) -> void:

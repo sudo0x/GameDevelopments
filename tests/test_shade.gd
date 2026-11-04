@@ -14,6 +14,14 @@ func wait(frames: int) -> void:
 		await physics_frame
 
 
+func spawn(main: Node, at: Vector2) -> Node2D:
+	var shade: Node2D = load("res://scenes/creatures/creature.tscn").instantiate()
+	shade.data = load("res://data/creatures/shade.tres")
+	shade.position = at
+	main.get_node("World").add_child(shade)
+	return shade
+
+
 func _initialize() -> void:
 	_run()
 
@@ -27,7 +35,8 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var g: TileMapLayer = farm.ground
 	var player: Node2D = main.get_node("World/Player")
-	var shade: Node2D = main.get_node("World/Shade")
+	var shade := spawn(main, Vector2(1072, 528))
+	await wait(2)
 	var WANDER := 0
 	var CHASE := 1
 	var home: Vector2 = shade._home
@@ -46,7 +55,8 @@ func _run() -> void:
 		furthest = maxf(furthest, shade.global_position.distance_to(home))
 		low = minf(low, shade.sprite.position.y)
 		high = maxf(high, shade.sprite.position.y)
-		on_curse = on_curse or g.get_cell_source_id(g.local_to_map(g.to_local(shade.global_position))) == 1
+		# The middle of its body: its base sits right on the body's bottom edge.
+		on_curse = on_curse or g.get_cell_source_id(g.local_to_map(g.to_local(shade.global_position + Vector2(0, -8)))) == 1
 	print("wander furthest %.1f, float %.1f to %.1f" % [furthest, low, high])
 	check("it moved", furthest > 8.0)
 	check("stays near home", furthest < shade.data.wander_radius + 8.0)

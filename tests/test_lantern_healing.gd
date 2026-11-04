@@ -26,13 +26,16 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var lantern = gs.BUILDINGS[0]
 	var healing: Node = farm.healing
+	# All messages, because only the newest one stays on screen.
+	var notices: Array = []
+	gs.notice.connect(func(text: String) -> void: notices.append(text))
 	check("lantern has a range", lantern.heal_radius == 4)
 
 	# Far from any curse: nothing happens, and nothing is said.
 	farm.builder.place(Vector2i(20, 13), lantern)
 	gs.end_day()
 	check("no curse in range, nothing healed", healing.cleansed.is_empty())
-	check("no message", hud.notice_label.text == "")
+	check("no message", notices.is_empty())
 
 	# Beside the curse: one tile a night, nearest first.
 	var edge := Vector2i(34, 13)
@@ -44,7 +47,7 @@ func _run() -> void:
 	print("first healed ", first)
 	check("it was close", Vector2(first - edge).length() <= 2.0)
 	check("the land really healed", g.get_cell_source_id(first) == 0)
-	check("message", hud.notice_label.text == "Your lanterns healed 1 tile overnight.")
+	check("message", notices.has("Your lanterns healed 1 tile overnight."))
 	check("progress counts it", gs.healed_percent > 0.0)
 	gs.end_day()
 	check("another the next night", healing.cleansed.size() == 2)
@@ -55,7 +58,7 @@ func _run() -> void:
 	var before: int = healing.cleansed.size()
 	gs.end_day()
 	check("two lanterns heal two tiles", healing.cleansed.size() == before + 2)
-	check("plural message", hud.notice_label.text == "Your lanterns healed 2 tiles overnight.")
+	check("plural message", notices.has("Your lanterns healed 2 tiles overnight."))
 	var unique := {}
 	for c: Vector2i in healing.cleansed:
 		unique[c] = true

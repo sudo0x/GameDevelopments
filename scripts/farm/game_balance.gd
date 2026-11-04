@@ -7,6 +7,14 @@ extends Resource
 @export var cleanse_radius: int = 1
 ## Cursed tiles the purifying hoe can heal each day.
 @export var hoe_daily_uses: int = 5
+## The first day creatures appear, so a new player has time to settle in.
+@export var creature_first_day: int = 3
+## How many creatures appear each morning, before counting how much land is healed.
+@export var creature_base_count: int = 2
+## One more creature for each this many percent of the island healed.
+@export var creature_heal_percent_each: float = 5.0
+## The most creatures at once, which also keeps phones running smoothly.
+@export var creature_max_count: int = 6
 ## Creatures can't come closer than this to a lantern's light, in pixels.
 @export var lantern_safe_radius: float = 96.0
 ## Hearts of damage one sword hit does.

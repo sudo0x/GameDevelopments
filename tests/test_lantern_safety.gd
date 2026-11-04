@@ -41,7 +41,6 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	await wait(3)
-	main.get_node("World/Shade").queue_free()
 	var farm: Node = main.get_node("Farm")
 	var player: Node2D = main.get_node("World/Player")
 	var radius: float = gs.BALANCE.lantern_safe_radius

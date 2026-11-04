@@ -49,7 +49,6 @@ func _run() -> void:
 	await process_frame
 	await wait(3)
 	var player: Node2D = main.get_node("World/Player")
-	main.get_node("World/Shade").queue_free()
 	var open := Vector2(600, 500)
 	player.global_position = open
 	player.facing = 3

@@ -86,8 +86,9 @@ func _sleep() -> void:
 ## Like sleeping, but the player wakes up at home.
 func _faint(money_lost: int) -> void:
 	_fade_to_next_day(func() -> void:
-		GameState.end_day()
+		# Home first, so the morning's creatures keep their distance from where the player wakes.
 		player.return_home()
+		GameState.end_day()
 		GameState.notice.emit("You fainted and woke up at home. You lost %d money." % money_lost))
 
 
