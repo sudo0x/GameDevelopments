@@ -7,6 +7,7 @@ extends Node2D
 const RING_DELAY := 0.1
 const FADE_SECONDS := 0.3
 const LIGHT_ENERGY := 1.6
+const MAX_SPARKLES := 400
 
 @onready var light: PointLight2D = $Light
 @onready var sparkles: CPUParticles2D = $Sparkles
@@ -37,6 +38,7 @@ func play(cells: Array[Vector2i], center: Vector2i, ground: TileMapLayer) -> voi
 
 	# reach is measured to a corner tile, so this is half the patch's width.
 	sparkles.emission_rect_extents = tile * (reach / sqrt(2.0) + 0.5)
+	sparkles.amount = clampi(cells.size() * 4, sparkles.amount, MAX_SPARKLES)
 	sparkles.emitting = true
 	# Sparkles outlive the tiles, so wait for whichever finishes last.
 	await get_tree().create_timer(maxf(seconds * 1.3, sparkles.lifetime), false).timeout

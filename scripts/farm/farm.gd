@@ -23,6 +23,10 @@ const GLIMMER_SCENE := preload("res://scenes/farm/find_glimmer.tscn")
 ## Holy water cleanses this many tiles out from the target: 1 makes a 3×3 patch.
 const CLEANSE_RADIUS := 1
 
+## Holy water needed to restore the shrine, and how many tiles out it then heals.
+const SHRINE_COST := 3
+const SHRINE_RADIUS := 9
+
 ## Treasure under cursed cells, marked by a faint glimmer. Healing the cell digs it up.
 ## Finds aren't saved: a find is gone once its cell is in `cleansed`.
 const BURIED_FINDS: Dictionary[Vector2i, Dictionary] = {
@@ -39,6 +43,7 @@ const BURIED_FINDS: Dictionary[Vector2i, Dictionary] = {
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
 @export var crops_parent_path: NodePath
+@export var shrine_path: NodePath
 
 var target_cell := Vector2i.ZERO
 ## Planted crops by cell.
@@ -57,6 +62,7 @@ var _cell_query := PhysicsShapeQueryParameters2D.new()
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
+@onready var shrine: Shrine = get_node(shrine_path)
 
 
 func _ready() -> void:
@@ -66,6 +72,7 @@ func _ready() -> void:
 	_cell_query.shape = shape
 	_cell_query.exclude = [player.get_rid()]
 	player.tool_used.connect(_on_tool_used)
+	shrine.activated.connect(_on_shrine_activated)
 	GameState.day_ended.connect(_on_day_ended)
 	_limit_camera()
 	_cursed_total = ground.get_used_cells_by_id(Source.CURSED).filter(is_cleansable).size()
@@ -152,6 +159,18 @@ func cleanse(center: Vector2i) -> void:
 	var cells := cleansable_cells(center)
 	if cells.is_empty() or not GameState.use_holy_water():
 		return
+	_cleanse_cells(cells, center)
+
+
+## Picks the crop. The soil stays tilled, so the cell can be planted again.
+func harvest(cell: Vector2i) -> void:
+	var crop: Crop = crops[cell]
+	GameState.add_harvest(crop.data)
+	crops.erase(cell)
+	crop.queue_free()
+
+
+func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
 	for cell in cells:
 		_heal(cell)
 		if BURIED_FINDS.has(cell):
@@ -162,12 +181,27 @@ func cleanse(center: Vector2i) -> void:
 	_report_progress()
 
 
-## Picks the crop. The soil stays tilled, so the cell can be planted again.
-func harvest(cell: Vector2i) -> void:
-	var crop: Crop = crops[cell]
-	GameState.add_harvest(crop.data)
-	crops.erase(cell)
-	crop.queue_free()
+func _on_shrine_activated() -> void:
+	if shrine.restored:
+		GameState.notice.emit("The shrine is at peace.")
+	elif not GameState.use_holy_water(SHRINE_COST):
+		GameState.notice.emit("The shrine needs %d holy water." % SHRINE_COST)
+	else:
+		shrine.restored = true
+		var center := ground.local_to_map(ground.to_local(shrine.global_position))
+		_cleanse_cells(_cursed_cells_around(center, SHRINE_RADIUS), center)
+		GameState.notice.emit("The old shrine is restored! The land around it heals.")
+
+
+## Healable cells in a circle, for a cleanse bigger than holy water's square patch.
+func _cursed_cells_around(center: Vector2i, radius: int) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for y in range(-radius, radius + 1):
+		for x in range(-radius, radius + 1):
+			var offset := Vector2i(x, y)
+			if Vector2(offset).length() <= radius and is_cleansable(center + offset):
+				cells.append(center + offset)
+	return cells
 
 
 func _heal(cell: Vector2i) -> void:
@@ -244,10 +278,11 @@ func _to_state() -> Dictionary:
 	var saved_crops: Array[Dictionary] = []
 	for cell in crops:
 		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown})
-	return {"cleansed": cleansed, "tilled": soil.get_used_cells(), "crops": saved_crops}
+	return {"cleansed": cleansed, "tilled": soil.get_used_cells(), "crops": saved_crops, "shrine": shrine.restored}
 
 
 func _restore(state: Dictionary) -> void:
+	shrine.restored = state.get("shrine", false)
 	for cell: Vector2i in state.get("cleansed", []):
 		_heal(cell)
 	for cell: Vector2i in state.get("tilled", []):

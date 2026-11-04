@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/shipping_box.tscn" id="box_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
@@ -18,6 +19,7 @@
 script = ExtResource("2_farm")
 player_path = NodePath("../World/Player")
 crops_parent_path = NodePath("../World")
+shrine_path = NodePath("../World/Shrine")
 
 [node name="Ground" parent="Farm" unique_id=539536092 instance=ExtResource("4_ground")]
 
@@ -53,6 +55,9 @@ position = Vector2(400, 624)
 
 [node name="LanternSouthEast" parent="World" unique_id=1853360172 instance=ExtResource("lantern_scene")]
 position = Vector2(816, 624)
+
+[node name="Shrine" parent="World" unique_id=1264790358 instance=ExtResource("shrine_scene")]
+position = Vector2(2224, 412)
 
 [node name="Player" parent="World" unique_id=1599642464 instance=ExtResource("1_player")]
 position = Vector2(784, 348)
@@ -99,9 +104,9 @@ offset_bottom = 354.0
 text = "Tool: Hoe"
 
 [node name="NoticeLabel" type="Label" parent="HUD" unique_id=1697204518]
-offset_left = 120.0
+offset_left = 40.0
 offset_top = 300.0
-offset_right = 520.0
+offset_right = 600.0
 offset_bottom = 324.0
 horizontal_alignment = 1
 

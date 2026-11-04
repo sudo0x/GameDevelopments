@@ -154,11 +154,11 @@ func buy_holy_water() -> bool:
 	return true
 
 
-## Removes one holy water. Returns false if there's none left.
-func use_holy_water() -> bool:
-	if holy_water <= 0:
+## Removes holy water. Returns false if there isn't enough.
+func use_holy_water(amount: int = 1) -> bool:
+	if holy_water < amount:
 		return false
-	holy_water -= 1
+	holy_water -= amount
 	inventory_changed.emit()
 	return true
 

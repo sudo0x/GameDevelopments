@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 2 step 6 done: progress and finds)
-- **Next:** Layer 2 step 7: old shrine in the clearing at (69, 12). It needs art, so give the user the prompts first (cursed and restored versions, in a new Layer 2 art doc). The user chose not to play Layer 1 by hand, so it's only covered by automated tests
+- Last updated: 2026-11-04 (Layer 2 step 7 done: old shrine)
+- **Next:** Layer 2 step 8: soft edges between grass and curse. Check first whether a tool can generate them from the existing textures; only ask for art if it can't. The user chose not to play Layer 1 by hand, so it's only covered by automated tests
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
@@ -42,6 +42,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Crops**: `CropData` resources in `data/crops/` (radish 3 days, carrot 5, pumpkin 8; seed and sell prices set), listed in `GameState.CROPS`. `Crop` (`scenes/farm/crop.tscn`): `days_grown`, stage = days × 3 / days_to_grow, `is_ripe()`. Frames: radish 32×32, carrot 32×40, pumpkin 40×32 (kept at real pixel size; the sprite offsets by texture height)
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
 - **Cleansing**: `GameState.holy_water`, bought at the stall for `HOLY_WATER_PRICE`. `Farm.cleanse(center)` heals the cursed cells in a 3×3 patch (`CLEANSE_RADIUS`), costs one use, and costs nothing if there's nothing to heal; `is_cleansable()` protects the outer ring. The land heals at once; `scenes/farm/cleanse_effect.tscn` (`CleanseEffect.play()`) only draws the old tiles fading out from the center, with a light flash and sparkles, then frees itself. It sizes itself from the cells, so it also suits a large cleanse
+- **Shrine**: `scenes/farm/shrine.tscn` (`Shrine`, an Area2D with a StaticBody2D child) at (2224, 412). F emits `activated`; `Farm._on_shrine_activated()` spends `SHRINE_COST` holy water, sets `restored` (swaps the sprite, turns on its light) and heals a circle of `SHRINE_RADIUS` through `_cleanse_cells()`. Saved as `shrine` in `farm_state`
 - **Finds and progress**: `Farm.BURIED_FINDS` maps cursed cells to rewards (money, seeds, holy water), each marked by `scenes/farm/find_glimmer.tscn`. `cleanse()` digs them up through `GameState.give_find()`, which sends `notice` to the HUD's NoticeLabel. A find is gone once its cell is in `cleansed`, so finds need no save data. `GameState.healed_percent` comes from `Farm._report_progress()`, shown on the HUD, and isn't saved either
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, seed rows built from `GameState.CROPS`, then holy water) → `GameState.buy_seed(crop)` / `buy_holy_water()`
@@ -52,10 +53,10 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
-- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post
+- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post, shrine (cursed and restored)
 - Next: item icons (harvested crops, seed packets, coin) and tool icons, to replace HUD text; tree, rock, fence for decoration (prompts in the art doc)
 - **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** (on the Mac, the only file) into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
-- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`)
+- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`, shrine `--height 80 --frame-w 64 --frame-h 80`)
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
 
