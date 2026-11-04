@@ -102,5 +102,5 @@ The prompts come with the step that needs them, in a new art doc.
 - **Nothing is balanced yet.** Two more areas sit on top of numbers nobody has played. A long grind to the third shrine would only show up in real play.
 - **Holy water cost grows with the map.** Healing a path across 80 more columns could take far too long at today's prices. This should be checked early, with simple math in step 1.
 - **The outer ring moves.** Column 75 was the map's edge and could never heal. After step 1 it can, so the rule and its tests must follow the new edge.
-- **Phones.** A map about twice as wide means more tiles and more curse edges to redraw. `CurseEdges.refresh()` needs timing on the larger map, and on a real phone in Layer 6 step 4.
+- **Phones.** A map about twice as wide means more tiles and more curse edges to redraw. `CurseEdges.refresh()` needs timing on the larger map, and on a real phone (release step 1, in [the release plan](20_2026-11-04_release.md)).
 - **Save changes.** Shrines move from one value to a list, so `tests/test_old_save.gd` must keep passing, and the fixture must never be regenerated to pass it.

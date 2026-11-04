@@ -10,22 +10,20 @@ Chats share nothing but this repo, so this file is the handoff. If this chat was
 
 ### Roadmap
 
-Two plans have their own step numbers, so **always say which plan you mean**: "areas step 1", or "Layer 6 step 4".
+Plans have their own step numbers, so **always say which plan you mean**: "release step 1", "areas step 1". Old names map like this: Layer 6 step 4 is now release step 1, step 7 is the playtest's balance pass (with a final check in release step 2), step 8 is release step 3, step 9 is release step 4.
 
 | Order | Work | Plan | Status |
 |---|---|---|---|
-| 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to Layer 6 step 7 |
-| 2 | Layer 6 steps 1 to 3b (title, touch, phone UI, UI art) | `docs/13_...` | ✅ Built. Title logo waits for the real name |
-| 3 | The user plays on the computer and reports problems; fix them between steps | `docs/16_...`, `17_...` | Ongoing |
-| 4 | Layer 6 step 5: sound and settings | `docs/13_...`, `18_...` | ✅ Built. 21 effects made by `tools/make_sounds.gd`; farm and title music from Suno (`docs/18_...`) |
-| 5 | **Layer 6 step 6: polish.** Part 1 (code) ✅: pause menu with settings, phone pause button, Use shows the tool, queued messages, movable starting objects. Part 2 (art) ✅: pause icon, joystick knob, "!" Act icon, vertical fence | `docs/13_...`, prompts in `14_...` | ✅ Built |
-| 6 | **Layer 6 step 4: Android build**, before balance so it's tuned on the real device | `docs/13_...` | **👉 Next.** Needs the user's phone and setup |
-| 7 | Layer 6 step 7: balance pass for everything | `docs/13_...` | Waiting. Needs real play, required before release |
-| 8 | Layer 6 step 8: rewarded ads | `docs/13_...` | Waiting. Needs an ad account |
-| 9 | Layer 6 step 9: Google Play release, with the real title and logo | `docs/13_...` | Waiting. Needs a developer account and the real title |
-| 10 | Areas steps 1 to 10 (woods, marsh, ending), as a free update after release | `docs/15_...` | Waiting |
+| 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to the playtest |
+| 2 | Layer 6 steps 1 to 6 (title, touch, phone UI, UI art, sound and settings, polish) | `docs/13_...`, `14_...`, `18_...` | ✅ Finished at step 6; the rest moved to the playtest and release plans |
+| 3 | **Playtest:** the user plays on the computer in sessions, reports problems; Claude logs, fixes, and runs the balance pass | `docs/19_...` | **👉 Next / ongoing.** Findings table and exit rules in the doc |
+| 4 | Release step 1: Android build and phone checks | `docs/20_...` | Waiting for the playtest. Needs the user's phone and setup |
+| 5 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
+| 6 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
+| 7 | Release step 4: Google Play, with the real title and logo | `docs/20_...` | Waiting. Needs a developer account and the real title |
+| 8 | Areas steps 1 to 10 (woods, marsh, ending), as a free update after release | `docs/15_...` | Waiting |
 
-The user chose this order on 2026-11-04: finish and release the smaller game first (see `docs/17_...`). Layer 6 steps are done out of number order, so always name the step. Update this table whenever a step finishes. Everything postponed is in the "Still open" table in `docs/13_...`. A ✅ means built and passing automated tests, not tried on a phone or played by a person.
+The user chose this order on 2026-11-04 (see `docs/17_...`): finish Layer 6, play and fix, then release the smaller game, then the woods and marsh. Update this table whenever a step finishes. Anything found or left open goes in the playtest's findings table (`docs/19_...`); phone-only checks are in release step 1 (`docs/20_...`). A ✅ means built and passing automated tests, not tried on a phone or played by a person.
 
 ### How we work
 
@@ -34,7 +32,7 @@ The user is usually away from the code, and answers with short replies.
 - **Advise, don't just follow.** If a request isn't the best approach (wrong order, a weaker fix, something that fights the design), say so first, suggest the best-practice way, and let the user choose. Doing exactly what was asked when it's a poor idea isn't helping
 - **Every problem fixed goes in `docs/16_...` (fixes log)**, newest first, briefly: the problem as the user saw it, the fix and whether it was code, art, data or a setting, and how other developers often solve it. The user compares fixes to learn. Features still go in the build notes
 - **Decisions go in `docs/17_...` (decisions log)**, with the reason. Before doing something that goes against one (for example "move the house"), point to it and explain why, then do what the user decides and update the row
-- The user plays on the computer and reports problems with screenshots; testing on a real phone waits for Layer 6 step 4
+- The user plays on the computer and reports problems with screenshots; testing on a real phone waits for release step 1. **Every finding goes in the playtest's findings table** (`docs/19_...`) with its kind and status, as well as the fixes or decisions log
 - One step at a time. At the end of a step, say what changed, what was tested, what wasn't, and what art comes next
 - **Commit and push only when asked.** The user normally replies "Commit, start step N", or "Commit and push". "Start step N" alone doesn't mean commit
 - Run `tests/run_all.sh` before every commit. After anything random, like creatures, run it 3 times. Report failures honestly, and never call something done or passing unless it just was
@@ -43,7 +41,7 @@ The user is usually away from the code, and answers with short replies.
 - Add a test with each feature, and update `docs/06_...` (build notes), the plan's ✅ and this file in the same step
 - Never touch the user's real save: tests use a temporary home folder. To check it, copy it to a temporary folder first
 - The user decides. Say so plainly when you disagree, but don't keep repeating it: they've chosen not to playtest for now, so mention untested balance only when it matters
-- Don't use a ✅ or "later" to hide a gap: if something is left over, add it to "Still open"
+- Don't use a ✅ or "later" to hide a gap: if something is left over, add it to the playtest's findings table (`docs/19_...`), or to release step 1's checks if only a phone can show it
 - Art prompts by layer: `docs/02`, `05`, `08`, `10`, `12`, `14`. Art files are local until committed, so check `art_source/` before asking for art that may already exist
 - Open decisions for the user: the game's real title
 
@@ -77,7 +75,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ## Current status (keep this updated at the end of each work session)
 - Last updated: 2026-11-04 (after 5fb8141: Layer 6 step 6 finished, with the knob, pause and "!" icons and fences that turn; then a check that every doc is current)
-- **Next:** see the roadmap at the top (Layer 6 step 4, the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
+- **Next:** see the roadmap at the top (the playtest, `docs/19_...`; then release step 1, the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now

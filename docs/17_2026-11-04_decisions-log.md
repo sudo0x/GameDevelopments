@@ -60,5 +60,6 @@ The Hand tool picks them up and the Build tool places them again, the same as th
 
 | Question | Decision | Why |
 |---|---|---|
-| Test on a phone now? | Not yet: play on the computer and report problems, phone in Layer 6 step 4 | Problems found on the computer can be fixed now |
+| Test on a phone now? | Not yet: play on the computer and report problems, phone in release step 1 (was Layer 6 step 4) | Problems found on the computer can be fixed now |
 | Areas or Layer 6 first? | **Layer 6 first**, then the woods and marsh as a free update after release. Order: keep playing, step 5 sound, step 6 polish, step 4 phone, step 7 balance, step 8 ads, step 9 release | Core loop and phone tested before adding content, and release (and income) comes sooner. This replaces the earlier choice of areas before release |
+| Where do the rest of Layer 6 and the playing go? | **Layer 6 closes at step 6.** A new **playtest** plan (`docs/19_...`) comes next: play on the computer in sessions, log findings, fix them, and do the balance pass. Then a **release** plan (`docs/20_...`): phone, final balance on the phone, ads, Google Play | The user's idea, and the usual studio order (alpha before release). Claude's two changes, agreed: balance moved into the playtest because it needs playing, and the phone is the release plan's first step, not its last |

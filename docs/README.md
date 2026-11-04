@@ -18,9 +18,11 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 10 | 2026-11-04 | [Art prompts: Layer 4](10_2026-11-04_art-prompts-layer-4.md) |
 | 11 | 2026-11-04 | [Layer 5 plan: combat](11_2026-11-04_layer-5-combat.md) |
 | 12 | 2026-11-04 | [Art prompts: Layer 5](12_2026-11-04_art-prompts-layer-5.md) |
-| 13 | 2026-11-04 | [Layer 6 plan: mobile and release](13_2026-11-04_layer-6-release.md) |
+| 13 | 2026-11-04 | [Layer 6 plan: mobile and release](13_2026-11-04_layer-6-release.md) (finished at step 6; the rest moved to 19 and 20) |
 | 14 | 2026-11-04 | [Art prompts: Layer 6](14_2026-11-04_art-prompts-layer-6.md) |
 | 15 | 2026-11-04 | [Areas plan: Whispering Woods and Sunken Marsh](15_2026-11-04_areas-woods-marsh.md) |
 | 16 | 2026-11-04 | [Fixes log: problems found and how they were fixed](16_2026-11-04_fixes-log.md) |
 | 17 | 2026-11-04 | [Decisions log: what we chose and why](17_2026-11-04_decisions-log.md) |
 | 18 | 2026-11-04 | [Sound list and how sound works](18_2026-11-04_sound-list.md) |
+| 19 | 2026-11-04 | [Playtest plan: play, find, fix, and balance](19_2026-11-04_playtest.md) |
+| 20 | 2026-11-04 | [Release plan: phone, ads and Google Play](20_2026-11-04_release.md) |

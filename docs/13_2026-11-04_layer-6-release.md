@@ -2,6 +2,8 @@
 
 **Date:** 2026-11-04
 
+> **✅ Finished at step 6 (2026-11-04).** Steps 1 to 6 are built. The rest moved to their own plans: playing and balance to [the playtest](19_2026-11-04_playtest.md), and the phone, ads and Google Play to [the release plan](20_2026-11-04_release.md). This doc stays as the record of what Layer 6 built and why.
+
 ## Goal
 
 Turn the working prototype into a game strangers can install and enjoy on an Android phone. This is the final layer: it adds no big new systems, and instead makes everything built so far playable, understandable and ready for a store.
@@ -15,12 +17,12 @@ flowchart LR
 	A[Title menu] --> B[Touch controls]
 	B --> C[Phone-sized UI]
 	C --> E[Sound and polish]
-	E --> D[Running on a real phone]
-	D --> F[Balance by real play]
-	F --> G[Ads]
-	G --> H[Google Play]
-	H --> I[Steam later]
+	E --> P[Playtest and balance<br/>docs/19]
+	P --> D[Phone, ads, Google Play<br/>docs/20]
+	D --> I[Steam later]
 ```
+
+Layer 6 itself is the first four boxes; the last ones are the next plans.
 
 ## Design decisions
 
@@ -56,57 +58,33 @@ Areas 5 and 6, the cursed heart, the ruined village, story, more islands. Those 
 
 ## Build steps
 
-Each step ends with something you can run and see working. ✅ means the code is built and passes its automated tests. It doesn't mean it's been tried on a phone or played by a person: see "Still open" below.
+Each step ends with something you can run and see working. ✅ means the code is built and passes its automated tests. It doesn't mean it's been tried on a phone or played by a person: that's what the playtest and release plans are for.
 
 1. ✅ **Title menu:** Continue, New Game and a working way to start over
 2. ✅ **Touch controls:** joystick, tool bar and action buttons
 3. ✅ **Phone UI:** touch wording, thumb-sized buttons and tool icons. This step fixed how the UI works, not how it looks
 3b. ✅ **UI art:** pixel font, one game theme, panels, buttons, hearts, coin, item icons and touch button art. Only the title logo is left, waiting for the real name
-4. **Android build:** the game running on a real phone, then checking everything in "Still open" (needs setup by you)
+4. ➡️ **Android build:** moved to [release step 1](20_2026-11-04_release.md)
 5. ✅ **Sound and settings:** the `Audio` manager, Music and Effects channels, every sound wired to its action, music for the title and farm, and a settings menu for volume on the title. The 21 effects are made by `tools/make_sounds.gd`, and the farm and title music came from Suno. See [the sound list](18_2026-11-04_sound-list.md)
 6. ✅ **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, movable starting objects, plus the weak spots listed in the build notes (needs art)
    - ✅ **Part 1, code:** pause menu (Resume, Settings, Back to title, which asks first and reloads the morning's save), a pause button on phones, Use showing the selected tool, and messages that take turns. The player already used floating movement, so that item needed nothing
    - ✅ **Part 2, art:** pause icon, joystick knob, a "!" speech bubble on Act (the open glove looked like the Hand tool, see [the decisions log](17_2026-11-04_decisions-log.md)), and fences that turn: a line going up and down uses the new vertical art. Prompts in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md). Optional, in code: moths around lanterns, grass in the wind
    - ✅ **Movable starting objects** (asked for after play, built early): the Hand tool picks up the shipping box, workbench and the map's 4 lantern posts, and the Build tool places them again, the same as built objects. Their positions are saved, and old saves keep them where they started. The house and shop stall stay fixed: see [the decisions log](17_2026-11-04_decisions-log.md)
-7. **Balance pass:** play on a real phone and tune everything (needs you to play)
-8. **Rewarded ads:** ads and the Remove Ads purchase (needs accounts)
-9. **Google Play release:** the real title and its logo, closed testing, then the public store (needs you)
-
-Steam comes after Android, and only needs its own build and store page.
+7. ➡️ **Balance pass:** moved to [the playtest](19_2026-11-04_playtest.md), since balance needs playing; a final check on the phone is release step 2
+8. ➡️ **Rewarded ads:** moved to [release step 3](20_2026-11-04_release.md)
+9. ➡️ **Google Play release:** moved to [release step 4](20_2026-11-04_release.md)
 
 ## Still open
 
-Work left over from finished steps, and where each piece will be done.
+Everything left open moved on 2026-11-04: the phone checks are in [release step 1](20_2026-11-04_release.md), and the rest (fence ends and corners, richer `cleanse` and `shrine` sounds, balance) is in the playtest's findings table. Only the title logo stays tied to this layer's art, and it's in release step 4, once the game has its real name.
 
-| Open item | Left over from | Done in |
-|---|---|---|
-| Touch controls on a real phone: thumb reach and feel | Step 2 | Step 4 |
-| Swiping to scroll the workbench list | Step 3 | Step 4 |
-| Whether text is big enough | Step 3 | Step 4 |
-| The title logo | Step 3b | Step 9 at the latest, once the game has its real name |
-| Fence row ends and corners show a bit of rail sticking out | Step 6 | Later polish: end and corner pieces |
-| Help text still says "then Use", though the Use button now shows a tool icon instead of the word ("Act" in menus became "Tap ! to close") | Step 6 | Check on a real phone in step 4 whether players get it |
-| Speed on a cheap phone | New | Step 4 |
-| Richer `cleanse` and `shrine` sounds than the generated ones (all music is in) | Step 5 | Any time, before release: drop them in `assets/audio/`, see [the sound list](18_2026-11-04_sound-list.md) |
-| Balance for Layers 3, 4 and 5, all postponed | Layers 3 to 5 | Step 7 |
-| The game's real title | Step 1 | Before step 9 |
+## Order of work
 
-## Before step 4
-
-~~The user chose to add areas 3 and 4 before release.~~ Changed on 2026-11-04: this layer is finished first, and [the woods and marsh plan](15_2026-11-04_areas-woods-marsh.md) comes after release as a free update. The steps run in this order: 5 (sound), 6 (polish), 4 (Android, before balance so numbers are tuned on a phone), 7, 8, 9. Why: see [the decisions log](17_2026-11-04_decisions-log.md).
+~~The user chose to add areas 3 and 4 before release.~~ Changed on 2026-11-04: this layer is finished first, and [the woods and marsh plan](15_2026-11-04_areas-woods-marsh.md) comes after release as a free update. The steps ran as 5 (sound), then 6 (polish). Then, also on 2026-11-04, the remaining steps moved out so this layer could close: playtest first, then release. Why: see [the decisions log](17_2026-11-04_decisions-log.md).
 
 ## What only you can do
 
-These can't be done by code, so they're listed early.
-
-| Needed | For | Notes |
-|---|---|---|
-| **A game title** | Steps 1 and 9 | Still "working title". Worth checking that it's free to use |
-| **An Android phone** | Step 4 | With developer mode turned on |
-| **A Google Play developer account** | Step 9 | There's a one-time fee, and new personal accounts may need to run a closed test with real testers before a public release. Check Google's current rules when you get there |
-| **An ad account** | Step 8 | AdMob is the usual choice, and it needs payment details |
-| **A privacy policy** | Steps 8 and 9 | Required once ads collect data |
-| **Real playing** | Step 7 | This can't be skipped before release |
+Moved to [the release plan](20_2026-11-04_release.md), "What only you can do": a game title, an Android phone, an ad account, a privacy policy, a Google Play developer account. Real playing is the whole of [the playtest](19_2026-11-04_playtest.md).
 
 ## Art and audio needed
 
@@ -116,7 +94,7 @@ These can't be done by code, so they're listed early.
 | 3b | ✅ Pixel font, panel and button art, hearts, item icons, seed packets, coin, touch control art. Title logo still to come |
 | 5 | ✅ 21 sound effects (made by a script) and the farm and title music (Suno), in [the sound list](18_2026-11-04_sound-list.md) |
 | 6 | ✅ Joystick knob, pause icon, "!" Act icon, vertical fence (Use needed none: it shows the selected tool) |
-| 9 | Title logo, store icon, banner and screenshots |
+| ➡️ | Title logo, store icon, banner and screenshots: moved to [release step 4](20_2026-11-04_release.md) |
 
 The prompts come with the step that needs them. AI-generated content must be disclosed on Steam, and this project's art docs are the record of how it was made.
 
@@ -134,15 +112,17 @@ What this step replaced, from before it started:
 | Bag, shop, workbench | Words only | Icons for crops, seed packets, materials and holy water |
 | Touch buttons | A plain generated circle | Round button art, with a Bag icon. Since step 6: Use shows the selected tool, Act a "!", and pause an iron-bar icon |
 | Joystick | Godot's default white ring | Ring uses your art. Since step 6 the knob has its own art too |
-| Title | Plain text | Still plain text, until the logo in step 9 |
+| Title | Plain text | Still plain text, until the logo in release step 4 |
 
 One `Theme` resource holds the font, panels and buttons, so every menu changes in one place. New items from the woods and marsh plan add their icons to the same sets.
 
 ## Risks
 
-- **Nothing has been balanced or properly played.** Layers 3 to 5 have only been tested by scripts. Step 7 is required before release, and it may lead to bigger changes than number tweaks.
-- **Performance on real phones is unknown.** Everything so far ran on fast computers (a Mac and a Windows PC). Lights, sound, music and creatures need checking on a cheap phone in step 4.
-- **Text is small.** The game draws at 640×360, which may be hard to read on a phone. Step 3 made buttons thumb-sized, but the text size is only checked on a real phone in step 4.
-- **Ad plugins may lag behind Godot.** AdMob needs a plugin that supports Godot 4.7. Check this before step 8, and leave time for it.
+The open risks now live in the next plans: playing and balance in [the playtest](19_2026-11-04_playtest.md); phone speed, text size, ad plugins and closed testing in [the release plan](20_2026-11-04_release.md). Kept here as a record:
+
+- **Nothing has been balanced or properly played.** Layers 3 to 5 have only been tested by scripts. The playtest is required before release, and it may lead to bigger changes than number tweaks.
+- **Performance on real phones is unknown.** Everything so far ran on fast computers (a Mac and a Windows PC). Checked on a cheap phone in release step 1.
+- **Text is small.** The game draws at 640×360, which may be hard to read on a phone. Step 3 made buttons thumb-sized, but the text size is only checked on a real phone in release step 1.
+- **Ad plugins may lag behind Godot.** AdMob needs a plugin that supports Godot 4.7. Check this before release step 3, and leave time for it.
 - **Old saves must keep working.** `tests/test_old_save.gd` stays in place. New Game must never delete a save without a warning.
 - ~~**Windows hasn't been tested lately.**~~ Checked on 2026-11-04: `tests/run_all.sh` passes on Windows (Git Bash) as well as the Mac.
