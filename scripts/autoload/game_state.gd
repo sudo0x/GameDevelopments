@@ -20,6 +20,8 @@ signal day_started
 
 const BALANCE: GameBalance = preload("res://data/balance.tres")
 
+const START_SEEDS: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin": 3}
+
 const SAVE_PATH := "user://save.cfg"
 ## Saves are written here first, so a crash can't damage the real save.
 const SAVE_TEMP_PATH := "user://save.tmp"
@@ -57,7 +59,7 @@ const BUILDINGS: Array[BuildingData] = [
 var day := 1
 var money := 0
 ## Seed counts by crop id.
-var seeds: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin": 3}
+var seeds: Dictionary[StringName, int] = START_SEEDS.duplicate()
 ## Harvested crop counts by crop id.
 var harvest: Dictionary[StringName, int] = {}
 ## Gathered material counts by material id.
@@ -259,6 +261,34 @@ func save_game() -> void:
 		error = DirAccess.rename_absolute(SAVE_TEMP_PATH, SAVE_PATH)
 	if error != OK:
 		push_error("Couldn't save the game: %s" % error_string(error))
+
+
+## Whether there's a save that load_game() could use.
+func has_save() -> bool:
+	var file := ConfigFile.new()
+	return file.load(SAVE_PATH) == OK and file.get_value("game", "version", 0) == SAVE_VERSION
+
+
+## Erases the save and goes back to a new game. Every value that's saved must be reset here.
+func start_new_game() -> void:
+	DirAccess.remove_absolute(SAVE_PATH)
+	DirAccess.remove_absolute(SAVE_TEMP_PATH)
+	day = 1
+	money = 0
+	seeds = START_SEEDS.duplicate()
+	harvest.clear()
+	materials.clear()
+	buildings.clear()
+	shipped.clear()
+	holy_water = 0
+	strong_holy_water = 0
+	has_purifying_hoe = false
+	has_sword = false
+	hoe_uses_left = 0
+	hearts = BALANCE.max_hearts
+	healed_percent = 0.0
+	day_changing = false
+	farm_state = {}
 
 
 ## Keeps the new-game values if there's no save, or it can't be read.

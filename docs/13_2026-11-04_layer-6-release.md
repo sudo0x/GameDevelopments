@@ -39,7 +39,7 @@ flowchart LR
 
 | Feature | Details |
 |---|---|
-| **Title menu** | Game title, Continue, New Game with a warning, and basic settings |
+| **Title menu** | Game title, Continue, New Game with a warning. Settings come with sound in step 5, when there's something to set |
 | **Touch controls** | Joystick, tool bar, Use and Interact buttons, shown only on touch screens |
 | **Phone UI** | Bigger text and buttons, icons for items, and menus that work by tapping |
 | **Android build** | An installable game, tested on a real phone |
@@ -57,7 +57,7 @@ Areas 3 to 6, the cursed heart, the ruined village, new creatures, story, more i
 
 Each step ends with something you can run and see working.
 
-1. **Title menu:** Continue, New Game and a working way to start over
+1. ✅ **Title menu:** Continue, New Game and a working way to start over
 2. **Touch controls:** joystick, tool bar and action buttons (needs art)
 3. **Phone UI:** readable text, tappable menus, and icons (needs art)
 4. **Android build:** the game running on a real phone (needs setup by you)
