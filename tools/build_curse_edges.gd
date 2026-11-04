@@ -1,7 +1,8 @@
 extends SceneTree
 ## Builds the edge atlases that TileEdges draws, so borders aren't straight lines along the grid:
-## curse_edge.png (curse over clean tiles, for CurseEdges) and grass_edge.png (grass over
-## tilled soil, for SoilEdges), each from its ground texture.
+## curse_edge.png (curse over clean tiles, for CurseEdges), grass_edge.png (grass over
+## tilled soil, for SoilEdges) and wet_edge.png (watered soil over dry soil, for WetEdges),
+## each from its ground texture.
 ##
 ## Usage:
 ##   godot --headless --path <project> --script tools/build_curse_edges.gd
@@ -10,10 +11,12 @@ extends SceneTree
 ## Layout: one row per direction (TileEdges.SIDES, then its corners), one column per
 ## 32×32 piece of the texture, so the pattern lines up with the tile next to it.
 
-## Source texture → atlas to write.
+## Source texture → [atlas to write, how deep the edge reaches, 1 = about 7 pixels].
+## Wet soil reaches only half as far, so each watered tile is still easy to tell apart.
 const ATLASES := {
-	"res://assets/tiles/cursed_ground.png": "res://assets/tiles/curse_edge.png",
-	"res://assets/tiles/grass.png": "res://assets/tiles/grass_edge.png",
+	"res://assets/tiles/cursed_ground.png": ["res://assets/tiles/curse_edge.png", 1.0],
+	"res://assets/tiles/grass.png": ["res://assets/tiles/grass_edge.png", 1.0],
+	"res://assets/tiles/soil_wet.png": ["res://assets/tiles/wet_edge.png", 0.5],
 }
 const TILE := 32
 const TEXTURE_TILES := 4
@@ -24,10 +27,14 @@ const STEP := 2
 ## Scattered pixels reach this far past the solid part of the edge.
 const FRINGE := 4
 
+## The current atlas's depth, from ATLASES.
+var _scale := 1.0
+
 
 func _init() -> void:
 	for source_path: String in ATLASES:
-		_build(source_path, ATLASES[source_path])
+		_scale = ATLASES[source_path][1]
+		_build(source_path, ATLASES[source_path][0])
 	quit()
 
 
@@ -76,7 +83,7 @@ func _is_curse(direction: int, x: int, y: int, at: Vector2i) -> bool:
 ## in the 128-pixel texture and repeats with it, so neighboring tiles join up.
 func _depth(along: int, phase: float) -> float:
 	var t := float(along / STEP * STEP) / TEXTURE_SIZE
-	return 7.0 + 3.0 * sin(TAU * 2.0 * t + phase) + 2.0 * sin(TAU * 5.0 * t + phase * 2.0)
+	return (7.0 + 3.0 * sin(TAU * 2.0 * t + phase) + 2.0 * sin(TAU * 5.0 * t + phase * 2.0)) * _scale
 
 
 func _within(distance: int, along: int, phase: float, at: Vector2i) -> bool:
@@ -84,14 +91,15 @@ func _within(distance: int, along: int, phase: float, at: Vector2i) -> bool:
 
 
 func _within_corner(x: int, y: int, at: Vector2i) -> bool:
-	return _solid_or_scattered(Vector2(x, y).length() - 8.0, at)
+	return _solid_or_scattered(Vector2(x, y).length() - 8.0 * _scale, at)
 
 
 ## Solid inside the edge, then fewer and fewer stray pixels past it.
 func _solid_or_scattered(past: float, at: Vector2i) -> bool:
 	if past <= 0.0:
 		return true
-	return past < FRINGE and _chance(at) > past / FRINGE
+	var fringe := FRINGE * _scale
+	return past < fringe and _chance(at) > past / fringe
 
 
 ## A repeatable random number from 0 to 1 for this texture pixel.

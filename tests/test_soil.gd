@@ -38,7 +38,9 @@ func _run() -> void:
 	var player: Node = main.get_node("World/Player")
 	var hud: Node = main.get_node("HUD")
 	var edges: Node2D = main.get_node("Farm/SoilEdges")
-	check("edges draw over soil, under curse edges", edges.get_index() == main.get_node("Farm/Soil").get_index() + 1 and edges.get_index() < main.get_node("Farm/CurseEdges").get_index())
+	var wet_edges: Node2D = main.get_node("Farm/WetEdges")
+	var soil_index: int = main.get_node("Farm/Soil").get_index()
+	check("order: soil, wet edges, grass edges, curse edges", wet_edges.get_index() == soil_index + 1 and edges.get_index() == soil_index + 2 and edges.get_index() < main.get_node("Farm/CurseEdges").get_index())
 	check("grass atlas size", edges.ATLAS.get_size() == Vector2(512, 256))
 	check("no soil, no edges", edges._pieces.is_empty())
 
@@ -77,9 +79,19 @@ func _run() -> void:
 		return edges._pieces.filter(func(p: Dictionary) -> bool: return farm.soil.local_to_map(p["to"].get_center()) == c).size()
 	check("touching tiles: 3 sides each", at.call(a) == 3 and at.call(b) == 3)
 
+	# Watered soil gets a thin ragged edge over the dry soil beside it, not over grass.
+	var wet_at := func(c: Vector2i) -> int:
+		return wet_edges._pieces.filter(func(p: Dictionary) -> bool: return farm.soil.local_to_map(p["to"].get_center()) == c).size()
+	check("no wet soil, no wet edges", wet_edges._pieces.is_empty())
+	farm.water(a)
+	farm._refresh_soil_edges()
+	check("the dry neighbor gets one wet edge", wet_at.call(b) == 1 and wet_at.call(a) == 0)
+	check("wet edge atlas", wet_edges.ATLAS.get_size() == Vector2(512, 256))
+
 	# Empty soil goes back to grass after 3 nights; soil with a crop stays.
 	check("balance number", gs.BALANCE.soil_idle_nights == 3)
 	gs.end_day()
+	check("soil dries overnight, and its wet edges go", not farm.is_watered(a) and wet_edges._pieces.is_empty())
 	gs.end_day()
 	check("still soil after 2 nights", farm.is_tilled(a) and farm.soil_idle.get(a, 0) == 2)
 	check("planted cell isn't counted", not farm.soil_idle.has(cell))

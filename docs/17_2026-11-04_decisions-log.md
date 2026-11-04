@@ -6,6 +6,13 @@ Choices we made about how the game works, and why, so we don't undo one by accid
 
 Newest first. Bigger plan decisions are also in each plan's "Design decisions" table.
 
+## Playtest session 1 (2026-11-04)
+
+| Question | Decision | Why |
+|---|---|---|
+| Watered soil edges: squares, light ragged, or full soft? | **Light ragged**, half as deep as the grass edge | Softer than squares, but each watered tile still shows clearly, which matters for knowing what needs water |
+| Tool display on computers? | **A tool bar with icons and number keys**, the same as phones; click to pick | The usual PC farming-game hotbar; reuses the phone's icons, and both layouts now match |
+
 ## Pause menu and messages (2026-11-04, Layer 6 step 6)
 
 | Question | Decision | Why |

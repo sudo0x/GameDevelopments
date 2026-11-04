@@ -42,6 +42,7 @@ var _build_query := PhysicsShapeQueryParameters2D.new()
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
 @onready var soil_edges: SoilEdges = $SoilEdges
+@onready var wet_edges: WetEdges = $WetEdges
 @onready var healing: Healing = $Healing
 @onready var gathering: Gathering = $Gathering
 @onready var build_preview: BuildPreview = $BuildPreview
@@ -255,6 +256,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
 			Audio.play(&"water")
+			_refresh_soil_edges()
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
 			Audio.play(&"plant")
@@ -287,6 +289,7 @@ func _on_day_ended() -> void:
 	gathering.advance_day(is_tilled)
 	_heal_from_buildings()
 	_water_from_buildings()
+	_refresh_soil_edges()
 	GameState.farm_state = _to_state()
 
 
@@ -299,11 +302,13 @@ func _age_empty_soil() -> void:
 		soil_idle[cell] = soil_idle.get(cell, 0) + 1
 		if soil_idle[cell] >= GameState.BALANCE.soil_idle_nights:
 			untill(cell)
-	_refresh_soil_edges()
 
 
+## Grass over the field's edge, and wet soil over dry. Call after any soil change:
+## tilling, untilling, watering, drying, or loading.
 func _refresh_soil_edges() -> void:
 	soil_edges.refresh(ground, soil)
+	wet_edges.refresh(soil)
 
 
 ## Wells water nearby soil for the new day. Also runs after loading, because watered soil

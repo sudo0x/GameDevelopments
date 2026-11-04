@@ -33,7 +33,6 @@ const ACTION_BUTTONS: Array[Array] = [
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["use_tool", "interact", "inventory"]
-const TOOL_LABEL_TOUCH_Y := 52.0
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -47,14 +46,13 @@ var _use_icon: Sprite2D
 @onready var player: Player = get_node(player_path)
 @onready var tool_bar: Node2D = $ToolBar
 @onready var hint: Label = get_parent().get_node("Hint")
-@onready var tool_label: Label = get_parent().get_node("ToolLabel")
 
 
 func _ready() -> void:
 	for i in TOOL_COUNT:
 		var at := Vector2(TOOL_BAR_START_X + i * TOOL_SPACING, TOOL_BAR_Y)
 		var button := _add_button(tool_bar, "", "tool_%d" % (i + 1), at, TOOL_SIZE)
-		_add_icon(button, _tool_icon(i))
+		_add_icon(button, tool_icon(i))
 		_tool_buttons.append(button)
 	for entry in ACTION_BUTTONS:
 		var keep_showing: bool = SHOWN_UNDER_MENUS.has(entry[1])
@@ -66,7 +64,7 @@ func _ready() -> void:
 		elif entry[1] == "interact":
 			_add_icon(button, ACT_ICON)
 		elif entry[1] == "use_tool":
-			_use_icon = _add_icon(button, _tool_icon(0))
+			_use_icon = _add_icon(button, tool_icon(0))
 	player.tool_changed.connect(_show_selected_tool)
 	set_active(DisplayServer.is_touchscreen_available())
 
@@ -81,8 +79,6 @@ func set_active(value: bool) -> void:
 	visible = value
 	GameState.touch_mode = value
 	hint.visible = not value
-	# The joystick sits where this label normally is.
-	tool_label.position.y = TOOL_LABEL_TOUCH_Y if value else tool_label.position.y
 	if not value:
 		_release_movement()
 	_show_selected_tool()
@@ -99,10 +95,10 @@ func _release_movement() -> void:
 func _show_selected_tool() -> void:
 	for i in _tool_buttons.size():
 		_tool_buttons[i].modulate = SELECTED_COLOR if i == player.tool else Color.WHITE
-	_fit_icon(_use_icon, _tool_icon(player.tool))
+	_fit_icon(_use_icon, tool_icon(player.tool))
 
 
-func _tool_icon(index: int) -> Texture2D:
+static func tool_icon(index: int) -> Texture2D:
 	if index == TOOL_COUNT - 1:
 		return SWORD_ICON
 	var icon := AtlasTexture.new()

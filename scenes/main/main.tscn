@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/creatures/creature_spawner.gd" id="spawner_script"]
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/soil_edges.gd" id="soil_edges_script"]
+[ext_resource type="Script" path="res://scripts/farm/wet_edges.gd" id="wet_edges_script"]
 [ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
@@ -20,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
 [ext_resource type="Texture2D" path="res://assets/items/coin.png" id="coin_icon"]
 [ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="touch_script"]
+[ext_resource type="Script" path="res://scripts/ui/key_tool_bar.gd" id="key_bar_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
@@ -39,6 +41,9 @@ crops_parent_path = NodePath("../World")
 
 [node name="Soil" type="TileMapLayer" parent="Farm" unique_id=499541455]
 tile_set = ExtResource("5_tiles")
+
+[node name="WetEdges" type="Node2D" parent="Farm"]
+script = ExtResource("wet_edges_script")
 
 [node name="SoilEdges" type="Node2D" parent="Farm"]
 script = ExtResource("soil_edges_script")
@@ -157,9 +162,9 @@ horizontal_alignment = 2
 
 [node name="ToolLabel" type="Label" parent="HUD" unique_id=1879404603]
 offset_left = 8.0
-offset_top = 330.0
+offset_top = 52.0
 offset_right = 632.0
-offset_bottom = 354.0
+offset_bottom = 76.0
 text = "Tool: Hoe"
 
 [node name="CropStatusLabel" type="Label" parent="HUD" unique_id=1450263987]
@@ -175,6 +180,10 @@ offset_top = 300.0
 offset_right = 600.0
 offset_bottom = 324.0
 horizontal_alignment = 1
+
+[node name="KeyToolBar" type="Node2D" parent="HUD"]
+script = ExtResource("key_bar_script")
+player_path = NodePath("../../World/Player")
 
 [node name="TouchControls" type="Node2D" parent="HUD" unique_id=1639042785]
 process_mode = 3

@@ -70,7 +70,7 @@ func _run() -> void:
 	check("Use shows the sword", controls._use_icon.texture == controls.SWORD_ICON)
 	await press("tool_2")
 	var shown: Texture2D = controls._use_icon.texture
-	check("then the watering can", shown is AtlasTexture and (shown as AtlasTexture).region == controls._tool_icon(1).region)
+	check("then the watering can", shown is AtlasTexture and (shown as AtlasTexture).region == controls.tool_icon(1).region)
 	controls.set_active(false)
 	check("Resume button resumes", not pause.visible and not paused)
 

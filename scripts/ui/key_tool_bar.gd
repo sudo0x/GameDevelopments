@@ -1,0 +1,68 @@
+class_name KeyToolBar
+extends Node2D
+## The tool bar on computers: the phone's tool icons in the same place, each with its number
+## key, and the selected tool highlighted. Clicking a slot sends that key's action, so the
+## player can't tell a click from the key. Hidden while touch controls are on, which have
+## their own tappable bar.
+
+const NUMBER_OFFSET := Vector2(-15, -19)
+
+@export var player_path: NodePath
+
+var _slots: Array[Sprite2D] = []
+
+@onready var player: Player = get_node(player_path)
+
+
+func _ready() -> void:
+	for i in TouchControls.TOOL_COUNT:
+		var at := Vector2(TouchControls.TOOL_BAR_START_X + i * TouchControls.TOOL_SPACING, TouchControls.TOOL_BAR_Y)
+		var slot := Sprite2D.new()
+		slot.texture = TouchControls.BUTTON_TEXTURE
+		slot.position = at
+		slot.scale = Vector2.ONE * TouchControls.TOOL_SIZE / TouchControls.TEXTURE_SIZE
+		add_child(slot)
+		var icon := Sprite2D.new()
+		icon.texture = TouchControls.tool_icon(i)
+		icon.scale = Vector2.ONE * TouchControls.TEXTURE_SIZE * 0.78 / maxf(icon.texture.get_width(), icon.texture.get_height())
+		slot.add_child(icon)
+		var number := Label.new()
+		number.text = str(i + 1)
+		number.add_theme_font_size_override("font_size", 16)
+		number.position = at + NUMBER_OFFSET
+		add_child(number)
+		_slots.append(slot)
+	player.tool_changed.connect(_show_selected)
+	# Touch controls emit this when they turn on or off.
+	GameState.inventory_changed.connect(_update_visible)
+	_show_selected()
+	_update_visible()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if not visible or get_tree().paused or not click or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var at: Vector2 = (make_input_local(click) as InputEventMouseButton).position
+	for i in _slots.size():
+		if at.distance_to(_slots[i].position) <= TouchControls.TOOL_SIZE / 2.0:
+			get_viewport().set_input_as_handled()
+			_press("tool_%d" % (i + 1))
+			return
+
+
+func _press(action: String) -> void:
+	for pressed in [true, false]:
+		var event := InputEventAction.new()
+		event.action = action
+		event.pressed = pressed
+		Input.parse_input_event(event)
+
+
+func _show_selected() -> void:
+	for i in _slots.size():
+		_slots[i].modulate = TouchControls.SELECTED_COLOR if i == player.tool else Color.WHITE
+
+
+func _update_visible() -> void:
+	visible = not GameState.touch_mode
