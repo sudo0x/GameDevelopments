@@ -10,12 +10,12 @@ func _run() -> void:
 	for i in 3:
 		await physics_frame
 	var farm: Node = main.get_node("Farm")
-	farm.cleanse(Vector2i(38, 13))
+	farm.healing.cleanse(Vector2i(38, 13))
 	await physics_frame
 	farm.till(Vector2i(38, 13))
 	farm.plant(Vector2i(38, 13), gs.CROPS[1])
 	farm.water(Vector2i(38, 13))
 	gs.end_day()
-	farm.cleanse(Vector2i(38, 3))   # after the last save: must revert
-	print("A saved: cleansed=%d holy=%d" % [farm.cleansed.size(), gs.holy_water])
+	farm.healing.cleanse(Vector2i(38, 3))   # after the last save: must revert
+	print("A saved: cleansed=%d holy=%d" % [farm.healing.cleansed.size(), gs.holy_water])
 	quit()

@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
 [ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
+[ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
@@ -20,7 +21,6 @@
 script = ExtResource("2_farm")
 player_path = NodePath("../World/Player")
 crops_parent_path = NodePath("../World")
-shrine_path = NodePath("../World/Shrine")
 
 [node name="Ground" parent="Farm" unique_id=539536092 instance=ExtResource("4_ground")]
 
@@ -32,6 +32,12 @@ script = ExtResource("edges_script")
 
 [node name="Highlight" type="Node2D" parent="Farm" unique_id=787745376]
 script = ExtResource("3_highlight")
+
+[node name="Healing" type="Node2D" parent="Farm" unique_id=1195738260]
+script = ExtResource("healing_script")
+ground_path = NodePath("../Ground")
+curse_edges_path = NodePath("../CurseEdges")
+shrine_path = NodePath("../../World/Shrine")
 
 [node name="Mood" type="CanvasModulate" parent="." unique_id=1918340275]
 color = Color(0.72, 0.7, 0.82, 1)

@@ -12,3 +12,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 04 | 2026-11-04 | [Layer 2 plan: the curse](04_2026-11-04_layer-2-curse.md) |
 | 05 | 2026-11-04 | [Art prompts: Layer 2](05_2026-11-04_art-prompts-layer-2.md) |
 | 06 | 2026-11-04 | [Build notes: what was built and why](06_2026-11-04_build-notes.md) |
+| 07 | 2026-11-04 | [Layer 3 plan: gathering and crafting](07_2026-11-04_layer-3-gathering-crafting.md) |

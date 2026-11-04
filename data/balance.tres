@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="GameBalance" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/game_balance.gd" id="1_balance"]
+
+[resource]
+script = ExtResource("1_balance")
+holy_water_price = 30
+cleanse_radius = 1
+shrine_cost = 3
+shrine_radius = 9

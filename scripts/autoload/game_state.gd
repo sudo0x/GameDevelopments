@@ -13,9 +13,11 @@ signal notice(text: String)
 signal day_ended
 signal day_started
 
-const HOLY_WATER_PRICE := 30
+const BALANCE: GameBalance = preload("res://data/balance.tres")
 
 const SAVE_PATH := "user://save.cfg"
+## Saves are written here first, so a crash can't damage the real save.
+const SAVE_TEMP_PATH := "user://save.tmp"
 ## Raise this when the save layout changes. Saves with another version are ignored.
 const SAVE_VERSION := 1
 
@@ -126,7 +128,9 @@ func save_game() -> void:
 	file.set_value("game", "harvest", harvest)
 	file.set_value("game", "holy_water", holy_water)
 	file.set_value("game", "farm", farm_state)
-	var error := file.save(SAVE_PATH)
+	var error := file.save(SAVE_TEMP_PATH)
+	if error == OK:
+		error = DirAccess.rename_absolute(SAVE_TEMP_PATH, SAVE_PATH)
 	if error != OK:
 		push_error("Couldn't save the game: %s" % error_string(error))
 
@@ -146,9 +150,9 @@ func load_game() -> void:
 
 ## Buys one holy water. Returns false if there isn't enough money.
 func buy_holy_water() -> bool:
-	if money < HOLY_WATER_PRICE:
+	if money < BALANCE.holy_water_price:
 		return false
-	money -= HOLY_WATER_PRICE
+	money -= BALANCE.holy_water_price
 	holy_water += 1
 	inventory_changed.emit()
 	return true
@@ -168,20 +172,18 @@ func set_healed_percent(percent: float) -> void:
 	inventory_changed.emit()
 
 
-## Gives the player what was buried. See Farm.BURIED_FINDS for the format.
-func give_find(find: Dictionary) -> void:
-	var amount: int = find["amount"]
-	match find["kind"]:
-		"money":
-			money += amount
-			notice.emit("You dug up %d money!" % amount)
-		"holy_water":
-			holy_water += amount
-			notice.emit("You dug up %d holy water!" % amount)
-		"seeds":
-			var crop := crop_by_id(find["crop"])
-			seeds[crop.id] = seed_count(crop) + amount
-			notice.emit("You dug up %d %s seeds!" % [amount, crop.display_name.to_lower()])
+## Gives the player what was buried.
+func give_find(find: BuriedFind) -> void:
+	match find.kind:
+		BuriedFind.Kind.MONEY:
+			money += find.amount
+			notice.emit("You dug up %d money!" % find.amount)
+		BuriedFind.Kind.HOLY_WATER:
+			holy_water += find.amount
+			notice.emit("You dug up %d holy water!" % find.amount)
+		BuriedFind.Kind.SEEDS:
+			seeds[find.crop.id] = seed_count(find.crop) + find.amount
+			notice.emit("You dug up %d %s seeds!" % [find.amount, find.crop.display_name.to_lower()])
 	inventory_changed.emit()
 
 

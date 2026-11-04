@@ -49,7 +49,7 @@ func _run() -> void:
 	var edge_cell := Vector2i(38, 13)
 	var at := func(cell: Vector2i) -> int: return edges._pieces.filter(func(p: Dictionary) -> bool: return g.local_to_map(p["to"].get_center()) == cell).size()
 	check("no piece in curse before", at.call(edge_cell) == 0)
-	farm.cleanse(edge_cell)
+	farm.healing.cleanse(edge_cell)
 	check("center of a patch has no edge", at.call(edge_cell) == 0)
 	check("patch rim has edges", at.call(edge_cell + Vector2i(1, 0)) > 0)
 	check("count changed", edges._pieces.size() != before)

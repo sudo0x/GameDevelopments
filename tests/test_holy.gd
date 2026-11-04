@@ -71,9 +71,9 @@ func _run() -> void:
 		await physics_frame
 	var feet: Vector2i = g.local_to_map(g.to_local(player.global_position + Vector2(0, -4)))
 	var target: Vector2i = farm.target_cell
-	print("feet ", feet, " target ", target, " cursed in patch: ", farm.cleansable_cells(target).size())
+	print("feet ", feet, " target ", target, " cursed in patch: ", farm.healing.cleansable_cells(target).size())
 	check("target is cursed", g.get_cell_source_id(target) == CURSED)
-	var patch: Array = farm.cleansable_cells(target)
+	var patch: Array = farm.healing.cleansable_cells(target)
 	var x0: float = player.global_position.x
 	await press("use_tool")
 	check("one use spent", gs.holy_water == 1)
@@ -98,20 +98,20 @@ func _run() -> void:
 
 	# Outer ring stays cursed.
 	gs.holy_water = 5
-	farm.cleanse(Vector2i(1, 1))
+	farm.healing.cleanse(Vector2i(1, 1))
 	check("ring kept", g.get_cell_source_id(Vector2i(0, 0)) == CURSED and g.get_cell_source_id(Vector2i(0, 1)) == CURSED and g.get_cell_source_id(Vector2i(1, 0)) == CURSED)
 	check("inner part healed", g.get_cell_source_id(Vector2i(1, 1)) == 0 and g.get_cell_source_id(Vector2i(2, 2)) == 0)
-	farm.cleanse(Vector2i(74, 24))
+	farm.healing.cleanse(Vector2i(74, 24))
 	check("east ring kept", g.get_cell_source_id(Vector2i(75, 24)) == CURSED and g.get_cell_source_id(Vector2i(74, 25)) == CURSED)
 	var before: int = gs.holy_water
-	check("ring-only patch not usable", farm.cleansable_cells(Vector2i(-1, 13)).is_empty())
-	farm.cleanse(Vector2i(-1, 13))
+	check("ring-only patch not usable", farm.healing.cleansable_cells(Vector2i(-1, 13)).is_empty())
+	farm.healing.cleanse(Vector2i(-1, 13))
 	check("ring-only patch costs nothing", gs.holy_water == before)
 
 	# None left.
 	gs.holy_water = 0
 	check("not usable with none", not farm.can_use(4, Vector2i(38, 13)))
-	farm.cleanse(Vector2i(38, 3))
+	farm.healing.cleanse(Vector2i(38, 3))
 	check("no heal with none", g.get_cell_source_id(Vector2i(38, 3)) == CURSED)
 
 	# Saved count.

@@ -5,7 +5,7 @@ func check(name: String, ok: bool) -> void:
 	if not ok:
 		fails += 1
 func effects(farm: Node) -> Array:
-	return farm.get_children().filter(func(n: Node) -> bool: return n.scene_file_path.ends_with("cleanse_effect.tscn"))
+	return farm.healing.get_children().filter(func(n: Node) -> bool: return n.scene_file_path.ends_with("cleanse_effect.tscn"))
 func _initialize() -> void:
 	_run()
 func _run() -> void:
@@ -17,9 +17,9 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var g: TileMapLayer = farm.ground
 	var c := Vector2i(40, 13)
-	farm.cleanse(c)
+	farm.healing.cleanse(c)
 	check("land healed at once", g.get_cell_source_id(c) == 0 and g.get_cell_source_id(c + Vector2i.ONE) == 0)
-	check("no double spend possible on same patch", farm.cleansable_cells(c).is_empty())
+	check("no double spend possible on same patch", farm.healing.cleansable_cells(c).is_empty())
 	var list := effects(farm)
 	check("one effect running", list.size() == 1)
 	var e: Node2D = list[0]
@@ -43,8 +43,8 @@ func _run() -> void:
 		await process_frame
 	check("effect removed itself", effects(farm).is_empty())
 	# Two at once, and pausing in the middle (the shop) must not break it.
-	farm.cleanse(Vector2i(44, 13))
-	farm.cleanse(Vector2i(48, 13))
+	farm.healing.cleanse(Vector2i(44, 13))
+	farm.healing.cleanse(Vector2i(48, 13))
 	check("two effects", effects(farm).size() == 2)
 	paused = true
 	for i in 20:
@@ -55,7 +55,7 @@ func _run() -> void:
 		await process_frame
 	check("both removed", effects(farm).is_empty())
 	# Sleeping straight after.
-	farm.cleanse(Vector2i(52, 13))
+	farm.healing.cleanse(Vector2i(52, 13))
 	gs.end_day()
 	for i in 150:
 		await process_frame

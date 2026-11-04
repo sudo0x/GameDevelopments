@@ -63,7 +63,7 @@ func _refresh() -> void:
 		_set_price(i, crop.seed_price)
 	var last := _labels.size() - 1
 	_labels[last].text = "Holy water: %d" % GameState.holy_water
-	_set_price(last, GameState.HOLY_WATER_PRICE)
+	_set_price(last, GameState.BALANCE.holy_water_price)
 
 
 func _set_price(row: int, price: int) -> void:

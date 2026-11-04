@@ -1,0 +1,62 @@
+[gd_resource type="Resource" script_class="BuriedFindTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/buried_find_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://scripts/farm/buried_find.gd" id="2_find"]
+[ext_resource type="Resource" path="res://data/crops/radish.tres" id="crop_radish"]
+[ext_resource type="Resource" path="res://data/crops/carrot.tres" id="crop_carrot"]
+[ext_resource type="Resource" path="res://data/crops/pumpkin.tres" id="crop_pumpkin"]
+
+[sub_resource type="Resource" id="find_1"]
+script = ExtResource("2_find")
+cell = Vector2i(38, 10)
+kind = 0
+amount = 40
+
+[sub_resource type="Resource" id="find_2"]
+script = ExtResource("2_find")
+cell = Vector2i(42, 15)
+kind = 1
+amount = 5
+crop = ExtResource("crop_radish")
+
+[sub_resource type="Resource" id="find_3"]
+script = ExtResource("2_find")
+cell = Vector2i(45, 8)
+kind = 2
+amount = 2
+
+[sub_resource type="Resource" id="find_4"]
+script = ExtResource("2_find")
+cell = Vector2i(47, 12)
+kind = 1
+amount = 3
+crop = ExtResource("crop_carrot")
+
+[sub_resource type="Resource" id="find_5"]
+script = ExtResource("2_find")
+cell = Vector2i(53, 11)
+kind = 0
+amount = 80
+
+[sub_resource type="Resource" id="find_6"]
+script = ExtResource("2_find")
+cell = Vector2i(55, 14)
+kind = 1
+amount = 2
+crop = ExtResource("crop_pumpkin")
+
+[sub_resource type="Resource" id="find_7"]
+script = ExtResource("2_find")
+cell = Vector2i(63, 8)
+kind = 2
+amount = 2
+
+[sub_resource type="Resource" id="find_8"]
+script = ExtResource("2_find")
+cell = Vector2i(64, 18)
+kind = 0
+amount = 120
+
+[resource]
+script = ExtResource("1_table")
+finds = Array[ExtResource("2_find")]([SubResource("find_1"), SubResource("find_2"), SubResource("find_3"), SubResource("find_4"), SubResource("find_5"), SubResource("find_6"), SubResource("find_7"), SubResource("find_8")])

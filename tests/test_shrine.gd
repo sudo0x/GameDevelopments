@@ -55,7 +55,7 @@ func _run() -> void:
 	print("holy after: ", gs.holy_water, " money +", gs.money - money0)
 	check("new look and light", shrine.sprite.texture == shrine.restored_texture and shrine.light.enabled)
 	check("final notice wins", hud.notice_label.text.begins_with("The old shrine is restored"))
-	var healed: int = farm.cleansed.size()
+	var healed: int = farm.healing.cleansed.size()
 	print("healed cells ", healed, " percent ", gs.healed_percent)
 	check("large area healed", healed > 100)
 	check("circle: 9 away healed", g.get_cell_source_id(cell + Vector2i(-9, 0)) == 0)
@@ -64,14 +64,14 @@ func _run() -> void:
 	check("east ring kept", g.get_cell_source_id(Vector2i(75, cell.y)) == 1)
 	check("top ring kept", g.get_cell_source_id(Vector2i(cell.x, 0)) == 1 or cell.y > 9)
 	check("finds in range paid", gs.money == money0 + 120)
-	check("glimmers removed", not farm._glimmers.has(Vector2i(63, 8)) and not farm._glimmers.has(Vector2i(64, 18)))
+	check("glimmers removed", not farm.healing._glimmers.has(Vector2i(63, 8)) and not farm.healing._glimmers.has(Vector2i(64, 18)))
 
 	var h: int = gs.holy_water
 	await press("interact")
 	check("second time costs nothing", gs.holy_water == h)
 	check("at peace", hud.notice_label.text == "The shrine is at peace.")
 
-	var fx := func() -> int: return farm.get_children().filter(func(n: Node) -> bool: return n.scene_file_path.ends_with("cleanse_effect.tscn")).size()
+	var fx := func() -> int: return farm.healing.get_children().filter(func(n: Node) -> bool: return n.scene_file_path.ends_with("cleanse_effect.tscn")).size()
 	check("effect running", fx.call() == 1)
 	for i in 200:
 		await process_frame
@@ -84,6 +84,6 @@ func _run() -> void:
 	await process_frame
 	var s2: Node2D = again.get_node("World/Shrine")
 	check("still restored after reload", s2.restored and s2.sprite.texture == s2.restored_texture and s2.light.enabled)
-	check("land still healed", again.get_node("Farm").cleansed.size() == healed)
+	check("land still healed", again.get_node("Farm").healing.cleansed.size() == healed)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

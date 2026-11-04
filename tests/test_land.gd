@@ -56,7 +56,7 @@ func _run() -> void:
 
 	# The whole loop on healed land, by input.
 	var c := Vector2i(38, 13)
-	farm.cleanse(c)
+	farm.healing.cleanse(c)
 	await physics_frame
 	check("healed land can be tilled", farm.can_use(HOE, c))
 	player.global_position = g.to_global(g.map_to_local(c + Vector2i(-1, 0)))
