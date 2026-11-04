@@ -6,6 +6,16 @@ Choices we made about how the game works, and why, so we don't undo one by accid
 
 Newest first. Bigger plan decisions are also in each plan's "Design decisions" table.
 
+## Pause menu and messages (2026-11-04, Layer 6 step 6)
+
+| Question | Decision | Why |
+|---|---|---|
+| What's in the pause menu? | Resume, Settings, Back to title | The three things a player needs mid-game; settings reuse the title's panel |
+| What happens to today when leaving? | It's lost, after a question with "No" focused; the game reloads the morning's save | The game only saves when you sleep. Saving mid-day would need far more saved data (positions, watered soil, half-hit trees) |
+| Pause on phones? | An "II" button at the top middle, sending Esc's action | Same code path as the keyboard; top middle is the only free spot |
+| Messages: stack or queue? | **Queue** on one line: 3 s alone, 1.5 s while others wait, at most 4 waiting | The bottom of the screen has no room for 3 lines (crop status above, tool label below) |
+| Use button on phones? | Shows the selected tool's icon | Tells you what Use will do, with no new art |
+
 ## Sound (2026-11-04)
 
 | Question | Decision | Why |

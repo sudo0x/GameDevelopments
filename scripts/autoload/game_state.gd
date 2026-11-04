@@ -286,6 +286,17 @@ func has_save() -> bool:
 func start_new_game() -> void:
 	DirAccess.remove_absolute(SAVE_PATH)
 	DirAccess.remove_absolute(SAVE_TEMP_PATH)
+	_reset()
+
+
+## Throws away everything since the last save (the morning), as if the game had been closed.
+## Used when leaving to the title, so Continue starts from the save, not from half a day.
+func discard_unsaved() -> void:
+	_reset()
+	load_game()
+
+
+func _reset() -> void:
 	day = 1
 	money = 0
 	seeds = START_SEEDS.duplicate()

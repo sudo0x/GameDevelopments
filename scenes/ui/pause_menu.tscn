@@ -1,0 +1,87 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause"]
+
+[node name="PauseMenu" type="PanelContainer"]
+process_mode = 3
+visible = false
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pause")
+close_action = &"ui_cancel"
+keyboard_help = "Esc: resume"
+touch_help = "Tap Resume to play on"
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Box" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Margin/Box"]
+layout_mode = 2
+text = "Paused"
+horizontal_alignment = 1
+
+[node name="Buttons" type="VBoxContainer" parent="Margin/Box"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Resume" type="Button" parent="Margin/Box/Buttons"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Resume"
+
+[node name="Settings" type="Button" parent="Margin/Box/Buttons"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Settings"
+
+[node name="Title" type="Button" parent="Margin/Box/Buttons"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Back to title"
+
+[node name="Confirm" type="VBoxContainer" parent="Margin/Box"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Message" type="Label" parent="Margin/Box/Confirm"]
+custom_minimum_size = Vector2(236, 0)
+layout_mode = 2
+text = "Leave to the title? What you did today is lost: the game saves when you sleep."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Box/Confirm"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="Yes" type="Button" parent="Margin/Box/Confirm/Buttons"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Yes, leave"
+
+[node name="No" type="Button" parent="Margin/Box/Confirm/Buttons"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "No, stay"
+
+[node name="Help" type="Label" parent="Margin/Box"]
+layout_mode = 2
+text = "Esc: resume"
+horizontal_alignment = 1

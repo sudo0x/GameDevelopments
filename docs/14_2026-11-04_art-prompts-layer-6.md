@@ -122,3 +122,64 @@ Now make an empty round button in exactly the same style: a circle with a worn w
 and iron rim, and a plain flat dark center so an icon can sit on it. It fills the whole
 image, and the circle is perfectly round. Transparent background. No text.
 ```
+
+## Polish (step 6)
+
+Four images. The **Use** button needs no art: it shows the selected tool's icon. Make the first three in one ChatGPT chat with the style reference attached, the same chat as the UI art if it's still open, so they match the round touch buttons.
+
+| Save in `art_source/` as | What | Replaces |
+|---|---|---|
+| `ui/touch_icons.png` | Act icon and pause icon, in one row | The words "Act" and "II" |
+| `ui/joystick_knob.png` | The joystick's knob | A plain light circle |
+| `objects/fence_vertical.png` | A fence running up and down the screen | Side-on fences in a vertical line, which look broken |
+
+Claude shrinks them with `tools/pixelize.gd` when they arrive (measure first; about 24 pixels tall for the icons, 40 for the knob, 32×32 for the fence piece).
+
+### 1. Act and pause icons
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game. Designed for a 32x32 pixel grid:
+chunky, clearly visible pixels, no anti-aliasing, no blur. Moody dark-fantasy style:
+muted, desaturated earthy colors, deep purples and teals in the shadows. 3-tone
+shading, light from the top-left, neutral daylight (not night, no glow effects).
+Transparent background. No text.
+
+A horizontal row of exactly two small icons, the same height, on one line, with clear
+empty space between them so they don't touch. Simple, bold shapes that read well when
+small. From left to right:
+1. a hand in a leather work glove with the index finger pointing up, as if reaching to
+   open or touch something
+2. a pause symbol: two short, thick upright bars of dark iron with worn edges
+```
+
+### 2. Joystick knob
+
+```
+Now make a joystick knob in exactly the same style: a small round domed knob of worn
+wood with a thin iron rim, seen from straight above, slightly lighter in the middle so
+it stands out on a dark round base. The circle is perfectly round and fills the whole
+image. Transparent background. No text.
+```
+
+### 3. Vertical fence
+
+In a **new chat**, attach both `art_source/style_reference.png` and `art_source/objects/fence.png`, so it matches the fence that exists.
+
+```
+Match the style of the attached reference exactly, and match the attached fence: the
+same wood, colors and thickness.
+
+Pixel art game asset for a 2D top-down farming game, 3/4 top-down view.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Realistic proportions, not chibi.
+Transparent background. No text. Single object, centered, filling most of the image.
+
+The same wooden fence, but running straight up and down the screen, away from the
+viewer: one weathered wooden post in the middle, with its two horizontal rails seen
+end-on, reaching the top and bottom edges of the art so that sections can stack in a
+vertical line.
+```

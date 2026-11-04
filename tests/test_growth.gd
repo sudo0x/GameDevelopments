@@ -94,6 +94,9 @@ func _run() -> void:
 	# Lanterns flicker around their base energy, and not all together.
 	var a: PointLight2D = main.get_node("World/LanternDoor/Light")
 	var b: PointLight2D = main.get_node("World/LanternStall/Light")
+	# Start times are random, and the flicker repeats every ~10.5 s, so about 1 run in 500
+	# two lanterns landed a whole repeat apart and flickered alike. Set them apart instead.
+	b._time = a._time + 1.0
 	var low := 99.0
 	var high := -99.0
 	var differ := false

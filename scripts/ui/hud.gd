@@ -4,12 +4,19 @@ extends CanvasLayer
 
 const FADE_SECONDS := 0.6
 const NOTICE_SECONDS := 3.0
+## While more notices wait, each shows this long, so a burst doesn't take ages.
+const QUEUED_NOTICE_SECONDS := 1.5
+const NOTICE_FADE_SECONDS := 0.5
+## Older waiting notices are dropped past this, so the queue never lags far behind play.
+const MAX_WAITING_NOTICES := 4
 
 @export var player_path: NodePath
 @export var farm_path: NodePath
 
 var _sleeping := false
-var _notice_tween: Tween
+## Notices waiting their turn, oldest first, and how long the one showing has left.
+var _waiting_notices: Array[String] = []
+var _notice_left := 0.0
 
 @onready var player: Player = get_node(player_path)
 @onready var farm: Farm = get_node(farm_path)
@@ -81,14 +88,42 @@ func _show_crop_status(text: String) -> void:
 	crop_status_label.text = text
 
 
+## The notice showing now, or the last one shown (faded out).
+func latest_notice() -> String:
+	return notice_label.text
+
+
+## Notices take turns on one line, so none replaces another before it can be read.
 func _show_notice(text: String) -> void:
+	if _notice_left > 0.0 and text == notice_label.text:
+		_notice_left = maxf(_notice_left, NOTICE_SECONDS if _waiting_notices.is_empty() else QUEUED_NOTICE_SECONDS)
+		return
+	if _waiting_notices.has(text):
+		return
+	if _notice_left <= 0.0:
+		_display_notice(text)
+		return
+	_waiting_notices.append(text)
+	if _waiting_notices.size() > MAX_WAITING_NOTICES:
+		_waiting_notices.pop_front()
+	_notice_left = minf(_notice_left, QUEUED_NOTICE_SECONDS)
+
+
+func _display_notice(text: String) -> void:
 	notice_label.text = text
 	notice_label.modulate.a = 1.0
-	if _notice_tween:
-		_notice_tween.kill()
-	_notice_tween = create_tween()
-	_notice_tween.tween_interval(NOTICE_SECONDS)
-	_notice_tween.tween_property(notice_label, "modulate:a", 0.0, 0.5)
+	_notice_left = NOTICE_SECONDS if _waiting_notices.is_empty() else QUEUED_NOTICE_SECONDS
+
+
+func _process(delta: float) -> void:
+	if _notice_left <= 0.0:
+		return
+	_notice_left -= delta
+	if _notice_left <= 0.0 and not _waiting_notices.is_empty():
+		_display_notice(_waiting_notices.pop_front())
+	elif _waiting_notices.is_empty():
+		# Only the last one fades: the next replaces it straight away otherwise.
+		notice_label.modulate.a = clampf(_notice_left / NOTICE_FADE_SECONDS, 0.0, 1.0)
 
 
 ## Fade out, end the day while the screen is black, fade back in.

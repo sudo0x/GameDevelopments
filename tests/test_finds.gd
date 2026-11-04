@@ -53,14 +53,16 @@ func _run() -> void:
 	var seeds0: int = gs.seed_count(gs.CROPS[1])
 	farm.healing.cleanse(Vector2i(47, 12))
 	check("seed find", gs.seed_count(gs.CROPS[1]) == seeds0 + 3)
-	check("seed notice", hud.notice_label.text == "You dug up 3 carrot seeds!")
+	# Notices take turns (test_notices.gd), so this one waits behind the earlier finds.
+	check("seed notice waits its turn", hud._waiting_notices.has("You dug up 3 carrot seeds!"))
 	# Find at the edge of a patch, not the center.
 	var money0: int = gs.money
 	farm.healing.cleanse(Vector2i(54, 12))
 	check("find at patch corner", gs.money == money0 + 80)
-	# The notice fades.
-	for i in 240:
+	# Each queued notice gets its turn, then the last fades.
+	for i in 600:
 		await process_frame
+	check("last find shown last", hud.latest_notice() == "You dug up 80 money!" and hud._waiting_notices.is_empty())
 	check("notice faded", hud.notice_label.modulate.a < 0.05)
 
 	# Save then reload through a fresh farm.

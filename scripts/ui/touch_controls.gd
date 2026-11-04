@@ -16,15 +16,20 @@ const TOOL_BAR_START_X := 214.0
 const TOOL_SIZE := 34.0
 const TOOL_SPACING := 36.0
 const TOOL_COUNT := 7
-## Text, action, center, size. A button with no text shows BAG_ICON.
+## Text, action, center, size. Bag shows BAG_ICON, and Use shows the selected tool,
+## so you can see what it will do.
 const BAG_ICON := preload("res://assets/ui/bag.png")
 const ACTION_BUTTONS: Array[Array] = [
-	["Use", "use_tool", Vector2(596, 296), 68.0],
+	["", "use_tool", Vector2(596, 296), 68.0],
 	["Act", "interact", Vector2(526, 322), 50.0],
 	["", "inventory", Vector2(526, 262), 42.0],
 	["<", "seed_prev", Vector2(476, 300), 34.0],
 	[">", "seed_next", Vector2(476, 340), 34.0],
+	# Pause: Esc's action, so the pause menu doesn't need to know about touch.
+	["II", "ui_cancel", Vector2(320, 22), 34.0],
 ]
+## The only buttons left showing under an open menu: they're what close it.
+const SHOWN_UNDER_MENUS: Array[String] = ["use_tool", "interact", "inventory"]
 const TOOL_LABEL_TOUCH_Y := 52.0
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
@@ -34,6 +39,7 @@ const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up"
 var active := false
 
 var _tool_buttons: Array[TouchScreenButton] = []
+var _use_icon: Sprite2D
 
 @onready var player: Player = get_node(player_path)
 @onready var tool_bar: Node2D = $ToolBar
@@ -48,11 +54,12 @@ func _ready() -> void:
 		_add_icon(button, _tool_icon(i))
 		_tool_buttons.append(button)
 	for entry in ACTION_BUTTONS:
-		# Only Act and Bag stay under a menu: they're what close it.
-		var keep_showing: bool = entry[1] != "seed_prev" and entry[1] != "seed_next"
+		var keep_showing: bool = SHOWN_UNDER_MENUS.has(entry[1])
 		var button := _add_button(self if keep_showing else tool_bar, entry[0], entry[1], entry[2], entry[3])
-		if entry[0].is_empty():
+		if entry[1] == "inventory":
 			_add_icon(button, BAG_ICON)
+		elif entry[1] == "use_tool":
+			_use_icon = _add_icon(button, _tool_icon(0))
 	player.tool_changed.connect(_show_selected_tool)
 	set_active(DisplayServer.is_touchscreen_available())
 
@@ -85,6 +92,7 @@ func _release_movement() -> void:
 func _show_selected_tool() -> void:
 	for i in _tool_buttons.size():
 		_tool_buttons[i].modulate = SELECTED_COLOR if i == player.tool else Color.WHITE
+	_fit_icon(_use_icon, _tool_icon(player.tool))
 
 
 func _tool_icon(index: int) -> Texture2D:
@@ -96,13 +104,18 @@ func _tool_icon(index: int) -> Texture2D:
 	return icon
 
 
-func _add_icon(button: TouchScreenButton, icon: Texture2D) -> void:
+func _add_icon(button: TouchScreenButton, icon: Texture2D) -> Sprite2D:
 	var sprite := Sprite2D.new()
-	sprite.texture = icon
 	sprite.position = Vector2(TEXTURE_SIZE, TEXTURE_SIZE) / 2.0
-	# Fits inside the round button, whatever the art's size.
-	sprite.scale = Vector2.ONE * TEXTURE_SIZE * 0.78 / maxf(icon.get_width(), icon.get_height())
+	_fit_icon(sprite, icon)
 	button.add_child(sprite)
+	return sprite
+
+
+## Fits the icon inside the round button, whatever the art's size.
+func _fit_icon(sprite: Sprite2D, icon: Texture2D) -> void:
+	sprite.texture = icon
+	sprite.scale = Vector2.ONE * TEXTURE_SIZE * 0.78 / maxf(icon.get_width(), icon.get_height())
 
 
 func _add_button(parent: Node, text: String, action: String, center: Vector2, size: float) -> TouchScreenButton:

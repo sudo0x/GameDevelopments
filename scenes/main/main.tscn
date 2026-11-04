@@ -23,6 +23,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="pause_menu_scene"]
+[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="settings_script"]
 [ext_resource type="PackedScene" path="res://scenes/farm/workbench.tscn" id="workbench_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
@@ -199,6 +201,22 @@ action_down = &"move_down"
 [node name="BagMenu" parent="HUD" unique_id=1742093386 instance=ExtResource("bag_menu_scene")]
 
 [node name="CraftingMenu" parent="HUD" unique_id=1825540917 instance=ExtResource("crafting_menu_scene")]
+
+[node name="PauseMenu" parent="HUD" instance=ExtResource("pause_menu_scene")]
+settings_path = NodePath("../SettingsMenu")
+
+[node name="SettingsMenu" type="PanelContainer" parent="HUD"]
+process_mode = 3
+visible = false
+custom_minimum_size = Vector2(280, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("settings_script")
 
 [node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
 offset_right = 640.0

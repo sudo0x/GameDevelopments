@@ -65,6 +65,8 @@ Each step ends with something you can run and see working. ✅ means the code is
 4. **Android build:** the game running on a real phone, then checking everything in "Still open" (needs setup by you)
 5. ✅ **Sound and settings:** the `Audio` manager, Music and Effects channels, every sound wired to its action, music for the title and farm, and a settings menu for volume on the title. The 21 effects are made by `tools/make_sounds.gd`; music is still missing. See [the sound list](18_2026-11-04_sound-list.md)
 6. **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, movable starting objects, plus the weak spots listed in the build notes (needs art)
+   - ✅ **Part 1, code:** pause menu (Resume, Settings, Back to title, which asks first and reloads the morning's save), a pause button on phones, Use showing the selected tool, and messages that take turns. The player already used floating movement, so that item needed nothing
+   - **Part 2, art:** Act and pause icons, joystick knob, vertical fence. Prompts in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md). Optional, in code: moths around lanterns, grass in the wind
    - ✅ **Movable starting objects** (asked for after play, built early): the Hand tool picks up the shipping box, workbench and the map's 4 lantern posts, and the Build tool places them again, the same as built objects. Their positions are saved, and old saves keep them where they started. The house and shop stall stay fixed: see [the decisions log](17_2026-11-04_decisions-log.md)
 7. **Balance pass:** play on a real phone and tune everything (needs you to play)
 8. **Rewarded ads:** ads and the Remove Ads purchase (needs accounts)
@@ -82,11 +84,10 @@ Work left over from finished steps, and where each piece will be done.
 | Swiping to scroll the workbench list | Step 3 | Step 4 |
 | Whether text is big enough | Step 3 | Step 4 |
 | The title logo | Step 3b | Step 9 at the latest, once the game has its real name |
-| Joystick knob is still a plain circle, and Use and Act are words | Step 3b | Step 6 |
+| Joystick knob is still a plain circle, and Act and pause are words (Use now shows the tool) | Step 3b | Step 6, part 2 (art) |
+| Help text still says "then Use", though the Use button now shows a tool icon instead of the word | Step 6 | Check on a real phone in step 4 whether players get it |
 | Speed on a cheap phone | New | Step 4 |
 | Richer `cleanse` and `shrine` sounds than the generated ones (all music is in) | Step 5 | Any time, before release: drop them in `assets/audio/`, see [the sound list](18_2026-11-04_sound-list.md) |
-| Settings from inside the game, not only the title | Step 5 | Step 6, in the pause menu |
-| A way back to the title without closing the game | Step 1 | Step 6 |
 | Balance for Layers 3, 4 and 5, all postponed | Layers 3 to 5 | Step 7 |
 | The game's real title | Step 1 | Before step 9 |
 

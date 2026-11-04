@@ -54,7 +54,9 @@ func _run() -> void:
 	check("costs 3, then the find at (63, 8) gives 2 back", gs.holy_water == 4 - 3 + 2)
 	print("holy after: ", gs.holy_water, " money +", gs.money - money0)
 	check("new look and light", shrine.sprite.texture == shrine.restored_texture and shrine.light.enabled)
-	check("final notice wins", hud.notice_label.text.begins_with("The old shrine is restored"))
+	# The finds' notices come first; the shrine's waits its turn after them.
+	var restored_notice := func(text: String) -> bool: return text.begins_with("The old shrine is restored")
+	check("shrine notice shown or waiting", restored_notice.call(hud.latest_notice()) or hud._waiting_notices.any(restored_notice))
 	var healed: int = farm.healing.cleansed.size()
 	print("healed cells ", healed, " percent ", gs.healed_percent)
 	check("large area healed", healed > 100)
@@ -69,7 +71,7 @@ func _run() -> void:
 	var h: int = gs.holy_water
 	await press("interact")
 	check("second time costs nothing", gs.holy_water == h)
-	check("at peace", hud.notice_label.text == "The shrine is at peace.")
+	check("at peace", hud.latest_notice() == "The shrine is at peace." or hud._waiting_notices.has("The shrine is at peace."))
 
 	var fx := func() -> int: return farm.healing.get_children().filter(func(n: Node) -> bool: return n.scene_file_path.ends_with("cleanse_effect.tscn")).size()
 	check("effect running", fx.call() == 1)

@@ -133,7 +133,8 @@ func _run() -> void:
 	craft.open()
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
-	check("tool bar and < > hide under a menu", not bar.visible and bar.get_child_count() == 9)
+	# 7 tools, < and >, and pause.
+	check("tool bar, < > and pause hide under a menu", not bar.visible and bar.get_child_count() == 10)
 	craft.close()
 	await wait(2)
 
