@@ -1,5 +1,47 @@
 # Project guide for Claude
 
+## Start here (every new or reopened chat)
+
+Chats share nothing but this repo, so this file is the handoff. If this chat was open earlier, its memory is out of date: trust this file and git.
+
+1. Run `git pull`. Check the machine in your environment, then use its row in "Two dev machines"
+2. Run `--headless --import`, then `tests/run_all.sh`, so you know everything works before you change it
+3. Read the roadmap below, then the plan for the next step, and tell the user in one or two lines where things stand
+
+### Roadmap
+
+Two plans have their own step numbers, so **always say which plan you mean**: "areas step 1", or "Layer 6 step 4".
+
+| Order | Work | Plan | Status |
+|---|---|---|---|
+| 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to Layer 6 step 7 |
+| 2 | Layer 6 steps 1 to 3b (title, touch, phone UI, UI art) | `docs/13_...` | ✅ Built. Title logo waits for the real name |
+| 3 | **Areas steps 1 to 10 (woods, marsh, ending)** | `docs/15_...` | **👉 Next: areas step 1, bigger map** |
+| 4 | Layer 6 step 4: Android build | `docs/13_...` | Waiting. Needs the user's phone and setup |
+| 5 | Layer 6 step 5: sound and settings | `docs/13_...` | Waiting |
+| 6 | Layer 6 step 6: polish, including a pause menu | `docs/13_...` | Waiting |
+| 7 | Layer 6 step 7: balance pass for everything | `docs/13_...` | Waiting. Needs real play, required before release |
+| 8 | Layer 6 step 8: rewarded ads | `docs/13_...` | Waiting. Needs an ad account |
+| 9 | Layer 6 step 9: Google Play release | `docs/13_...` | Waiting. Needs a developer account |
+
+Update this table whenever a step finishes. Everything postponed is in the "Still open" table in `docs/13_...`. A ✅ means built and passing automated tests, not tried on a phone or played by a person.
+
+### How we work
+
+The user is usually away from the code, and answers with short replies.
+
+- One step at a time. At the end of a step, say what changed, what was tested, what wasn't, and what art comes next
+- **Commit and push only when asked.** The user normally replies "Commit, start step N", or "Commit and push". "Start step N" alone doesn't mean commit
+- Run `tests/run_all.sh` before every commit. After anything random, like creatures, run it 3 times. Report failures honestly, and never call something done or passing unless it just was
+- Check the first lines of command output: a failed push or import can scroll past. GitHub sometimes returns a server error, so retry, then compare `git rev-parse HEAD` with `git ls-remote`
+- Look at a screenshot as well as the tests. Screenshots have caught what tests couldn't
+- Add a test with each feature, and update `docs/06_...` (build notes), the plan's ✅ and this file in the same step
+- Never touch the user's real save: tests use a temporary home folder. To check it, copy it to a temporary folder first
+- The user decides. Say so plainly when you disagree, but don't keep repeating it: they've chosen not to playtest for now, so mention untested balance only when it matters
+- Don't use a ✅ or "later" to hide a gap: if something is left over, add it to "Still open"
+- Art prompts by layer: `docs/02`, `05`, `08`, `10`, `12`, `14`. Art files are local until committed, so check `art_source/` before asking for art that may already exist
+- Open decisions for the user: the game's real title
+
 ## Engine
 - Godot 4.7.2, GDScript, Compatibility renderer (for web and mobile)
 - Targets Android first, then Steam
@@ -15,7 +57,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 | `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | Works (`gh` is logged in as `sudo0x`) |
 
 - GitHub is the only link between the machines, so unpushed work is invisible on the other one
-- Start of a session: run `git pull`, then `--headless --import` (`.godot/` isn't in git, so each machine has its own cache)
+- `.godot/` isn't in git, so each machine has its own cache: that's why a new session needs `--headless --import`
+- `tests/run_all.sh` needs Git Bash on Windows, and hasn't been tried there yet
 - End of a session: commit, and make sure the work gets pushed before the user switches machines
 - Keep both machines on Godot 4.7.2
 - Keep this file machine-neutral: when something differs between machines, put it in the table above
@@ -23,14 +66,13 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 ## Game
 - Moody dark-fantasy 2D top-down farming game: farming heals a cursed island (concept: `docs/03_2026-11-03_game-concept.md`)
 - Built in layers: farming → curse/cleansing → collect/craft → build → combat → mobile/release
-- Current order: `docs/15_2026-11-04_areas-woods-marsh.md`, then `docs/13_2026-11-04_layer-6-release.md` from step 4; read them before adding features (Layers 1 to 5 are finished: `docs/01_...`, `docs/04_...`, `docs/07_...`, `docs/09_...`, `docs/11_...`)
-- Art: AI-generated 32×32 pixel art, prompts in `docs/02_2026-11-03_art-prompts-layer-1.md`; use colored placeholders until an asset exists
+- What to build next is in the roadmap at the top of this file; read that step's plan before adding features
+- Art: AI-generated pixel art on a 32×32 grid; use colored placeholders until an asset exists
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 6 step 3b done: UI art; Layer 6 paused for the woods and marsh)
-- **Next:** the areas plan, step 1: bigger map: the user chose to add areas 3 and 4 before release. Layer 6 continues from step 4 (Android) afterward, and its "Still open" table lists everything postponed. Touch has only been simulated, never tried on a phone; judge text size and the need for item icons there. The balance pass for Layers 3 to 5 is now Layer 6 step 7, and must happen before release. The user still needs to choose a game title: "The Cursed Island" on the title screen is a placeholder. Don't change `config/name` in `project.godot` without moving saves, because Godot uses it for the save folder All balance passes are postponed to Layer 5 step 9. The user postponed the balance passes and doesn't want to playtest for now. Don't keep asking, but mention balance is untested when it matters The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
-- Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
+- Last updated: 2026-11-04 (last commit before this handoff update: b99753f, UI art)
+- **Next:** see the roadmap at the top. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now
@@ -130,5 +172,5 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Use simple English, and say so when you disagree with a choice, instead of only following it
 - The user is learning from this project: after each step, add what was built, where and why to `docs/06_2026-11-04_build-notes.md`, and keep its "Things to do better" table honest
 - Keep changes focused on the requested feature; don't refactor unrelated code
-- Don't open or edit `.godot/`, `.import` files or binary assets
+- Don't open or edit `.godot/` or binary assets, or `.import` files (one exception: `assets/fonts/m5x7.ttf.import` has smoothing turned off)
 - Prefer editing `.gd` scripts; edit `.tscn` files only when necessary and keep changes minimal

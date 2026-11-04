@@ -8,7 +8,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 
 ## Status
 
-**Early prototype.** Layer 1 (basic farming) and Layer 2 (the curse) are playable, and Layers 3 to 5 (crafting, building and combat) are playable but not balanced yet.
+**Early prototype.** Layers 1 to 5 (farming, the curse, crafting, building and combat) are playable but not balanced yet. Next are the [Whispering Woods and Sunken Marsh](docs/15_2026-11-04_areas-woods-marsh.md), then the [Android build and release](docs/13_2026-11-04_layer-6-release.md).
 
 | | Feature |
 |---|---|
