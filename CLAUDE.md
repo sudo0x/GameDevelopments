@@ -23,13 +23,13 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 ## Game
 - Moody dark-fantasy 2D top-down farming game: farming heals a cursed island (concept: `docs/03_2026-11-03_game-concept.md`)
 - Built in layers: farming → curse/cleansing → collect/craft → build → combat → mobile/release
-- Current layer plan: `docs/04_2026-11-04_layer-2-curse.md`; read it before adding gameplay features (Layer 1 is finished: `docs/01_2026-11-03_layer-1-farming.md`)
+- Layer plans: `docs/01_2026-11-03_layer-1-farming.md` and `docs/04_2026-11-04_layer-2-curse.md` are finished; read the current layer's plan before adding gameplay features
 - Art: AI-generated 32×32 pixel art, prompts in `docs/02_2026-11-03_art-prompts-layer-1.md`; use colored placeholders until an asset exists
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 2 step 7 done: old shrine)
-- **Next:** Layer 2 step 8: soft edges between grass and curse. Check first whether a tool can generate them from the existing textures; only ask for art if it can't. The user chose not to play Layer 1 by hand, so it's only covered by automated tests
+- Last updated: 2026-11-04 (Layer 2 complete: step 8 soft edges done)
+- **Next:** write the Layer 3 plan (gathering and crafting, see the concept doc); there's no plan doc for it yet. The user chose not to play Layers 1 and 2 by hand, so they're only covered by automated tests, and holy water prices are untuned
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - Unknown: whether the user has used Godot before (never answered); explain Godot concepts by comparing them to Angular
 
@@ -43,6 +43,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Days**: house door (`scenes/farm/house.tscn`, Door Area2D) → `GameState.request_sleep()` → HUD fades out → `GameState.end_day()` emits `day_ended` (Farm grows watered crops, dries all soil) then `day_started`
 - **Cleansing**: `GameState.holy_water`, bought at the stall for `HOLY_WATER_PRICE`. `Farm.cleanse(center)` heals the cursed cells in a 3×3 patch (`CLEANSE_RADIUS`), costs one use, and costs nothing if there's nothing to heal; `is_cleansable()` protects the outer ring. The land heals at once; `scenes/farm/cleanse_effect.tscn` (`CleanseEffect.play()`) only draws the old tiles fading out from the center, with a light flash and sparkles, then frees itself. It sizes itself from the cells, so it also suits a large cleanse
 - **Shrine**: `scenes/farm/shrine.tscn` (`Shrine`, an Area2D with a StaticBody2D child) at (2224, 412). F emits `activated`; `Farm._on_shrine_activated()` spends `SHRINE_COST` holy water, sets `restored` (swaps the sprite, turns on its light) and heals a circle of `SHRINE_RADIUS` through `_cleanse_cells()`. Saved as `shrine` in `farm_state`
+- **Curse edges**: `Farm/CurseEdges` (`scripts/farm/curse_edges.gd`) draws ragged pieces from `assets/tiles/curse_edge.png` over clean tiles beside cursed ones, for looks only; collision still follows the tiles. `refresh(ground)` rebuilds them after any heal, and any new way of changing ground tiles must call it. Rerun `tools/build_curse_edges.gd` then `--import` if `cursed_ground.png` changes
 - **Finds and progress**: `Farm.BURIED_FINDS` maps cursed cells to rewards (money, seeds, holy water), each marked by `scenes/farm/find_glimmer.tscn`. `cleanse()` digs them up through `GameState.give_find()`, which sends `notice` to the HUD's NoticeLabel. A find is gone once its cell is in `cleansed`, so finds need no save data. `GameState.healed_percent` comes from `Farm._report_progress()`, shown on the HUD, and isn't saved either
 - **Selling**: `scenes/farm/shipping_box.tscn` at (848, 368): F calls `GameState.ship_all()` (all of `harvest` into `shipped`); `end_day()` pays `shipped_value()` before `day_ended`
 - **Shop**: `scenes/farm/shop_stall.tscn` at (352, 352): F calls `GameState.request_shop()` → `scenes/ui/shop_menu.tscn` (under HUD; pauses the tree, `process_mode` Always, seed rows built from `GameState.CROPS`, then holy water) → `GameState.buy_seed(crop)` / `buy_holy_water()`
@@ -68,7 +69,6 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Tests that call `end_day()` write the save, so never run them against the user's real save. Point the home folder somewhere temporary first: on Mac run Godot with `HOME=<temp dir>`; on Windows set `APPDATA=<temp dir>` (not tried yet). Check with `OS.get_user_data_dir()`
 
 ### Known issues / later
-- Hard square edge between grass and cursed ground (edge transition tiles later)
 - `project.godot`: Godot itself moves the `2d/snap/snap_2d_transforms_to_pixel` line when it runs; harmless, `git restore project.godot` before committing
 - Standing "facing right" pose is separate art, slightly different from the mirrored walk side
 
@@ -87,7 +87,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - `data/`: game data (crop definitions, prices)
 - `assets/`: tiles/, crops/, items/, tools/, objects/, player/ (game-ready art at real pixel size, don't read)
 - `art_source/`: original AI images from ChatGPT (ignored by Godot via `.gdignore`)
-- `tools/`: dev scripts, ignored by Godot. `build_farm_map.gd` builds the tileset and ground scene. `pixelize.gd` shrinks AI art to real pixel size: `--headless --path . --script tools/pixelize.gd -- --in art_source/... --out assets/... --height 64 --frame-w 48 --frame-h 64`
+- `tools/`: dev scripts, ignored by Godot. `build_farm_map.gd` builds the tileset and ground scene. `build_curse_edges.gd` builds the curse edge pieces. `pixelize.gd` shrinks AI art to real pixel size: `--headless --path . --script tools/pixelize.gd -- --in art_source/... --out assets/... --height 64 --frame-w 48 --frame-h 64`
 - `docs/`: design and build plans (ignored by Godot via `.gdignore`); `research/`: research notes
 
 ## Code style

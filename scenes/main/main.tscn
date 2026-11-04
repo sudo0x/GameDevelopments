@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
+[ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
@@ -25,6 +26,9 @@ shrine_path = NodePath("../World/Shrine")
 
 [node name="Soil" type="TileMapLayer" parent="Farm" unique_id=499541455]
 tile_set = ExtResource("5_tiles")
+
+[node name="CurseEdges" type="Node2D" parent="Farm" unique_id=1387645021]
+script = ExtResource("edges_script")
 
 [node name="Highlight" type="Node2D" parent="Farm" unique_id=787745376]
 script = ExtResource("3_highlight")

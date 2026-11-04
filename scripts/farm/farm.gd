@@ -59,6 +59,7 @@ var _cell_query := PhysicsShapeQueryParameters2D.new()
 
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
+@onready var curse_edges: CurseEdges = $CurseEdges
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
@@ -78,6 +79,7 @@ func _ready() -> void:
 	_cursed_total = ground.get_used_cells_by_id(Source.CURSED).filter(is_cleansable).size()
 	_restore(GameState.farm_state)
 	_add_glimmers()
+	curse_edges.refresh(ground)
 	_report_progress()
 
 
@@ -178,6 +180,7 @@ func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
 	var effect: CleanseEffect = CLEANSE_EFFECT_SCENE.instantiate()
 	add_child(effect)
 	effect.play(cells, center, ground)
+	curse_edges.refresh(ground)
 	_report_progress()
 
 
