@@ -76,8 +76,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (after b8176e5: Layer 6 step 6 finished, with the knob, pause and "!" icons and fences that turn)
-- **Next:** see the roadmap at the top (Layer 6 step 6). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
+- Last updated: 2026-11-04 (after 5fb8141: Layer 6 step 6 finished, with the knob, pause and "!" icons and fences that turn; then a check that every doc is current)
+- **Next:** see the roadmap at the top (Layer 6 step 4, the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. Touch has only been simulated, never tried on a phone
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now

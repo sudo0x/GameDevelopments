@@ -129,7 +129,8 @@ Four images. The **Use** button needs no art: it shows the selected tool's icon.
 
 | Save in `art_source/` as | What | Replaces |
 |---|---|---|
-| `ui/touch_icons.png` | Act icon and pause icon, in one row | The words "Act" and "II" |
+| `ui/touch_icons.png` | Act icon (a glove, not used) and pause icon, in one row | The word "II" |
+| `ui/act_icon.png` | The "!" speech bubble (prompt 4, added later) | The word "Act" |
 | `ui/joystick_knob.png` | The joystick's knob | A plain light circle |
 | `objects/fence_vertical.png` | A fence running up and down the screen | Side-on fences in a vertical line, which look broken |
 

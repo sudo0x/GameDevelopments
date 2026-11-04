@@ -14,9 +14,9 @@ This layer serves the fourth pillar: **short sessions, long goal.** A player sho
 flowchart LR
 	A[Title menu] --> B[Touch controls]
 	B --> C[Phone-sized UI]
-	C --> D[Running on a real phone]
-	D --> E[Sound and polish]
-	E --> F[Balance by real play]
+	C --> E[Sound and polish]
+	E --> D[Running on a real phone]
+	D --> F[Balance by real play]
 	F --> G[Ads]
 	G --> H[Google Play]
 	H --> I[Steam later]
@@ -39,7 +39,7 @@ flowchart LR
 
 | Feature | Details |
 |---|---|
-| **Title menu** | Game title, Continue, New Game with a warning. Settings come with sound in step 5, when there's something to set |
+| **Title menu** | Game title, Continue, New Game with a warning, and Settings (added with sound in step 5) |
 | **Touch controls** | Joystick, tool bar, Use and Interact buttons, shown only on touch screens |
 | **Phone UI** | Touch wording, bigger buttons, tool icons, and menus that work by tapping |
 | **UI art** | A pixel font, a game theme for panels and buttons, item icons, hearts, and art for the touch controls and title |
@@ -63,7 +63,7 @@ Each step ends with something you can run and see working. ✅ means the code is
 3. ✅ **Phone UI:** touch wording, thumb-sized buttons and tool icons. This step fixed how the UI works, not how it looks
 3b. ✅ **UI art:** pixel font, one game theme, panels, buttons, hearts, coin, item icons and touch button art. Only the title logo is left, waiting for the real name
 4. **Android build:** the game running on a real phone, then checking everything in "Still open" (needs setup by you)
-5. ✅ **Sound and settings:** the `Audio` manager, Music and Effects channels, every sound wired to its action, music for the title and farm, and a settings menu for volume on the title. The 21 effects are made by `tools/make_sounds.gd`; music is still missing. See [the sound list](18_2026-11-04_sound-list.md)
+5. ✅ **Sound and settings:** the `Audio` manager, Music and Effects channels, every sound wired to its action, music for the title and farm, and a settings menu for volume on the title. The 21 effects are made by `tools/make_sounds.gd`, and the farm and title music came from Suno. See [the sound list](18_2026-11-04_sound-list.md)
 6. ✅ **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, movable starting objects, plus the weak spots listed in the build notes (needs art)
    - ✅ **Part 1, code:** pause menu (Resume, Settings, Back to title, which asks first and reloads the morning's save), a pause button on phones, Use showing the selected tool, and messages that take turns. The player already used floating movement, so that item needed nothing
    - ✅ **Part 2, art:** pause icon, joystick knob, a "!" speech bubble on Act (the open glove looked like the Hand tool, see [the decisions log](17_2026-11-04_decisions-log.md)), and fences that turn: a line going up and down uses the new vertical art. Prompts in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md). Optional, in code: moths around lanterns, grass in the wind
@@ -114,8 +114,8 @@ These can't be done by code, so they're listed early.
 |---|---|
 | 2 | ✅ Tool icons, in [the Layer 6 art doc](14_2026-11-04_art-prompts-layer-6.md) |
 | 3b | ✅ Pixel font, panel and button art, hearts, item icons, seed packets, coin, touch control art. Title logo still to come |
-| 5 | Music and sound effects |
-| 6 | Joystick knob, Use icon and Act icon |
+| 5 | ✅ 21 sound effects (made by a script) and the farm and title music (Suno), in [the sound list](18_2026-11-04_sound-list.md) |
+| 6 | ✅ Joystick knob, pause icon, "!" Act icon, vertical fence (Use needed none: it shows the selected tool) |
 | 9 | Title logo, store icon, banner and screenshots |
 
 The prompts come with the step that needs them. AI-generated content must be disclosed on Steam, and this project's art docs are the record of how it was made.
@@ -132,8 +132,8 @@ What this step replaced, from before it started:
 | Hearts | Shapes drawn in code | Full and empty heart art |
 | Money | The word "Money" | A coin icon |
 | Bag, shop, workbench | Words only | Icons for crops, seed packets, materials and holy water |
-| Touch buttons | A plain generated circle | Round button art, with a Bag icon. Use and Act stay words until step 6 |
-| Joystick | Godot's default white ring | Ring uses your art. The knob is a plain circle until step 6 |
+| Touch buttons | A plain generated circle | Round button art, with a Bag icon. Since step 6: Use shows the selected tool, Act a "!", and pause an iron-bar icon |
+| Joystick | Godot's default white ring | Ring uses your art. Since step 6 the knob has its own art too |
 | Title | Plain text | Still plain text, until the logo in step 9 |
 
 One `Theme` resource holds the font, panels and buttons, so every menu changes in one place. New items from the woods and marsh plan add their icons to the same sets.
@@ -141,8 +141,8 @@ One `Theme` resource holds the font, panels and buttons, so every menu changes i
 ## Risks
 
 - **Nothing has been balanced or properly played.** Layers 3 to 5 have only been tested by scripts. Step 7 is required before release, and it may lead to bigger changes than number tweaks.
-- **Performance on real phones is unknown.** Everything so far ran on a fast Mac. Lights, particles and creatures need checking on a cheap phone in step 4.
-- **Text is small.** The game draws at 640×360, which may be hard to read on a phone. Step 3 might need larger fonts or a different layout.
+- **Performance on real phones is unknown.** Everything so far ran on fast computers (a Mac and a Windows PC). Lights, sound, music and creatures need checking on a cheap phone in step 4.
+- **Text is small.** The game draws at 640×360, which may be hard to read on a phone. Step 3 made buttons thumb-sized, but the text size is only checked on a real phone in step 4.
 - **Ad plugins may lag behind Godot.** AdMob needs a plugin that supports Godot 4.7. Check this before step 8, and leave time for it.
 - **Old saves must keep working.** `tests/test_old_save.gd` stays in place. New Game must never delete a save without a warning.
-- **Windows hasn't been tested lately.** `tests/run_all.sh` has only run on the Mac. Worth checking before building for other platforms.
+- ~~**Windows hasn't been tested lately.**~~ Checked on 2026-11-04: `tests/run_all.sh` passes on Windows (Git Bash) as well as the Mac.
