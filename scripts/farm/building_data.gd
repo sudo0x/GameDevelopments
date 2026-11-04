@@ -10,3 +10,5 @@ extends Resource
 @export var preview_offset: Vector2
 ## If above 0, heals the nearest cursed tile within this many tiles each night.
 @export var heal_radius: int = 0
+## If above 0, waters all soil this many tiles out each morning: 2 makes a 5×5 area.
+@export var water_radius: int = 0

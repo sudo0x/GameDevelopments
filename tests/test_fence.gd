@@ -59,10 +59,12 @@ func _run() -> void:
 	await physics_frame
 	check("preview changes", farm.build_preview.texture == fence.preview_texture)
 	check("label changes", hud.tool_label.text == "Tool: Build  |  Fence: 6  (Q / E to change)")
-	await press("seed_next")
-	check("wraps around", player.selected_building().id == &"lantern_post")
 	await press("seed_prev")
-	check("Q goes back", player.selected_building() == fence)
+	await press("seed_prev")
+	check("Q wraps around to the last one", player.selected_building() == gs.BUILDINGS[gs.BUILDINGS.size() - 1])
+	await press("seed_next")
+	await press("seed_next")
+	check("E goes back", player.selected_building() == fence)
 
 	# A row of fences, side by side.
 	var y := 12

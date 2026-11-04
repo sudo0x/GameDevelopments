@@ -233,7 +233,20 @@ func _on_day_ended() -> void:
 		till(cell)
 	gathering.advance_day(is_tilled)
 	_heal_from_buildings()
+	_water_from_buildings()
 	GameState.farm_state = _to_state()
+
+
+## Wells water nearby soil for the new day. Also runs after loading, because watered soil
+## isn't saved: a save is always made in the morning, so this puts the water back.
+func _water_from_buildings() -> void:
+	for center in builder.placed:
+		var radius: int = builder.placed[center]["data"].water_radius
+		for y in range(-radius, radius + 1):
+			for x in range(-radius, radius + 1):
+				var cell: Vector2i = center + Vector2i(x, y)
+				if is_tilled(cell):
+					water(cell)
 
 
 ## Each healing building pushes the curse back a little while the player sleeps.
@@ -274,6 +287,8 @@ func _restore(state: Dictionary) -> void:
 		var data := GameState.crop_by_id(saved["id"])
 		if data:
 			_add_crop(saved["cell"], data).set_days_grown(saved["days"])
+	# Last, because restoring the soil above leaves it all dry.
+	_water_from_buildings()
 
 
 func _limit_camera() -> void:

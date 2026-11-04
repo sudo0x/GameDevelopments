@@ -66,7 +66,7 @@ Each step ends with something you can run in Godot and see working.
 3. ✅ **Removing:** the hand tool picks a building back up
 4. ✅ **Lantern post:** the first real building, healing the curse each night
 5. ✅ **Fence:** a simple building for decoration
-6. **Well:** waters nearby crops each morning (needs art)
+6. ✅ **Well:** waters nearby crops each morning (placeholder art for now)
 7. **Balance pass:** play the full game and tune Layers 3 and 4 together
 
 ## Art needed
