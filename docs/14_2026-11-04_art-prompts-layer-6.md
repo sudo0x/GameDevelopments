@@ -227,3 +227,16 @@ Square image, transparent background. No text.
 ```
 
 **Status (2026-11-04):** ✅ saved as `art_source/ui/tile_cursor.png` and checked: four separate corners, fully see-through between them. Shrunk at its own pixel size to `assets/ui/tile_cursor.png` (54×54, 12-pixel corners) with `--scale 21.8 --single true --frame-w 54 --frame-h 54`. The frame must match the art exactly (54, not 56), or the 9-slice corners come out uneven.
+
+### Crop icons (playtest finding 13)
+
+✅ Done: saved as `art_source/ui/need_icons.png`. Shrunk with `--scale 34 --single true`, cut with `--crop-x 0 --crop-w 1000 --frame-w 11 --frame-h 13` to `assets/ui/need_water.png`, and `--crop-x 1100 --crop-w 1072 --frame-w 13 --frame-h 13` to `assets/ui/need_ripe.png`.
+
+```
+Now make a horizontal row of exactly two very small icons in exactly the same style,
+the same height, with clear empty space between them so they don't touch. They must
+read clearly when tiny (about 12 pixels tall), so use very simple, bold shapes with a
+dark outline and bright colors. Transparent background. No text. From left to right:
+1. a single bright blue water drop
+2. a four-pointed golden sparkle star
+```

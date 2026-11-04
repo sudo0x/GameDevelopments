@@ -89,7 +89,7 @@ func _run() -> void:
 	await press("use_tool")
 	await physics_frame
 	await physics_frame
-	check("empty soil after harvest", hud.crop_status_label.text == "Empty soil: grass returns in 3 nights.")
+	check("clears after harvest", hud.crop_status_label.text == "")
 
 	# Lanterns flicker around their base energy, and not all together.
 	var a: PointLight2D = main.get_node("World/LanternDoor/Light")

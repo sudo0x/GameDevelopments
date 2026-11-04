@@ -20,6 +20,8 @@ const FACING_OFFSETS := {
 }
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
+const WATER_ICON := preload("res://assets/ui/need_water.png")
+const RIPE_ICON := preload("res://assets/ui/need_ripe.png")
 
 ## Where a building's base sits, measured from the center of its tile.
 const BUILDING_BASE := Vector2(0, 12)
@@ -223,12 +225,13 @@ func crop_status(cell: Vector2i) -> String:
 	return _growing_status(cell, crop)
 
 
-## Empty soil quietly turns back into grass, so say when.
+## Empty soil quietly turns back into grass, so warn on its last night only.
 func soil_status(cell: Vector2i) -> String:
 	if not is_tilled(cell) or crops.has(cell):
 		return ""
-	var left := maxi(GameState.BALANCE.soil_idle_nights - soil_idle.get(cell, 0), 1)
-	return "Empty soil: grass returns in %d %s." % [left, "night" if left == 1 else "nights"]
+	if GameState.BALANCE.soil_idle_nights - soil_idle.get(cell, 0) > 1:
+		return ""
+	return "Empty soil: grass returns tonight."
 
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
@@ -297,6 +300,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.BUILD:
 			builder.place(target_cell, player.selected_building())
 			Audio.play(&"place")
+	_refresh_crop_needs()
 
 
 ## Overnight: watered crops grow one day, empty soil slowly turns back into grass,
@@ -312,6 +316,7 @@ func _on_day_ended() -> void:
 	_heal_from_buildings()
 	_water_from_buildings()
 	_refresh_soil_edges()
+	_refresh_crop_needs()
 	GameState.farm_state = _to_state()
 
 
@@ -324,6 +329,16 @@ func _age_empty_soil() -> void:
 		soil_idle[cell] = soil_idle.get(cell, 0) + 1
 		if soil_idle[cell] >= GameState.BALANCE.soil_idle_nights:
 			untill(cell)
+
+
+## Icons only for what needs the player: ripe, or not watered yet. Calm otherwise.
+func _refresh_crop_needs() -> void:
+	for cell in crops:
+		var crop := crops[cell]
+		if crop.is_ripe():
+			crop.show_need(RIPE_ICON)
+		else:
+			crop.show_need(null if is_watered(cell) else WATER_ICON)
 
 
 ## Grass over the field's edge, and wet soil over dry. Call after any soil change:
@@ -391,6 +406,7 @@ func _restore(state: Dictionary) -> void:
 	# Last, because restoring the soil above leaves it all dry.
 	_water_from_buildings()
 	_refresh_soil_edges()
+	_refresh_crop_needs()
 
 
 func _limit_camera() -> void:

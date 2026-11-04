@@ -5,6 +5,9 @@ extends Node2D
 
 const STAGES := 4
 const STEM_COLOR := Color(0.36, 0.55, 0.3)
+## How high the need icon floats at each stage, so it sits just above the plant.
+const NEED_HEIGHTS: Array[float] = [-14.0, -22.0, -30.0, -40.0]
+const NEED_BOB_SPEED := 3.0
 
 var data: CropData
 ## 0 = seed, 1 = sprout, 2 = growing, 3 = ripe.
@@ -15,11 +18,37 @@ var stage := 0:
 ## Watered days so far. The crop is ripe when this reaches data.days_to_grow.
 var days_grown := 0
 
+## The small icon above the crop for what it needs, or null when it needs nothing.
+var need_icon: Texture2D
+var _need_sprite := Sprite2D.new()
+var _bob_time := 0.0
+
 @onready var sprite: Sprite2D = $Sprite2D
 
 
 func _ready() -> void:
+	add_child(_need_sprite)
 	_update_look()
+	_update_need()
+
+
+func _process(delta: float) -> void:
+	_bob_time += delta
+	_need_sprite.offset.y = roundf(sin(_bob_time * NEED_BOB_SPEED))
+
+
+## Shows what the crop needs (Farm decides). Crops loading from a save aren't ready yet.
+func show_need(icon: Texture2D) -> void:
+	need_icon = icon
+	if is_node_ready():
+		_update_need()
+
+
+func _update_need() -> void:
+	_need_sprite.texture = need_icon
+	_need_sprite.visible = need_icon != null
+	_need_sprite.position.y = NEED_HEIGHTS[stage]
+	set_process(need_icon != null)
 
 
 func is_ripe() -> bool:

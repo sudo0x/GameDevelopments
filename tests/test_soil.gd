@@ -54,7 +54,12 @@ func _run() -> void:
 	check("tilled", farm.is_tilled(cell))
 	check("a lone soil tile gets 4 grass sides", edges._pieces.size() == 4)
 	await physics_frame
-	check("says when grass returns", hud.crop_status_label.text == "Empty soil: grass returns in 3 nights.")
+	check("fresh soil says nothing", hud.crop_status_label.text == "")
+	farm.soil_idle[cell] = 2
+	await physics_frame
+	await physics_frame
+	check("warns on its last night", hud.crop_status_label.text == "Empty soil: grass returns tonight.")
+	farm.soil_idle.erase(cell)
 	await press("use_tool")
 	check("hoe turns it back to grass", not farm.is_tilled(cell) and farm.is_farmable(cell))
 	check("edges gone with it", edges._pieces.is_empty())
