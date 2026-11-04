@@ -9,10 +9,10 @@ signal tool_used(tool: Tool)
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
 enum Facing { DOWN, UP, LEFT, RIGHT }
-## Keys 1–5 select these, in this order.
-enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER }
+## Keys 1–6 select these, in this order.
+enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD }
 
-const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water"]
+const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build"]
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -30,6 +30,8 @@ var look_direction: Vector2 = Vector2.DOWN
 var tool: Tool = Tool.HOE
 ## Index into GameState.CROPS of the seed planted with the Seeds tool.
 var seed_index := 0
+## Index into GameState.BUILDINGS of the building placed with the Build tool.
+var building_index := 0
 
 var _walk_time: float = 0.0
 
@@ -81,11 +83,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			tool = i as Tool
 			tool_changed.emit()
 	if event.is_action_pressed("seed_next"):
-		seed_index = posmod(seed_index + 1, GameState.CROPS.size())
-		tool_changed.emit()
+		_change_selection(1)
 	elif event.is_action_pressed("seed_prev"):
-		seed_index = posmod(seed_index - 1, GameState.CROPS.size())
-		tool_changed.emit()
+		_change_selection(-1)
 	if event.is_action_pressed("use_tool"):
 		tool_used.emit(tool)
 	if event.is_action_pressed("interact"):
@@ -94,6 +94,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func selected_seed() -> CropData:
 	return GameState.CROPS[seed_index]
+
+
+func selected_building() -> BuildingData:
+	return GameState.BUILDINGS[building_index]
+
+
+## Q and E pick a building while building, and a seed the rest of the time.
+func _change_selection(step: int) -> void:
+	if tool == Tool.BUILD:
+		building_index = posmod(building_index + step, GameState.BUILDINGS.size())
+	else:
+		seed_index = posmod(seed_index + step, GameState.CROPS.size())
+	tool_changed.emit()
 
 
 ## Interacts with the first nearby area that has an interact() method (door, later shipping box and shop).

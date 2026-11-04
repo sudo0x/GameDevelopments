@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BuildingData" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/building_data.gd" id="1_building"]
+[ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="2_scene"]
+[ext_resource type="Texture2D" path="res://assets/objects/lantern_post.png" id="3_texture"]
+
+[resource]
+script = ExtResource("1_building")
+id = &"lantern_post"
+display_name = "Lantern post"
+scene = ExtResource("2_scene")
+preview_texture = ExtResource("3_texture")
+preview_offset = Vector2(13, -36)

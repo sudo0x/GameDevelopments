@@ -46,7 +46,7 @@ func _run() -> void:
 	var recipe = gs.RECIPES[1]
 
 	# Before crafting, the hoe does nothing to the curse.
-	check("recipe needs", menu._buttons.size() == 2 and recipe.needs.size() == 2)
+	check("recipe needs", menu._buttons.size() == gs.RECIPES.size() and recipe.needs.size() == 2)
 	check("no hoe at the start", not gs.has_purifying_hoe)
 	var edge := Vector2i(35, 12)
 	check("cursed tile as expected", g.get_cell_source_id(edge) == 1)

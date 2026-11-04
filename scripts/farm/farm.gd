@@ -21,6 +21,9 @@ const FACING_OFFSETS := {
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
 
+## Where a building's base sits, measured from the center of its tile.
+const BUILDING_BASE := Vector2(0, 12)
+
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
 @export var crops_parent_path: NodePath
@@ -31,11 +34,14 @@ var crops: Dictionary[Vector2i, Crop] = {}
 var _target_status := ""
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
+## The same, but it also sees interact areas and the player, to keep them clear of buildings.
+var _build_query := PhysicsShapeQueryParameters2D.new()
 
 @onready var ground: TileMapLayer = $Ground
 @onready var soil: TileMapLayer = $Soil
 @onready var healing: Healing = $Healing
 @onready var gathering: Gathering = $Gathering
+@onready var build_preview: BuildPreview = $BuildPreview
 @onready var highlight: TileHighlight = $Highlight
 @onready var player: Player = get_node(player_path)
 @onready var crops_parent: Node2D = get_node(crops_parent_path)
@@ -47,6 +53,11 @@ func _ready() -> void:
 	shape.size = Vector2(ground.tile_set.tile_size) - Vector2(4, 4)
 	_cell_query.shape = shape
 	_cell_query.exclude = [player.get_rid()]
+	_build_query.shape = shape
+	_build_query.collide_with_areas = true
+	# Without this, the player's own reach would count as something in the way.
+	# get_node, because Farm starts before Player, so player.reach isn't set yet.
+	_build_query.exclude = [player.get_node("Reach").get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	healing.land_healed.connect(gathering.reveal)
 	GameState.day_ended.connect(_on_day_ended)
@@ -61,6 +72,7 @@ func _physics_process(_delta: float) -> void:
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * GameState.BALANCE.cleanse_radius)
 	highlight.show_cell(rect, can_use(player.tool, target_cell))
+	_update_build_preview()
 	_update_target_status()
 
 
@@ -83,6 +95,14 @@ func is_watered(cell: Vector2i) -> bool:
 	return soil.get_cell_source_id(cell) == Source.SOIL_WET
 
 
+## Buildings need clean grass with nothing on it, and must keep doors, shops and the player clear.
+func can_build(cell: Vector2i) -> bool:
+	if ground.get_cell_source_id(cell) != Source.GRASS or is_tilled(cell) or gathering.spots.has(cell):
+		return false
+	_build_query.transform = _cell_transform(cell)
+	return get_world_2d().direct_space_state.intersect_shape(_build_query, 1).is_empty()
+
+
 ## Whether the tool would do something on this cell (drives the highlight color).
 func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 	match tool:
@@ -96,6 +116,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell)
 		Player.Tool.HOLY_WATER:
 			return GameState.holy_water > 0 and not healing.cleansable_cells(cell).is_empty()
+		Player.Tool.BUILD:
+			return GameState.building_count(player.selected_building()) > 0 and can_build(cell)
 	return false
 
 
@@ -121,6 +143,14 @@ func harvest(cell: Vector2i) -> void:
 	crop.queue_free()
 
 
+func _update_build_preview() -> void:
+	if player.tool != Player.Tool.BUILD:
+		build_preview.hide()
+		return
+	var at := ground.map_to_local(target_cell) + BUILDING_BASE
+	build_preview.show_at(player.selected_building(), at, can_use(Player.Tool.BUILD, target_cell))
+
+
 func _update_target_status() -> void:
 	var status := crop_status(target_cell) if crops.has(target_cell) else gathering.status(target_cell)
 	if status != _target_status:
@@ -142,8 +172,12 @@ func crop_status(cell: Vector2i) -> String:
 
 
 func _has_solid_object(cell: Vector2i) -> bool:
-	_cell_query.transform = Transform2D(0.0, ground.to_global(ground.map_to_local(cell)))
+	_cell_query.transform = _cell_transform(cell)
 	return not get_world_2d().direct_space_state.intersect_shape(_cell_query, 1).is_empty()
+
+
+func _cell_transform(cell: Vector2i) -> Transform2D:
+	return Transform2D(0.0, ground.to_global(ground.map_to_local(cell)))
 
 
 func _add_crop(cell: Vector2i, data: CropData) -> Crop:

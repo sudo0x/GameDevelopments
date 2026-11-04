@@ -56,6 +56,7 @@ Targets: **Android first**, then **Steam**.
 | 3 | Seeds (Q / E to change the seed type) |
 | 4 | Hand (harvest ripe crops, gather from trees and rocks) |
 | 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
+| 6 | Build: choose a building and see where it can go (Q / E to change the building) |
 | Space / left click | Use the tool on the highlighted tile |
 | F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; workbench: craft; shrine: restore it) |
 | I | Open the bag |

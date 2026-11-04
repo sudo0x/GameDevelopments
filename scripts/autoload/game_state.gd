@@ -37,6 +37,11 @@ const MATERIALS: Array[MaterialData] = [
 const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/holy_water.tres"),
 	preload("res://data/recipes/purifying_hoe.tres"),
+	preload("res://data/recipes/lantern_post.tres"),
+]
+
+const BUILDINGS: Array[BuildingData] = [
+	preload("res://data/buildings/lantern_post.tres"),
 ]
 
 var day := 1
@@ -47,6 +52,8 @@ var seeds: Dictionary[StringName, int] = {&"radish": 10, &"carrot": 5, &"pumpkin
 var harvest: Dictionary[StringName, int] = {}
 ## Gathered material counts by material id.
 var materials: Dictionary[StringName, int] = {}
+## Crafted buildings not placed yet, by building id.
+var buildings: Dictionary[StringName, int] = {}
 ## Crops in the shipping box by crop id, paid when the day ends.
 var shipped: Dictionary[StringName, int] = {}
 ## Uses of holy water owned. Each one cleanses a patch of cursed land.
@@ -82,6 +89,10 @@ func harvest_count(crop: CropData) -> int:
 
 func material_count(material: MaterialData) -> int:
 	return materials.get(material.id, 0)
+
+
+func building_count(building: BuildingData) -> int:
+	return buildings.get(building.id, 0)
 
 
 ## What everything in the shipping box will earn overnight.
@@ -163,6 +174,8 @@ func craft(recipe: RecipeData) -> bool:
 	match recipe.result:
 		RecipeData.Result.HOLY_WATER:
 			holy_water += recipe.result_amount
+		RecipeData.Result.BUILDING:
+			buildings[recipe.building.id] = building_count(recipe.building) + recipe.result_amount
 		RecipeData.Result.PURIFYING_HOE:
 			has_purifying_hoe = true
 			hoe_uses_left = BALANCE.hoe_daily_uses
@@ -197,6 +210,7 @@ func save_game() -> void:
 	file.set_value("game", "seeds", seeds)
 	file.set_value("game", "harvest", harvest)
 	file.set_value("game", "materials", materials)
+	file.set_value("game", "buildings", buildings)
 	file.set_value("game", "holy_water", holy_water)
 	file.set_value("game", "purifying_hoe", has_purifying_hoe)
 	file.set_value("game", "farm", farm_state)
@@ -217,6 +231,7 @@ func load_game() -> void:
 	seeds.assign(file.get_value("game", "seeds", seeds))
 	harvest.assign(file.get_value("game", "harvest", harvest))
 	materials.assign(file.get_value("game", "materials", materials))
+	buildings.assign(file.get_value("game", "buildings", buildings))
 	holy_water = file.get_value("game", "holy_water", holy_water)
 	has_purifying_hoe = file.get_value("game", "purifying_hoe", has_purifying_hoe)
 	_refill_hoe()

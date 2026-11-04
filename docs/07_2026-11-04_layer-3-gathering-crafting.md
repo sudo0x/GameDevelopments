@@ -66,7 +66,7 @@ Each step ends with something you can run in Godot and see working.
 5. ✅ **Workbench:** the object and its crafting menu, with `RecipeData`
 6. ✅ **Craft holy water:** the first recipe, using crops and stone
 7. ✅ **Purifying hoe:** the second recipe, and the free daily healing
-8. **Balance pass:** play the full loop and tune prices, recipes and regrowth
+8. ⏸ **Balance pass:** postponed by the user on 2026-11-04, and moved to the end of [Layer 4](09_2026-11-04_layer-4-building.md)
 
 ## Art needed
 

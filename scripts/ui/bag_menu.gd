@@ -30,6 +30,9 @@ func _refresh() -> void:
 	var lines: PackedStringArray = ["Holy water: %d" % GameState.holy_water]
 	for material in GameState.MATERIALS:
 		lines.append("%s: %d" % [material.display_name, GameState.material_count(material)])
+	for building in GameState.BUILDINGS:
+		if GameState.building_count(building) > 0:
+			lines.append("%s: %d" % [building.display_name, GameState.building_count(building)])
 	if GameState.has_purifying_hoe:
 		lines.append("Purifying hoe: %d of %d left today" % [GameState.hoe_uses_left, GameState.BALANCE.hoe_daily_uses])
 	items_label.text = "\n".join(lines)
