@@ -15,6 +15,8 @@
 [ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/workbench.tscn" id="workbench_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
 [node name="Main" type="Node2D" unique_id=1909061381]
@@ -71,6 +73,9 @@ position = Vector2(400, 624)
 [node name="LanternSouthEast" parent="World" unique_id=1853360172 instance=ExtResource("lantern_scene")]
 position = Vector2(816, 624)
 
+[node name="Workbench" parent="World" unique_id=1093386571 instance=ExtResource("workbench_scene")]
+position = Vector2(976, 384)
+
 [node name="Shrine" parent="World" unique_id=1264790358 instance=ExtResource("shrine_scene")]
 position = Vector2(2224, 412)
 
@@ -87,7 +92,7 @@ offset_left = 8.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
-text = "WASD move   1-5 tools   Space use   F door / box / shop   I bag"
+text = "WASD move   1-5 tools   Space use   F interact   I bag"
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
 offset_left = 472.0
@@ -136,6 +141,8 @@ horizontal_alignment = 1
 [node name="ShopMenu" parent="HUD" unique_id=1582206743 instance=ExtResource("shop_menu_scene")]
 
 [node name="BagMenu" parent="HUD" unique_id=1742093386 instance=ExtResource("bag_menu_scene")]
+
+[node name="CraftingMenu" parent="HUD" unique_id=1825540917 instance=ExtResource("crafting_menu_scene")]
 
 [node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
 offset_right = 640.0

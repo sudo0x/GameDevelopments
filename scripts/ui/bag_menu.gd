@@ -1,6 +1,5 @@
-extends PanelContainer
+extends GameMenu
 ## The bag: everything the player owns on one screen. Key I opens and closes it.
-## The game pauses while it's open; this node keeps running (process_mode = Always).
 
 const COLUMNS: Array[String] = ["", "Harvested", "Seeds"]
 
@@ -8,31 +7,12 @@ const COLUMNS: Array[String] = ["", "Harvested", "Seeds"]
 @onready var items_label: Label = $Margin/Box/Items
 
 
-func _ready() -> void:
-	GameState.inventory_changed.connect(_refresh)
-
-
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("inventory"):
-		if visible:
-			close()
-		elif not get_tree().paused:
-			open()
+	if not visible and not get_tree().paused and event.is_action_pressed("inventory"):
 		get_viewport().set_input_as_handled()
-	elif visible and event.is_action_pressed("ui_cancel"):
-		close()
-		get_viewport().set_input_as_handled()
-
-
-func open() -> void:
-	show()
-	_refresh()
-	get_tree().paused = true
-
-
-func close() -> void:
-	hide()
-	get_tree().paused = false
+		open()
+	else:
+		super(event)
 
 
 ## Skipped while closed: open() refreshes anyway, so there's no need to rebuild the list.

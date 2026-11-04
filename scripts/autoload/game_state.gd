@@ -7,6 +7,8 @@ signal inventory_changed
 signal sleep_requested
 ## Something (the shop stall) asked to open the shop. The shop menu opens.
 signal shop_requested
+## Something (the workbench) asked to open the crafting menu.
+signal crafting_requested
 ## A short message for the player, such as what they just dug up.
 signal notice(text: String)
 ## The day is over: crops grow, soil dries. Shipped crops are paid just before this.
@@ -30,6 +32,10 @@ const CROPS: Array[CropData] = [
 const MATERIALS: Array[MaterialData] = [
 	preload("res://data/materials/wood.tres"),
 	preload("res://data/materials/stone.tres"),
+]
+
+const RECIPES: Array[RecipeData] = [
+	preload("res://data/recipes/holy_water.tres"),
 ]
 
 var day := 1
@@ -89,6 +95,10 @@ func request_shop() -> void:
 	shop_requested.emit()
 
 
+func request_crafting() -> void:
+	crafting_requested.emit()
+
+
 func end_day() -> void:
 	_pay_shipped()
 	day_ended.emit()
@@ -114,6 +124,34 @@ func add_harvest(crop: CropData) -> void:
 func add_material(material: MaterialData, amount: int) -> void:
 	materials[material.id] = material_count(material) + amount
 	inventory_changed.emit()
+
+
+## How much of a recipe's ingredient the player has.
+func owned(need: RecipeNeed) -> int:
+	return harvest_count(need.crop) if need.crop else material_count(need.material)
+
+
+func can_craft(recipe: RecipeData) -> bool:
+	for need in recipe.needs:
+		if owned(need) < need.amount:
+			return false
+	return true
+
+
+## Uses up the ingredients and gives the result. Returns false if something is missing.
+func craft(recipe: RecipeData) -> bool:
+	if not can_craft(recipe):
+		return false
+	for need in recipe.needs:
+		if need.crop:
+			harvest[need.crop.id] -= need.amount
+		else:
+			materials[need.material.id] -= need.amount
+	match recipe.result:
+		RecipeData.Result.HOLY_WATER:
+			holy_water += recipe.result_amount
+	inventory_changed.emit()
+	return true
 
 
 ## Moves every harvested crop into the shipping box.

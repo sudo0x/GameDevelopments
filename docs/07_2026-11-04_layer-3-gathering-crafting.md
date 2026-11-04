@@ -63,8 +63,8 @@ Each step ends with something you can run in Godot and see working.
 2. ✅ **Materials and inventory:** wood and stone in `GameState`, plus the bag screen on key I
 3. ✅ **Trees and rocks:** hit them with the hand tool to gather
 4. ✅ **Regrowth:** gathered trees and rocks come back after a few days, and their state is saved
-5. **Workbench:** the object and its crafting menu, with `RecipeData` (needs art)
-6. **Craft holy water:** the first recipe, using crops and stone
+5. ✅ **Workbench:** the object and its crafting menu, with `RecipeData`
+6. ✅ **Craft holy water:** the first recipe, using crops and stone
 7. **Purifying hoe:** the second recipe, and the free daily healing
 8. **Balance pass:** play the full loop and tune prices, recipes and regrowth
 
@@ -73,9 +73,9 @@ Each step ends with something you can run in Godot and see working.
 | Step | Art |
 |---|---|
 | 3 | ✅ Tree, tree stump, rock, small rubble |
-| 5 | Workbench |
+| 5 | ✅ Workbench |
 
-The prompts come with the step that needs them.
+The prompts are in [the Layer 3 art doc](08_2026-11-04_art-prompts-layer-3.md).
 
 ## Risks
 

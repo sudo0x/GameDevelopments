@@ -1,6 +1,5 @@
-extends PanelContainer
+extends GameMenu
 ## The shop. One seed row per crop, built from GameState.CROPS, then holy water.
-## The game pauses while it's open; this node keeps running (process_mode = Always).
 
 var _labels: Array[Label] = []
 var _buttons: Array[Button] = []
@@ -14,32 +13,15 @@ func _ready() -> void:
 		_add_row(GameState.buy_seed.bind(crop))
 	_add_row(GameState.buy_holy_water)
 	GameState.shop_requested.connect(open)
-	GameState.inventory_changed.connect(_refresh)
+	super()
 	_refresh()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
-		return
-	if event.is_action_pressed("interact") or event.is_action_pressed("ui_cancel"):
-		# Handled, so the same key press can't reach the player and reopen the shop.
-		get_viewport().set_input_as_handled()
-		close()
-
-
-func open() -> void:
-	_refresh()
-	show()
-	get_tree().paused = true
+func _focus_first_button() -> void:
 	for button in _buttons:
 		if not button.disabled:
 			button.grab_focus()
 			break
-
-
-func close() -> void:
-	hide()
-	get_tree().paused = false
 
 
 func _add_row(buy: Callable) -> void:

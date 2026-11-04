@@ -8,7 +8,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 
 ## Status
 
-**Early prototype.** Layer 1 (basic farming) and Layer 2 (the curse) are playable.
+**Early prototype.** Layer 1 (basic farming) and Layer 2 (the curse) are playable, and Layer 3 (gathering and crafting) is in progress.
 
 | | Feature |
 |---|---|
@@ -24,6 +24,7 @@ A moody dark-fantasy 2D top-down farming game, made with **Godot 4.7** by a solo
 | ✅ | Healing cursed land with holy water, then farming on it |
 | ✅ | The old farmlands, buried treasure and a healing progress score |
 | ✅ | The old shrine: restore it to heal a huge area |
+| ✅ | Gathering wood and stone, and crafting holy water at the workbench |
 
 ## Roadmap
 
@@ -52,10 +53,10 @@ Targets: **Android first**, then **Steam**.
 | 1 | Hoe: till grass into soil |
 | 2 | Watering can |
 | 3 | Seeds (Q / E to change the seed type) |
-| 4 | Hand (harvest ripe crops) |
+| 4 | Hand (harvest ripe crops, gather from trees and rocks) |
 | 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
 | Space / left click | Use the tool on the highlighted tile |
-| F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; shrine: restore it) |
+| F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; workbench: craft; shrine: restore it) |
 | I | Open the bag |
 
 ## Project structure

@@ -10,7 +10,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 | | Windows | Mac (Apple Silicon) |
 |---|---|---|
 | Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `/Applications/Godot.app/Contents/MacOS/Godot` |
-| Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | `~/Game Assets/` (one 1254×1254 PNG per image, already transparent; no separate master) |
+| Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | `~/Game Assets/`, or `~/.codex/generated_images/<id>/` with a random name (one 1254×1254 PNG per image, already transparent; no separate master). Copy into `art_source/` with a clear name |
 | Save file (not in git, so each machine has its own farm) | `%APPDATA%\Godot\app_userdata\Farm Game (working title)\save.cfg` | `~/Library/Application Support/Godot/app_userdata/Farm Game (working title)/save.cfg` |
 | `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | Works (`gh` is logged in as `sudo0x`) |
 
@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 3 step 4 done: regrowth)
-- **Next:** Layer 3 step 5: workbench and crafting menu, with `RecipeData`. It needs workbench art: give the user the prompt, and use a placeholder until it arrives. The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- Last updated: 2026-11-04 (Layer 3 steps 5 and 6 done: workbench and crafting)
+- **Next:** Layer 3 step 7: purifying hoe (second recipe, heals one tile for free 5 times a day). Then step 8: balance pass, which needs the user to really play. The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
@@ -52,14 +52,15 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Lighting**: `Main/Mood` CanvasModulate darkens the world (HUD isn't affected, it's a CanvasLayer). `scenes/farm/lantern_post.tscn`: origin at the post's base, `Light` PointLight2D at the lamp (24, -32), radial `GradientTexture2D`, 128px radius. 4 posts in `World` (door, stall, farm south corners). `lantern_light.gd` makes the light flicker
 - **GameState** autoload (`scripts/autoload/game_state.gd`): `day`, `money`, `seeds` (start: radish 10, carrot 5, pumpkin 3), `harvest` (`harvest_count()`, `add_harvest()`), `shipped`, signals `inventory_changed`, `sleep_requested`, `shop_requested`, `day_ended`, `day_started`
 - **Gathering**: `Farm/Gathering` (`scripts/farm/gathering.gd`) places `Gatherable` objects (`scenes/farm/gatherable.tscn`) in `World` from `data/gather/spots.tres`; kinds are `GatherData` in `data/gather/`. Hand tool on one: 3 hits, then material and remains (a stump is solid, rubble isn't). Ones on cursed land stay hidden until `Healing.land_healed`. They fade while the player is behind them. Gathered ones grow back after `regrow_days` nights (`Gathering.advance_day()`), waiting if the cell is tilled; saved as `gathered` in `farm_state`
+- **Crafting**: `scenes/farm/workbench.tscn` at (976, 384): F calls `GameState.request_crafting()` → `scenes/ui/crafting_menu.tscn`. Recipes are `RecipeData` (with `RecipeNeed`s: a crop or a material) in `data/recipes/`, listed in `GameState.RECIPES`; `GameState.craft()` checks, spends and gives the result
+- **Menus**: `GameMenu` (`scripts/ui/game_menu.gd`) is the base for the shop, bag and crafting menus: open, close, pause, `close_action`, and a `_refresh()` to override. They share `data/ui/menu_panel.tres`
 - **Materials and bag**: `MaterialData` in `data/materials/`, listed in `GameState.MATERIALS`, counts in `GameState.materials` (saved). `scenes/ui/bag_menu.tscn` on key I shows crops, seeds, holy water and materials; it pauses the game like the shop, and won't open over another menu
 - **HUD** (`scripts/ui/hud.gd`): hint line, day and money labels, StatusLabel (top right: holy water, shipping, island healed %), crop status and notice labels, tool/seed label, fade rect. `_refresh()` runs on `inventory_changed`, so emit that when money changes
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
-- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post, shrine (cursed and restored), tree, stump, rock, rubble
+- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post, shrine (cursed and restored), tree, stump, rock, rubble, workbench
 - Next: item icons (harvested crops, seed packets, coin) and tool icons, to replace HUD text; tree, rock, fence for decoration (prompts in the art doc)
-- Next for Layer 3: workbench (step 5)
 - **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** (on the Mac, the only file) into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
 - Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`, shrine `--height 80 --frame-w 64 --frame-h 80`, tree `--height 96 --frame-w 96 --frame-h 96`, rock `--height 36 --frame-w 48 --frame-h 40`). Remains use the same `--scale` as the whole object (tree 12.34, rock 23.11). Add `--single true` for art in separate pieces
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
