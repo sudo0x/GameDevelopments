@@ -6,7 +6,7 @@
 [node name="CraftingMenu" type="PanelContainer"]
 process_mode = 3
 visible = false
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -34,11 +34,18 @@ layout_mode = 2
 text = "Workbench"
 horizontal_alignment = 1
 
-[node name="Rows" type="VBoxContainer" parent="Margin/Box"]
+[node name="Scroll" type="ScrollContainer" parent="Margin/Box"]
+custom_minimum_size = Vector2(0, 216)
 layout_mode = 2
+follow_focus = true
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="Margin/Box/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="Help" type="Label" parent="Margin/Box"]
 layout_mode = 2
-text = "Enter: make   F / Esc: close"
+text = "Arrows: choose   Enter: make   F / Esc: close"
 horizontal_alignment = 1

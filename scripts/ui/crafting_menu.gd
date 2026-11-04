@@ -4,7 +4,7 @@ extends GameMenu
 var _labels: Array[Label] = []
 var _buttons: Array[Button] = []
 
-@onready var rows: VBoxContainer = $Margin/Box/Rows
+@onready var rows: VBoxContainer = $Margin/Box/Scroll/Rows
 
 
 func _ready() -> void:
@@ -24,6 +24,7 @@ func _focus_first_button() -> void:
 
 func _add_row(recipe: RecipeData) -> void:
 	var row := HBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var label := Label.new()
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
@@ -39,7 +40,7 @@ func _refresh() -> void:
 	for i in GameState.RECIPES.size():
 		var recipe := GameState.RECIPES[i]
 		var made := GameState.already_made(recipe)
-		var details := "Use the hoe on cursed land." if made else _needs_text(recipe)
+		var details := recipe.made_text if made else _needs_text(recipe)
 		_labels[i].text = "%s\n%s" % [recipe.display_name, details]
 		_buttons[i].text = "Made" if made else "Make"
 		_buttons[i].disabled = not GameState.can_craft(recipe)

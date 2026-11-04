@@ -102,7 +102,7 @@ offset_left = 8.0
 offset_top = 6.0
 offset_right = 632.0
 offset_bottom = 30.0
-text = "WASD move   1-6 tools   Space use   F interact   I bag"
+text = "WASD move   1-7 tools   Space use   F interact   I bag"
 
 [node name="HeartsBar" type="Control" parent="HUD" unique_id=1570426893]
 offset_left = 8.0

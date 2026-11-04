@@ -21,3 +21,4 @@ display_name = "Purifying hoe"
 needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("need_stone")])
 result = 1
 result_amount = 1
+made_text = "Use the hoe on cursed land."

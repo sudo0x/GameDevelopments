@@ -7,6 +7,7 @@ script = ExtResource("1_balance")
 holy_water_price = 30
 cleanse_radius = 1
 hoe_daily_uses = 5
+sword_damage = 1
 max_hearts = 5
 faint_money_percent = 10
 shrine_cost = 3

@@ -43,6 +43,7 @@ const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/lantern_post.tres"),
 	preload("res://data/recipes/fence.tres"),
 	preload("res://data/recipes/well.tres"),
+	preload("res://data/recipes/sword.tres"),
 ]
 
 const BUILDINGS: Array[BuildingData] = [
@@ -67,6 +68,7 @@ var shipped: Dictionary[StringName, int] = {}
 var holy_water := 0
 ## The crafted upgrade: the hoe also heals single cursed tiles, a few times a day.
 var has_purifying_hoe := false
+var has_sword := false
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
 ## Health left today. Full every morning, and the game only saves in the morning, so it isn't saved.
@@ -167,7 +169,12 @@ func owned(need: RecipeNeed) -> int:
 
 ## Whether this is a one-time recipe the player has already made.
 func already_made(recipe: RecipeData) -> bool:
-	return recipe.result == RecipeData.Result.PURIFYING_HOE and has_purifying_hoe
+	match recipe.result:
+		RecipeData.Result.PURIFYING_HOE:
+			return has_purifying_hoe
+		RecipeData.Result.SWORD:
+			return has_sword
+	return false
 
 
 func can_craft(recipe: RecipeData) -> bool:
@@ -196,6 +203,8 @@ func craft(recipe: RecipeData) -> bool:
 		RecipeData.Result.PURIFYING_HOE:
 			has_purifying_hoe = true
 			hoe_uses_left = BALANCE.hoe_daily_uses
+		RecipeData.Result.SWORD:
+			has_sword = true
 	inventory_changed.emit()
 	return true
 
@@ -230,6 +239,7 @@ func save_game() -> void:
 	file.set_value("game", "buildings", buildings)
 	file.set_value("game", "holy_water", holy_water)
 	file.set_value("game", "purifying_hoe", has_purifying_hoe)
+	file.set_value("game", "sword", has_sword)
 	file.set_value("game", "farm", farm_state)
 	var error := file.save(SAVE_TEMP_PATH)
 	if error == OK:
@@ -251,6 +261,7 @@ func load_game() -> void:
 	buildings.assign(file.get_value("game", "buildings", buildings))
 	holy_water = file.get_value("game", "holy_water", holy_water)
 	has_purifying_hoe = file.get_value("game", "purifying_hoe", has_purifying_hoe)
+	has_sword = file.get_value("game", "sword", has_sword)
 	_refill_hoe()
 	farm_state = file.get_value("game", "farm", farm_state)
 

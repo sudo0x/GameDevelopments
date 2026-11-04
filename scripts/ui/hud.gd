@@ -46,6 +46,8 @@ func _refresh() -> void:
 	if player.tool == Player.Tool.BUILD:
 		var building := player.selected_building()
 		text += "  |  %s: %d  (Q / E to change)" % [building.display_name, GameState.building_count(building)]
+	if player.tool == Player.Tool.SWORD and not GameState.has_sword:
+		text += "  |  Craft one at the workbench"
 	if player.tool == Player.Tool.HOE and GameState.has_purifying_hoe:
 		text += "  |  Purify left today: %d" % GameState.hoe_uses_left
 	tool_label.text = text

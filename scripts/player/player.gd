@@ -9,10 +9,12 @@ signal tool_used(tool: Tool)
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
 enum Facing { DOWN, UP, LEFT, RIGHT }
-## Keys 1–6 select these, in this order.
-enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD }
+## Keys 1–7 select these, in this order.
+enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD, SWORD }
 
-const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build"]
+const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build", "Sword"]
+## In the same order as Facing.
+const FACING_DIRECTIONS: Array[Vector2] = [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT]
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -37,6 +39,7 @@ var _walk_time: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
+@onready var sword: Sword = $Sword
 @onready var _idle_texture: Texture2D = sprite.texture
 ## Where the player wakes after fainting.
 @onready var _home_position: Vector2 = global_position
@@ -89,6 +92,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("seed_prev"):
 		_change_selection(-1)
 	if event.is_action_pressed("use_tool"):
+		if tool == Tool.SWORD and GameState.has_sword:
+			sword.swing(FACING_DIRECTIONS[facing])
 		tool_used.emit(tool)
 	if event.is_action_pressed("interact"):
 		_interact()

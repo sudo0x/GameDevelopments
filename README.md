@@ -57,6 +57,7 @@ Targets: **Android first**, then **Steam**.
 | 4 | Hand (harvest ripe crops, gather from trees and rocks) |
 | 5 | Holy water: heal a 3×3 patch of cursed land (buy it at the stall) |
 | 6 | Build: place crafted buildings on clean land (Q / E to change the building) |
+| 7 | Sword: swing at whatever is in front of you (craft it at the workbench) |
 | Space / left click | Use the tool on the highlighted tile |
 | F | Interact (house door: sleep and save; shipping box: sell crops; stall: buy seeds; workbench: craft; shrine: restore it) |
 | I | Open the bag |

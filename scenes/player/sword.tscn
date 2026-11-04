@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/sword.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/sword.png" id="2_texture"]
+
+[sub_resource type="CircleShape2D" id="Shape_hit"]
+radius = 20.0
+
+[node name="Sword" type="Node2D"]
+position = Vector2(0, -20)
+script = ExtResource("1_script")
+
+[node name="Blade" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_texture")
+offset = Vector2(0, -18)
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="Shape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("Shape_hit")

@@ -56,9 +56,9 @@ func _ready() -> void:
 	_cell_query.exclude = [player.get_rid()]
 	_build_query.shape = shape
 	_build_query.collide_with_areas = true
-	# Without this, the player's own reach would count as something in the way.
+	# Without this, the player's own areas would count as something in the way.
 	# get_node, because Farm starts before Player, so player.reach isn't set yet.
-	_build_query.exclude = [player.get_node("Reach").get_rid()]
+	_build_query.exclude = [player.get_node("Reach").get_rid(), player.get_node("Sword/Hitbox").get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	healing.land_healed.connect(gathering.reveal)
 	builder.setup(ground, crops_parent)
@@ -74,6 +74,8 @@ func _physics_process(_delta: float) -> void:
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * GameState.BALANCE.cleanse_radius)
 	highlight.show_cell(rect, can_use(player.tool, target_cell))
+	# The sword works on whatever is in front, not on a tile.
+	highlight.visible = player.tool != Player.Tool.SWORD
 	_update_build_preview()
 	_update_target_status()
 

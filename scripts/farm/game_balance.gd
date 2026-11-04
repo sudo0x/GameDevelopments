@@ -7,6 +7,8 @@ extends Resource
 @export var cleanse_radius: int = 1
 ## Cursed tiles the purifying hoe can heal each day.
 @export var hoe_daily_uses: int = 5
+## Hearts of damage one sword hit does.
+@export var sword_damage: int = 1
 ## Hearts the player starts each day with.
 @export var max_hearts: int = 5
 ## How much of their money the player loses when they faint, in percent.

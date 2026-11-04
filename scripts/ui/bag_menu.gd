@@ -33,6 +33,8 @@ func _refresh() -> void:
 	for building in GameState.BUILDINGS:
 		if GameState.building_count(building) > 0:
 			lines.append("%s: %d" % [building.display_name, GameState.building_count(building)])
+	if GameState.has_sword:
+		lines.append("Sword")
 	if GameState.has_purifying_hoe:
 		lines.append("Purifying hoe: %d of %d left today" % [GameState.hoe_uses_left, GameState.BALANCE.hoe_daily_uses])
 	items_label.text = "\n".join(lines)
