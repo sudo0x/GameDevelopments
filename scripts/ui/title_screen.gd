@@ -5,6 +5,8 @@ const GAME_SCENE := "res://scenes/main/main.tscn"
 
 @onready var continue_button: Button = $Center/Box/Continue
 @onready var new_game_button: Button = $Center/Box/NewGame
+@onready var settings_button: Button = $Center/Box/Settings
+@onready var settings_menu: SettingsMenu = $SettingsMenu
 @onready var quit_button: Button = $Center/Box/Quit
 @onready var confirm: PanelContainer = $Confirm
 @onready var confirm_label: Label = $Confirm/Margin/Box/Message
@@ -16,6 +18,9 @@ func _ready() -> void:
 	continue_button.pressed.connect(_start_game)
 	new_game_button.pressed.connect(_on_new_game)
 	quit_button.pressed.connect(get_tree().quit)
+	settings_button.pressed.connect(_open_settings)
+	settings_menu.closed.connect(_on_settings_closed)
+	Audio.play_music(&"title")
 	confirm_yes.pressed.connect(_erase_and_start)
 	confirm_no.pressed.connect(_cancel_new_game)
 	var has_save := GameState.has_save()
@@ -40,6 +45,17 @@ func _on_new_game() -> void:
 	confirm.show()
 	# "No" first, so pressing Enter by accident can't erase a farm.
 	confirm_no.grab_focus()
+
+
+## The title's own buttons hide behind the panel, so keys can't reach them.
+func _open_settings() -> void:
+	$Center.hide()
+	settings_menu.open()
+
+
+func _on_settings_closed() -> void:
+	$Center.show()
+	settings_button.grab_focus()
 
 
 func _cancel_new_game() -> void:

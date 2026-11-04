@@ -32,6 +32,7 @@ func _add_row(buy: Callable, icon: Texture2D) -> void:
 	var button := Button.new()
 	button.custom_minimum_size = BUTTON_SIZE
 	button.pressed.connect(buy)
+	button.pressed.connect(Audio.play.bind(&"buy"))
 	row.add_child(label)
 	row.add_child(button)
 	rows.add_child(row)

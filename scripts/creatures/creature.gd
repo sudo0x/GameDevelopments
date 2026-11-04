@@ -70,7 +70,10 @@ func take_hit(amount: int, direction: Vector2) -> void:
 	_knockback = direction * KNOCKBACK_SPEED * data.knockback_scale
 	_flash()
 	if health <= 0:
+		Audio.play(&"defeat")
 		_defeat()
+	else:
+		Audio.play(&"hit")
 
 
 func _update_state() -> void:

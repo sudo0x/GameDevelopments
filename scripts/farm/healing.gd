@@ -100,7 +100,9 @@ func purify(cell: Vector2i) -> void:
 		_cleanse_cells([cell], cell)
 
 
-func _cleanse_cells(cells: Array[Vector2i], center: Vector2i) -> void:
+## `sound` lets the shrine play its own bigger sound instead.
+func _cleanse_cells(cells: Array[Vector2i], center: Vector2i, sound: StringName = &"cleanse") -> void:
+	Audio.play(sound)
 	for cell in cells:
 		_heal(cell)
 		if finds.has(cell):
@@ -122,7 +124,7 @@ func _on_shrine_activated() -> void:
 	else:
 		shrine.restored = true
 		var center := ground.local_to_map(ground.to_local(shrine.global_position))
-		_cleanse_cells(_cursed_cells_around(center, GameState.BALANCE.shrine_radius), center)
+		_cleanse_cells(_cursed_cells_around(center, GameState.BALANCE.shrine_radius), center, &"shrine")
 		GameState.notice.emit("The old shrine is restored! The land around it heals.")
 
 
@@ -144,6 +146,7 @@ func _heal(cell: Vector2i) -> void:
 
 func _dig_up(cell: Vector2i) -> void:
 	GameState.give_find(finds[cell])
+	Audio.play(&"find")
 	_glimmers[cell].queue_free()
 	_glimmers.erase(cell)
 

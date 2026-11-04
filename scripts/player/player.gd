@@ -124,6 +124,7 @@ func hurt(amount: int, direction: Vector2) -> void:
 		return
 	_safe_left = SAFE_SECONDS
 	_knockback = direction * KNOCKBACK_SPEED
+	Audio.play(&"hurt")
 	GameState.take_damage(amount)
 
 

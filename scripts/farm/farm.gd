@@ -78,6 +78,7 @@ func _ready() -> void:
 	_limit_camera()
 	_restore(GameState.farm_state)
 	spawner.spawn_for_today()
+	Audio.play_music(&"farm")
 
 
 func _physics_process(_delta: float) -> void:
@@ -244,26 +245,34 @@ func _on_tool_used(tool: Player.Tool) -> void:
 		Player.Tool.HOE:
 			if healing.is_cleansable(target_cell):
 				healing.purify(target_cell)
-			elif is_tilled(target_cell):
-				untill(target_cell)
 			else:
-				till(target_cell)
+				if is_tilled(target_cell):
+					untill(target_cell)
+				else:
+					till(target_cell)
+				Audio.play(&"till")
 			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
+			Audio.play(&"water")
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
+			Audio.play(&"plant")
 		Player.Tool.HAND:
 			if crops.has(target_cell):
 				harvest(target_cell)
+				Audio.play(&"harvest")
 			elif builder.placed.has(target_cell):
 				builder.pick_up(target_cell)
+				Audio.play(&"pick_up")
 			else:
 				gathering.hit(target_cell)
+				Audio.play(&"gather")
 		Player.Tool.HOLY_WATER:
 			healing.cleanse(target_cell, player.strong_water)
 		Player.Tool.BUILD:
 			builder.place(target_cell, player.selected_building())
+			Audio.play(&"place")
 
 
 ## Overnight: watered crops grow one day, empty soil slowly turns back into grass,

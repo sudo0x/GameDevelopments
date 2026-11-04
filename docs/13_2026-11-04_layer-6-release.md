@@ -63,7 +63,7 @@ Each step ends with something you can run and see working. ✅ means the code is
 3. ✅ **Phone UI:** touch wording, thumb-sized buttons and tool icons. This step fixed how the UI works, not how it looks
 3b. ✅ **UI art:** pixel font, one game theme, panels, buttons, hearts, coin, item icons and touch button art. Only the title logo is left, waiting for the real name
 4. **Android build:** the game running on a real phone, then checking everything in "Still open" (needs setup by you)
-5. **Sound:** music and effects (needs audio)
+5. ✅ **Sound and settings:** the `Audio` manager, Music and Effects channels, every sound wired to its action, music for the title and farm, and a settings menu for volume on the title. The 21 effects are made by `tools/make_sounds.gd`; music is still missing. See [the sound list](18_2026-11-04_sound-list.md)
 6. **Polish:** a pause menu with a way back to the title, joystick knob art, icons for Use and Act, movable starting objects, plus the weak spots listed in the build notes (needs art)
    - ✅ **Movable starting objects** (asked for after play, built early): the Hand tool picks up the shipping box, workbench and the map's 4 lantern posts, and the Build tool places them again, the same as built objects. Their positions are saved, and old saves keep them where they started. The house and shop stall stay fixed: see [the decisions log](17_2026-11-04_decisions-log.md)
 7. **Balance pass:** play on a real phone and tune everything (needs you to play)
@@ -84,7 +84,8 @@ Work left over from finished steps, and where each piece will be done.
 | The title logo | Step 3b | Step 9 at the latest, once the game has its real name |
 | Joystick knob is still a plain circle, and Use and Act are words | Step 3b | Step 6 |
 | Speed on a cheap phone | New | Step 4 |
-| Settings, such as sound volume | Step 1 | Step 5 |
+| Music (1 or 2 tracks), and richer `cleanse` and `shrine` sounds than the generated ones | Step 5 | Any time, before release: drop them in `assets/audio/`, see [the sound list](18_2026-11-04_sound-list.md) |
+| Settings from inside the game, not only the title | Step 5 | Step 6, in the pause menu |
 | A way back to the title without closing the game | Step 1 | Step 6 |
 | Balance for Layers 3, 4 and 5, all postponed | Layers 3 to 5 | Step 7 |
 | The game's real title | Step 1 | Before step 9 |

@@ -6,6 +6,18 @@ Choices we made about how the game works, and why, so we don't undo one by accid
 
 Newest first. Bigger plan decisions are also in each plan's "Design decisions" table.
 
+## Sound (2026-11-04)
+
+| Question | Decision | Why |
+|---|---|---|
+| Where are volume settings saved? | Their own file, `settings.cfg` | New Game shouldn't reset your volume, and every farm shares it |
+| Sliders or buttons for volume? | − and + buttons, 10% steps | They match the button art, suit thumbs on a phone, and work with keys |
+| How are sound files found? | By name, in `assets/audio/effects/` and `music/` | You can add sounds without code changes |
+| Sounds before files exist? | Everything wired now, silent until files arrive | Code and sounds can be done separately, in any order |
+| Where do the effects come from? | Made by a script (`tools/make_sounds.gd`), from waves | No license, no waiting, matches the retro pixel style. Replace any one later by saving a file with its name |
+| Music? | From the user: a CC0 track, a composer, or a paid AI plan | A script can't write good music |
+| Which sound matters most? | `cleanse` | The concept says healing must look and sound satisfying |
+
 ## Which objects can be moved (2026-11-04)
 
 The Hand tool picks them up and the Build tool places them again, the same as things you build.

@@ -22,6 +22,7 @@ func swing(direction: Vector2) -> void:
 	if _busy:
 		return
 	_busy = true
+	Audio.play(&"swing")
 	hitbox.position = direction * REACH
 	# The art points up, so "up" is a rotation of zero.
 	var center := direction.angle() + PI / 2.0

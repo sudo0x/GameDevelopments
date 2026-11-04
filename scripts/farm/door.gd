@@ -3,4 +3,5 @@ extends Area2D
 
 
 func interact(_player: Player) -> void:
+	Audio.play(&"sleep")
 	GameState.request_sleep()

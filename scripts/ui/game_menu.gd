@@ -36,12 +36,14 @@ func open() -> void:
 	show()
 	_refresh()
 	get_tree().paused = true
+	Audio.play(&"menu_open")
 	_focus_first_button()
 
 
 func close() -> void:
 	hide()
 	get_tree().paused = false
+	Audio.play(&"menu_close")
 
 
 ## A fixed-size picture, so rows line up however big the art is.

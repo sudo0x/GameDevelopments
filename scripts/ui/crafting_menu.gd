@@ -34,6 +34,7 @@ func _add_row(recipe: RecipeData) -> void:
 	var button := Button.new()
 	button.custom_minimum_size = MAKE_BUTTON_SIZE
 	button.pressed.connect(GameState.craft.bind(recipe))
+	button.pressed.connect(Audio.play.bind(&"craft"))
 	row.add_child(label)
 	row.add_child(button)
 	rows.add_child(row)

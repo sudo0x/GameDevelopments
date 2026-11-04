@@ -23,3 +23,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 15 | 2026-11-04 | [Areas plan: Whispering Woods and Sunken Marsh](15_2026-11-04_areas-woods-marsh.md) |
 | 16 | 2026-11-04 | [Fixes log: problems found and how they were fixed](16_2026-11-04_fixes-log.md) |
 | 17 | 2026-11-04 | [Decisions log: what we chose and why](17_2026-11-04_decisions-log.md) |
+| 18 | 2026-11-04 | [Sound list and how sound works](18_2026-11-04_sound-list.md) |
