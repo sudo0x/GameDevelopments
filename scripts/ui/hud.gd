@@ -1,6 +1,5 @@
 extends CanvasLayer
-## Shows the day and the selected tool and seed, and fades to black when sleeping.
-## Grows into the full HUD (money, inventory) in step 6.
+## Shows the day, money, inventory and the selected tool and seed, and fades to black when sleeping.
 
 const FADE_SECONDS := 0.6
 
@@ -11,6 +10,8 @@ var _sleeping := false
 @onready var player: Player = get_node(player_path)
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
+@onready var money_label: Label = $MoneyLabel
+@onready var inventory_label: Label = $InventoryLabel
 @onready var fade: ColorRect = $Fade
 
 
@@ -24,11 +25,21 @@ func _ready() -> void:
 
 func _refresh() -> void:
 	day_label.text = "Day %d" % GameState.day
+	money_label.text = "Money: %d" % GameState.money
+	inventory_label.text = _inventory_text()
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
 		text += "  |  %s seeds: %d  (Q / E to change)" % [crop.display_name, GameState.seed_count(crop)]
 	tool_label.text = text
+
+
+## One line per crop: harvested count, then seeds left.
+func _inventory_text() -> String:
+	var lines: PackedStringArray = []
+	for crop in GameState.CROPS:
+		lines.append("%s: %d  (%d seeds)" % [crop.display_name, GameState.harvest_count(crop), GameState.seed_count(crop)])
+	return "\n".join(lines)
 
 
 ## Fade out, end the day while the screen is black, fade back in.

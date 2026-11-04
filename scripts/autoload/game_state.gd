@@ -27,6 +27,10 @@ func seed_count(crop: CropData) -> int:
 	return seeds.get(crop.id, 0)
 
 
+func harvest_count(crop: CropData) -> int:
+	return harvest.get(crop.id, 0)
+
+
 func request_sleep() -> void:
 	sleep_requested.emit()
 
@@ -44,3 +48,8 @@ func use_seed(crop: CropData) -> bool:
 	seeds[crop.id] -= 1
 	inventory_changed.emit()
 	return true
+
+
+func add_harvest(crop: CropData) -> void:
+	harvest[crop.id] = harvest_count(crop) + 1
+	inventory_changed.emit()

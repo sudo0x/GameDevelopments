@@ -80,7 +80,7 @@ Each step ends with something you can run in Godot and see working.
 3. ✅ **Farm grid:** a TileMap with grass, a farmable area and the cursed border, plus a highlight on the targeted tile
 4. ✅ **Tools: till and plant:** switch tools, till soil, plant seeds (crops use a drawn placeholder until crop art exists)
 5. ✅ **Water and day cycle:** watering, house door to sleep (with a fade), day counter, crops grow overnight
-6. **Harvest and inventory:** pick crops, track counts, HUD
+6. ✅ **Harvest and inventory:** pick crops, track counts, HUD
 7. **Shipping box and shop:** sell crops, earn money, buy seeds
 8. **Save / load:** keep progress between sessions
 9. **Mood lighting:** darken the scene and add lantern light

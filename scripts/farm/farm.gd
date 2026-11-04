@@ -76,6 +76,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 			return is_tilled(cell) and not is_watered(cell)
 		Player.Tool.SEEDS:
 			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
+		Player.Tool.HAND:
+			return crops.has(cell) and crops[cell].is_ripe()
 	return false
 
 
@@ -97,6 +99,14 @@ func plant(cell: Vector2i, data: CropData) -> void:
 	crops[cell] = crop
 
 
+## Picks the crop. The soil stays tilled, so the cell can be planted again.
+func harvest(cell: Vector2i) -> void:
+	var crop: Crop = crops[cell]
+	GameState.add_harvest(crop.data)
+	crops.erase(cell)
+	crop.queue_free()
+
+
 ## Which 32×32 piece of a 128×128 texture a cell uses, so neighbors line up seamlessly.
 static func texture_coords(cell: Vector2i) -> Vector2i:
 	return Vector2i(posmod(cell.x, TEXTURE_TILES), posmod(cell.y, TEXTURE_TILES))
@@ -112,6 +122,8 @@ func _on_tool_used(tool: Player.Tool) -> void:
 			water(target_cell)
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
+		Player.Tool.HAND:
+			harvest(target_cell)
 
 
 ## Overnight: watered crops grow one day, then all soil dries.
