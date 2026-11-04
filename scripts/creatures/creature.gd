@@ -50,9 +50,9 @@ func _physics_process(delta: float) -> void:
 		velocity = _knockback
 		_knockback = _knockback.move_toward(Vector2.ZERO, KNOCKBACK_FADE * delta)
 	elif state == State.CHASE:
-		velocity = _chase_velocity()
+		velocity = _avoid_light(_chase_velocity(), delta)
 	else:
-		velocity = _wander_velocity(delta)
+		_wander(delta)
 	move_and_slide()
 	_touch_player()
 	_update_look(delta)
@@ -99,6 +99,29 @@ func _defeat() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, DEFEAT_FADE_SECONDS)
 	tween.tween_callback(queue_free)
+
+
+func _wander(delta: float) -> void:
+	var wanted := _wander_velocity(delta)
+	velocity = _avoid_light(wanted, delta)
+	# The way is blocked by light, so give up on that spot and pick another.
+	if wanted != Vector2.ZERO and velocity.length() < wanted.length() / 2.0:
+		_wander_target = global_position
+
+
+## Lantern light is safe ground. Creatures slide around its edge, and leave at once if they
+## end up inside, such as when a lantern is placed next to them or they're knocked in.
+func _avoid_light(wanted: Vector2, delta: float) -> Vector2:
+	var radius := GameState.BALANCE.lantern_safe_radius
+	var result := wanted
+	for light: Node2D in get_tree().get_nodes_in_group("lantern_light"):
+		var away := global_position - light.global_position
+		if away.length() < radius:
+			return away.normalized() * data.chase_speed
+		var next := global_position + result * delta
+		if next.distance_to(light.global_position) < radius:
+			result -= result.project(away)
+	return result
 
 
 func _chase_velocity() -> Vector2:

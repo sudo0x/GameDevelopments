@@ -7,6 +7,8 @@ extends Resource
 @export var cleanse_radius: int = 1
 ## Cursed tiles the purifying hoe can heal each day.
 @export var hoe_daily_uses: int = 5
+## Creatures can't come closer than this to a lantern's light, in pixels.
+@export var lantern_safe_radius: float = 96.0
 ## Hearts of damage one sword hit does.
 @export var sword_damage: int = 1
 ## Hearts the player starts each day with.

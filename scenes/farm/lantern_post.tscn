@@ -28,7 +28,7 @@ shape = SubResource("Shape_post")
 texture = ExtResource("1_texture")
 offset = Vector2(13, -36)
 
-[node name="Light" type="PointLight2D" parent="."]
+[node name="Light" type="PointLight2D" parent="." groups=["lantern_light"]]
 position = Vector2(24, -32)
 color = Color(1, 0.72, 0.42, 1)
 texture = SubResource("Texture_glow")
