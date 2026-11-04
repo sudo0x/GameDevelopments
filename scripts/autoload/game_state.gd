@@ -38,10 +38,12 @@ const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/holy_water.tres"),
 	preload("res://data/recipes/purifying_hoe.tres"),
 	preload("res://data/recipes/lantern_post.tres"),
+	preload("res://data/recipes/fence.tres"),
 ]
 
 const BUILDINGS: Array[BuildingData] = [
 	preload("res://data/buildings/lantern_post.tres"),
+	preload("res://data/buildings/fence.tres"),
 ]
 
 var day := 1

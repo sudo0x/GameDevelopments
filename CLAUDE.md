@@ -28,8 +28,8 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-04 (Layer 4 step 4 done: healing lanterns)
-- **Next:** Layer 4 step 5: fence (give the user the art prompt first; the Layer 1 art doc has one). The user postponed Layer 3's balance pass and doesn't want to playtest for now; it's step 7 of Layer 4. Don't keep asking, but mention balance is untested when it matters The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
+- Last updated: 2026-11-04 (Layer 4 step 5 done: fence)
+- **Next:** Layer 4 step 6: well (the prompt is in the Layer 4 art doc; the user has it). The user postponed Layer 3's balance pass and doesn't want to playtest for now; it's step 7 of Layer 4. Don't keep asking, but mention balance is untested when it matters The user's first play found that crop growth was unclear (now fixed); they haven't yet got far enough to judge holy water prices
 - Layer 1 progress: all 9 steps done (setup, player, farm grid, till/plant, water/days, harvest/HUD, shipping/shop, save/load, mood lighting); the plan doc marks each with ✅
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
@@ -61,10 +61,10 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - **Main scene**: Main → Farm (Ground instance, Soil, Highlight), Mood, World (y-sorted: House at (912, 288), ShippingBox, ShopStall, 4 lantern posts, Player, crops), HUD (with ShopMenu)
 
 ### Art
-- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post, shrine (cursed and restored), tree, stump, rock, rubble, workbench
+- Done: style reference, player idle + walk ×3, ground ×4, house, radish/carrot/pumpkin stages, shipping box, shop stall, lantern post, shrine (cursed and restored), tree, stump, rock, rubble, workbench, fence
 - Next: item icons (harvested crops, seed packets, coin) and tool icons, to replace HUD text; tree, rock, fence for decoration (prompts in the art doc)
 - **Workflow**: the user generates art in ChatGPT/Codex; files land in the Codex folder for this machine (see "Two dev machines"), as both a `*-master.png` and a small version. Copy the **master** (on the Mac, the only file) into `art_source/` and shrink with `tools/pixelize.gd`; never use ChatGPT's own small version (it loses detail)
-- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`, shrine `--height 80 --frame-w 64 --frame-h 80`, tree `--height 96 --frame-w 96 --frame-h 96`, rock `--height 36 --frame-w 48 --frame-h 40`). Remains use the same `--scale` as the whole object (tree 12.34, rock 23.11). Add `--single true` for art in separate pieces
+- Find the real pixel size first (measure the color-run length of the master); keep it, don't squeeze art into a tile. Player sheets: `--scale 9.70 --frame-w 48 --frame-h 64`. Ground textures: `--height 128 --frame-w 128 --frame-h 128`. Objects: pick a height that fits next to the player and house rather than the master's pixel size (shipping box `--height 48 --frame-w 40 --frame-h 48`, stall `--height 96 --frame-w 96 --frame-h 96`, lantern `--height 72 --frame-w 48 --frame-h 72`, shrine `--height 80 --frame-w 64 --frame-h 80`, tree `--height 96 --frame-w 96 --frame-h 96`, rock `--height 36 --frame-w 48 --frame-h 40`). Remains use the same `--scale` as the whole object (tree 12.34, rock 23.11). Add `--single true` for art in separate pieces, and `--crop-x`, `--crop-w` to cut one section from wider art
 - Check walk cycles: frames 1 and 3 must lift opposite legs (walk_down needed a fix: frame 3's legs replaced with frame 1's legs mirrored)
 - Always give the user complete, ready-to-paste prompts (style block included); never "change this line in the earlier prompt"
 
@@ -79,6 +79,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 ### Known issues / later
 - `project.godot`: Godot itself moves the `2d/snap/snap_2d_transforms_to_pixel` line when it runs; harmless, `git restore project.godot` before committing
+- Fences only have side-on art, so a vertical line of them looks broken (needs a second image and neighbor-aware art)
 - Later polish (the user asked, and agreed to wait): soft soil edges, moths or butterflies around lanterns, grass moving in the wind
 - Standing "facing right" pose is separate art, slightly different from the mirrored walk side
 

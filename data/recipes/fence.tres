@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RecipeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/recipe_data.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/farm/recipe_need.gd" id="2_need"]
+[ext_resource type="Resource" path="res://data/materials/wood.tres" id="3_wood"]
+[ext_resource type="Resource" path="res://data/buildings/fence.tres" id="4_building"]
+
+[sub_resource type="Resource" id="need_wood"]
+script = ExtResource("2_need")
+material = ExtResource("3_wood")
+amount = 1
+
+[resource]
+script = ExtResource("1_recipe")
+display_name = "Fence"
+needs = Array[ExtResource("2_need")]([SubResource("need_wood")])
+result = 2
+result_amount = 1
+building = ExtResource("4_building")

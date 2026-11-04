@@ -12,6 +12,8 @@ extends SceneTree
 ##     --height 64 --frame-w 48 --frame-h 64
 ##   Optional: --scale 9.70 (source pixels per art pixel) instead of fitting the tallest sprite to --height.
 ##   Optional: --single true keeps everything as one sprite, for art made of separate pieces (rubble).
+##   Optional: --crop-x 144 --crop-w 723 uses only that strip of the source, to cut one repeating
+##   section out of wider art (fence).
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
@@ -27,6 +29,8 @@ func _init() -> void:
 
 	var src := Image.load_from_file(ProjectSettings.globalize_path("res://" + in_path))
 	src.convert(Image.FORMAT_RGBA8)
+	if args.has("crop-x"):
+		src = src.get_region(Rect2i(int(args["crop-x"]), 0, int(args["crop-w"]), src.get_height()))
 
 	var boxes := _find_sprites(src)
 	if boxes.is_empty():

@@ -65,7 +65,7 @@ Each step ends with something you can run in Godot and see working.
 2. ✅ **Placing and saving:** buildings go on clean land and survive a restart
 3. ✅ **Removing:** the hand tool picks a building back up
 4. ✅ **Lantern post:** the first real building, healing the curse each night
-5. **Fence:** a simple building for decoration (needs art)
+5. ✅ **Fence:** a simple building for decoration
 6. **Well:** waters nearby crops each morning (needs art)
 7. **Balance pass:** play the full game and tune Layers 3 and 4 together
 
@@ -75,10 +75,10 @@ No art is needed for steps 1 to 4, because the lantern post already exists.
 
 | Step | Art |
 |---|---|
-| 5 | Fence |
+| 5 | ✅ Fence |
 | 6 | Well |
 
-The prompts come with the step that needs them.
+The prompts are in [the Layer 4 art doc](10_2026-11-04_art-prompts-layer-4.md).
 
 ## Risks
 
