@@ -9,9 +9,9 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 
 | | Windows | Mac (Apple Silicon) |
 |---|---|---|
-| Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `~/Downloads/Godot.app/Contents/MacOS/Godot`, or `/Applications/Godot.app/Contents/MacOS/Godot` if moved |
+| Godot (use `--headless` for checks) | `C:\Program Files\Godot\Godot_v4.7.2-stable_win64_console.exe` | `/Applications/Godot.app/Contents/MacOS/Godot` |
 | Art files from ChatGPT/Codex | `C:\Users\raksm\.codex\visualizations\<yyyy>\<mm>\<dd>\<id>\` | Not confirmed yet (check `~/.codex/visualizations/` first) |
-| `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | No saved GitHub login as of 2026-11-04 (the user needs to run `gh auth login`) |
+| `git push` by Claude | Fails (the `dancypher` GitHub login is saved) | Works (`gh` is logged in as `sudo0x`) |
 
 - GitHub is the only link between the machines, so unpushed work is invisible on the other one
 - Start of a session: run `git pull`, then `--headless --import` (`.godot/` isn't in git, so each machine has its own cache)
@@ -63,7 +63,7 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Standing "facing right" pose is separate art, slightly different from the mirrored walk side
 
 ### Git
-- Branch `development`, remote `sudo0x/GameDevelopments`. Claude's `git push` doesn't work on either machine yet (see "Two dev machines"); commit, then ask the user to run `git push` themselves
+- Branch `development`, remote `sudo0x/GameDevelopments`. Whether Claude can `git push` depends on the machine (see "Two dev machines"); on Windows, commit, then ask the user to run `git push` themselves
 
 ## Display and input
 - Base resolution 640×360 (20×11 tiles of 32px), window 1280×720, stretch mode `canvas_items` (not `viewport`: that made movement jump in 2-pixel steps), integer scaling
