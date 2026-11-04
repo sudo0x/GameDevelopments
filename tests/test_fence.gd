@@ -102,5 +102,29 @@ func _run() -> void:
 	gs.end_day()
 	check("no healing from fences", farm.healing.cleansed.size() == healed)
 	check("saved with its id", gs.farm_state["buildings"].filter(func(b: Dictionary) -> bool: return b["id"] == &"fence").size() == 4)
+
+	# A line going up and down uses the vertical art, and has no gaps either.
+	gs.add_building(fence, 3)
+	for row in range(8, 11):
+		farm.builder.place(Vector2i(10, row), fence)
+	var top: Node = farm.builder.placed[Vector2i(10, 8)]["node"]
+	var middle: Node = farm.builder.placed[Vector2i(10, 9)]["node"]
+	check("a vertical line uses the vertical art", middle.vertical and top.vertical and middle.get_node("Sprite2D").texture == middle.VERTICAL_TEXTURE)
+	check("a row stays side-on", not second.vertical and second.get_node("Sprite2D").texture == second.SIDE_TEXTURE)
+	check("a lone fence is side-on", not farm.builder.placed[Vector2i(34, 13)]["node"].vertical)
+	check("each fence has its own shape", (middle.get_node("Shape").shape as RectangleShape2D).size.y == 32.0 and (second.get_node("Shape").shape as RectangleShape2D).size.y == 8.0)
+	await physics_frame
+	await physics_frame
+	player.global_position = Vector2(middle.global_position.x + 24, middle.global_position.y - 12)
+	for i in 3:
+		await physics_frame
+	Input.action_press("move_left")
+	for i in 60:
+		await physics_frame
+	Input.action_release("move_left")
+	check("no gap in the vertical line", player.global_position.x > middle.global_position.x)
+	# Taking the middle one leaves two loners, which go back to side-on.
+	farm.builder.pick_up(Vector2i(10, 9))
+	check("neighbors refit when one is picked up", not top.vertical)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

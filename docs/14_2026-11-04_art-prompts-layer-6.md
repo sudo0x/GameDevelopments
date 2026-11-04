@@ -135,6 +135,27 @@ Four images. The **Use** button needs no art: it shows the selected tool's icon.
 
 Claude shrinks them with `tools/pixelize.gd` when they arrive (measure first; about 24 pixels tall for the icons, 40 for the knob, 32×32 for the fence piece).
 
+**Status (2026-11-04):** ✅ all three are saved in `art_source/`. The first pointing glove looked like a rude gesture when small, so it was redone as an open glove. Shrunk with:
+
+| Saved as | From | Options | Notes |
+|---|---|---|---|
+| `assets/ui/pause_icon.png` | `touch_icons.png`, right half | `--crop-x 1000 --crop-w 774 --scale 20.5 --single true --frame-w 24 --frame-h 26` | `--single`, or the two bars become two sprites |
+| `assets/ui/act_icon.png` | `act_icon.png`, the "!" bubble (prompt 4 below) | `--scale 32.5 --single true --frame-w 24 --frame-h 26` | Replaced the open glove, which looked like the Hand tool; the glove is still in `touch_icons.png` (left half, `--crop-x 0 --crop-w 1000 --scale 20.5`) |
+| `assets/ui/joystick_knob.png` | `joystick_knob.png` | `--crop-x 174 --crop-w 906 --crop-y 174 --crop-h 906 --circle true --scale 25 --single true --frame-w 36 --frame-h 36` | It was drawn on a purple base ring the joystick already has; the cut keeps only the iron rim and wood |
+| `assets/objects/fence_vertical.png` | `fence_vertical.png` | `--crop-y 244 --crop-h 723 --scale 22.6 --single true --frame-w 32 --frame-h 32` | Same scale as the side-on fence (22.6), cut to one tile around the post |
+
+### 4. Act icon, second try: "!" (chosen 2026-11-04)
+
+The open glove looked like the Hand tool, so Act gets the usual "you can do something here" sign. Send in the same chat as the icons. Save as `art_source/ui/act_icon.png`.
+
+```
+Now make one more icon in exactly the same style, size and colors as the pause icon,
+with a transparent background: a small speech bubble of worn wood with a dark iron
+rim and a short tail at the bottom left, with a bold exclamation mark "!" in pale
+cream in the middle. Simple, bold shapes that read well when small. Only this one
+icon, centered. No other text.
+```
+
 ### 1. Act and pause icons
 
 ```

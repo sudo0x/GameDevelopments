@@ -14,6 +14,9 @@ extends SceneTree
 ##   Optional: --single true keeps everything as one sprite, for art made of separate pieces (rubble).
 ##   Optional: --crop-x 144 --crop-w 723 uses only that strip of the source, to cut one repeating
 ##   section out of wider art (fence).
+##   Optional: --crop-y 257 --crop-h 723 does the same up and down (the vertical fence).
+##   Optional: --circle true then keeps only the circle that fills the cut (the joystick knob,
+##   drawn on a base ring it doesn't need).
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
@@ -31,6 +34,11 @@ func _init() -> void:
 	src.convert(Image.FORMAT_RGBA8)
 	if args.has("crop-x"):
 		src = src.get_region(Rect2i(int(args["crop-x"]), 0, int(args["crop-w"]), src.get_height()))
+	if args.has("crop-y"):
+		src = src.get_region(Rect2i(0, int(args["crop-y"]), src.get_width(), int(args["crop-h"])))
+	# Keeps only a circle filling the (cropped) image: for round art drawn on a bigger base.
+	if args.has("circle"):
+		_keep_circle(src)
 
 	var boxes := _find_sprites(src)
 	if boxes.is_empty():
@@ -119,3 +127,12 @@ func _find_sprites(img: Image) -> Array[Rect2i]:
 			boxes.append(Rect2i(start, top, x - start, bottom - top + 1))
 			start = -1
 	return boxes
+
+
+func _keep_circle(img: Image) -> void:
+	var center := Vector2(img.get_size()) / 2.0
+	var radius := minf(center.x, center.y)
+	for y in img.get_height():
+		for x in img.get_width():
+			if Vector2(x + 0.5, y + 0.5).distance_to(center) > radius:
+				img.set_pixel(x, y, Color(0, 0, 0, 0))

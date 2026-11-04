@@ -15,6 +15,9 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 | Pause on phones? | An "II" button at the top middle, sending Esc's action | Same code path as the keyboard; top middle is the only free spot |
 | Messages: stack or queue? | **Queue** on one line: 3 s alone, 1.5 s while others wait, at most 4 waiting | The bottom of the screen has no room for 3 lines (crop status above, tool label below) |
 | Use button on phones? | Shows the selected tool's icon | Tells you what Use will do, with no new art |
+| The first Act icon (a pointing glove)? | Rejected | A fist with one raised finger can read as a rude gesture when shrunk to 24 pixels |
+| The open-glove Act icon? | **Not used. Act shows a "!" in a wooden speech bubble** (chosen 2026-11-04, in the game; prompt in `docs/14_...`). Menus say "Tap ! to close" | It looks almost the same as the Hand tool's glove, so with the Hand tool selected, Use and Act would show two gloves side by side. A different symbol is clearer |
+| A vertical line of fences? | The new vertical art at the same pixel scale as the side-on fence: it reads as a line of posts | Squeezing it smaller to show rails would mix two pixel sizes |
 
 ## Sound (2026-11-04)
 

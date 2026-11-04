@@ -23,6 +23,7 @@ func setup(ground: TileMapLayer, parent: Node2D) -> void:
 func place(cell: Vector2i, building: BuildingData) -> void:
 	if GameState.use_building(building):
 		_spawn(cell, building)
+		fit_neighbors()
 
 
 ## Takes a placed building back into the bag, so a mistake costs nothing.
@@ -30,6 +31,7 @@ func pick_up(cell: Vector2i) -> void:
 	var entry := placed[cell]
 	placed.erase(cell)
 	entry["node"].queue_free()
+	fit_neighbors()
 	GameState.add_building(entry["data"])
 	GameState.notice.emit("Picked up: %s" % entry["data"].display_name)
 
@@ -81,6 +83,21 @@ func restore(saved: Array) -> void:
 		var building := GameState.building_by_id(entry["id"])
 		if building:
 			_spawn(entry["cell"], building)
+	fit_neighbors()
+
+
+## Lets buildings that join up (fences) match their neighbors of the same kind.
+## Each one with a fit() method gets the directions that hold the same building.
+func fit_neighbors() -> void:
+	for cell in placed:
+		var node: Node = placed[cell]["node"]
+		if not node.has_method("fit"):
+			continue
+		var same: Array[Vector2i] = []
+		for side: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			if placed.has(cell + side) and placed[cell + side]["data"] == placed[cell]["data"]:
+				same.append(side)
+		node.fit(same)
 
 
 ## Only starting-only kinds, so the map's lanterns are old ones that don't heal.

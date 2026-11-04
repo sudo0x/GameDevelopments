@@ -16,17 +16,20 @@ const TOOL_BAR_START_X := 214.0
 const TOOL_SIZE := 34.0
 const TOOL_SPACING := 36.0
 const TOOL_COUNT := 7
-## Text, action, center, size. Bag shows BAG_ICON, and Use shows the selected tool,
-## so you can see what it will do.
+## Text, action, center, size. Buttons with no text show an icon: Bag, Act and pause have
+## their own, and Use shows the selected tool, so you can see what it will do.
 const BAG_ICON := preload("res://assets/ui/bag.png")
+const PAUSE_ICON := preload("res://assets/ui/pause_icon.png")
+## Act (interact): "you can do something here", unlike any tool icon.
+const ACT_ICON := preload("res://assets/ui/act_icon.png")
 const ACTION_BUTTONS: Array[Array] = [
 	["", "use_tool", Vector2(596, 296), 68.0],
-	["Act", "interact", Vector2(526, 322), 50.0],
+	["", "interact", Vector2(526, 322), 50.0],
 	["", "inventory", Vector2(526, 262), 42.0],
 	["<", "seed_prev", Vector2(476, 300), 34.0],
 	[">", "seed_next", Vector2(476, 340), 34.0],
 	# Pause: Esc's action, so the pause menu doesn't need to know about touch.
-	["II", "ui_cancel", Vector2(320, 22), 34.0],
+	["", "ui_cancel", Vector2(320, 22), 34.0],
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["use_tool", "interact", "inventory"]
@@ -58,6 +61,10 @@ func _ready() -> void:
 		var button := _add_button(self if keep_showing else tool_bar, entry[0], entry[1], entry[2], entry[3])
 		if entry[1] == "inventory":
 			_add_icon(button, BAG_ICON)
+		elif entry[1] == "ui_cancel":
+			_add_icon(button, PAUSE_ICON)
+		elif entry[1] == "interact":
+			_add_icon(button, ACT_ICON)
 		elif entry[1] == "use_tool":
 			_use_icon = _add_icon(button, _tool_icon(0))
 	player.tool_changed.connect(_show_selected_tool)
