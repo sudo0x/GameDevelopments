@@ -130,17 +130,21 @@ mouse_filter = 2
 script = ExtResource("hearts_script")
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
-offset_left = 472.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -168.0
 offset_top = 6.0
-offset_right = 632.0
+offset_right = -8.0
 offset_bottom = 30.0
 text = "Day 1"
 horizontal_alignment = 2
 
 [node name="MoneyRow" type="HBoxContainer" parent="HUD" unique_id=1460275318]
-offset_left = 472.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -168.0
 offset_top = 32.0
-offset_right = 632.0
+offset_right = -8.0
 offset_bottom = 56.0
 alignment = 2
 
@@ -154,9 +158,11 @@ layout_mode = 2
 text = "0"
 
 [node name="StatusLabel" type="Label" parent="HUD" unique_id=1137790264]
-offset_left = 432.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -208.0
 offset_top = 58.0
-offset_right = 632.0
+offset_right = -8.0
 offset_bottom = 132.0
 horizontal_alignment = 2
 
@@ -168,17 +174,23 @@ offset_bottom = 76.0
 text = "Tool: Hoe"
 
 [node name="CropStatusLabel" type="Label" parent="HUD" unique_id=1450263987]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 40.0
-offset_top = 276.0
-offset_right = 600.0
-offset_bottom = 300.0
+offset_top = -84.0
+offset_right = -40.0
+offset_bottom = -60.0
 horizontal_alignment = 1
 
 [node name="NoticeLabel" type="Label" parent="HUD" unique_id=1697204518]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 40.0
-offset_top = 300.0
-offset_right = 600.0
-offset_bottom = 324.0
+offset_top = -60.0
+offset_right = -40.0
+offset_bottom = -36.0
 horizontal_alignment = 1
 
 [node name="KeyToolBar" type="Node2D" parent="HUD"]
@@ -191,10 +203,11 @@ script = ExtResource("touch_script")
 player_path = NodePath("../../World/Player")
 
 [node name="Joystick" type="VirtualJoystick" parent="HUD/TouchControls" unique_id=1782935406]
-offset_left = 2.0
-offset_top = 232.0
-offset_right = 130.0
+offset_top = 180.0
+offset_right = 190.0
 offset_bottom = 360.0
+joystick_mode = 1
+initial_offset_ratio = Vector2(0.505, 0.59)
 joystick_size = 84.0
 tip_size = 36.0
 deadzone_ratio = 0.1
@@ -228,7 +241,7 @@ grow_vertical = 2
 script = ExtResource("settings_script")
 
 [node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
-offset_right = 640.0
-offset_bottom = 360.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0)

@@ -6,8 +6,8 @@ extends PanelContainer
 ## Big enough for a thumb on a phone.
 const BUTTON_SIZE := Vector2(92, 36)
 const ICON_SIZE := Vector2(24, 24)
-## On touch screens menus sit left of center, to stay clear of the buttons that close them.
-const TOUCH_CENTER_X := 0.39
+## The gap kept between a menu and the Act button, which closes it on touch screens.
+const ACT_GAP := 4.0
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 
@@ -19,6 +19,7 @@ const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 
 func _ready() -> void:
 	GameState.inventory_changed.connect(_refresh)
+	resized.connect(_place)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -30,11 +31,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func open() -> void:
 	$Margin/Box/Help.text = GameState.controls(keyboard_help, touch_help)
-	var center_x := TOUCH_CENTER_X if GameState.touch_mode else 0.5
-	anchor_left = center_x
-	anchor_right = center_x
 	show()
 	_refresh()
+	_place()
 	get_tree().paused = true
 	Audio.play(&"menu_open")
 	_focus_first_button()
@@ -44,6 +43,16 @@ func close() -> void:
 	hide()
 	get_tree().paused = false
 	Audio.play(&"menu_close")
+
+
+## Centered, unless that would cover the Act button: then only as far left as it takes.
+func _place() -> void:
+	var width := get_viewport_rect().size.x
+	var center := width / 2.0
+	if GameState.touch_mode:
+		center = minf(center, TouchControls.act_left(self) - ACT_GAP - size.x / 2.0)
+	anchor_left = center / width
+	anchor_right = anchor_left
 
 
 ## A fixed-size picture, so rows line up however big the art is.

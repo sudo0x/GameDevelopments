@@ -32,11 +32,17 @@ func _ready() -> void:
 		number.position = at + NUMBER_OFFSET
 		add_child(number)
 		_slots.append(slot)
+	get_viewport().size_changed.connect(_fit_screen)
+	_fit_screen()
 	player.tool_changed.connect(_show_selected)
 	# Touch controls emit this when they turn on or off.
 	GameState.inventory_changed.connect(_update_visible)
 	_show_selected()
 	_update_visible()
+
+
+func _fit_screen() -> void:
+	position = TouchControls.extra_space(self) * TouchControls.TOOL_BAR_ANCHOR
 
 
 func _unhandled_input(event: InputEvent) -> void:

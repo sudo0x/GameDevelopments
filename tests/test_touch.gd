@@ -108,6 +108,16 @@ func _run() -> void:
 	await wait(10)
 	check("stops on release", player.global_position == from)
 	check("nothing left pressed", not Input.is_action_pressed("move_left") and not Input.is_action_pressed("move_right"))
+
+	# The stick starts where the thumb lands, so there's room to push left even near the edge.
+	check("the stick starts under the thumb", stick.joystick_mode == 1)
+	touch(Vector2(40, 300), 0, true)
+	await wait(2)
+	drag(Vector2(6, 300), 0)
+	await wait(2)
+	check("pushing left near the edge works", Input.is_action_pressed("move_left"))
+	touch(Vector2(6, 300), 0, false)
+	await wait(2)
 	touch(Vector2(320, 100), 0, true)
 	await wait(2)
 	check("a touch elsewhere isn't the stick", not Input.is_action_pressed("move_right"))

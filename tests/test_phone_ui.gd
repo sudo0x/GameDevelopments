@@ -95,6 +95,7 @@ func _run() -> void:
 		check("shop button fits a thumb", button.size.y >= 34.0)
 	check("the shop fits the screen", shop.get_global_rect().size.y <= 360.0 and shop.get_global_rect().position.y >= 0.0)
 	check("the shop leaves Act showing", shop.get_global_rect().end.x <= act_left)
+	check("the shop is centered when it fits", is_equal_approx(shop.get_global_rect().get_center().x, 320.0))
 	shop.close()
 	bag.open()
 	await process_frame
