@@ -17,7 +17,7 @@ Plans have their own step numbers, so **always say which plan you mean**: "relea
 | 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to the playtest |
 | 2 | Layer 6 steps 1 to 6 (title, touch, phone UI, UI art, sound and settings, polish) | `docs/13_...`, `14_...`, `18_...` | ✅ Finished at step 6; the rest moved to the playtest and release plans |
 | 3 | **Playtest:** the user plays on the computer in sessions, reports problems; Claude logs, fixes, and runs the balance pass | `docs/19_...` | **👉 Next / ongoing.** Findings table and exit rules in the doc |
-| 4 | Release step 1: Android build and phone checks | `docs/20_...` | Waiting for the playtest. Needs the user's phone and setup |
+| 4 | Release step 1: Android build and phone checks | `docs/20_...` | Started early: the build runs on the user's phone, and first fixes are done (findings 14 to 20). The phone checks are still open |
 | 5 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
 | 6 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
 | 7 | Release step 4: Google Play, with the real title and logo | `docs/20_...` | Waiting. Needs a developer account and the real title |
@@ -75,8 +75,13 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-05 (playtest session 1 in progress, findings 8 to 14 fixed; first Android test build ran on the user's phone)
-- **Next (start here tomorrow):** the user starts a **New Game** for playtest session 1 and tries the 2 free holy water. Ask them to report anything unclear, especially whether a new player would know what the holy water is for, and that crops go in the shipping box (finding 4). If it is unclear, suggest a fix (for example first-day hints), log it in `docs/19_...`, and let them choose. After session 1: sessions 2 to 7, then release step 1 (the Android build). Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes. The user made a first Android test build (`export_presets.cfg` and the ETC2/ASTC line in `project.godot`, not yet committed); recheck finding 14 on the phone. Touch feel hasn't been reported yet
+- Last updated: 2026-11-05 (playtest session 1 in progress, findings 8 to 20 fixed; the Android test build runs on the user's phone, and phone fixes are in `f4ea380`)
+- **Next (start here):** first check `git status -sb`: on Windows the user pushes, so make sure commits `1673257` and `f4ea380` reached GitHub. Then, in this order:
+  1. The user installs `builds/cursed-island-test.apk` (built from `f4ea380`, not in git) and tries it on the phone. Ask for a screenshot and these checks: the game fills the screen, the camera hole or notch covers nothing, text and buttons are comfortable, the moving joystick feels right (if not, try Following: `joystick_mode = 2` on `HUD/TouchControls/Joystick`), the pause button and its icon look right, and long messages stay clear of the buttons. Log results in `docs/19_...` and `docs/20_...`
+  2. Ask the two questions still open: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
+  3. Continue playtest session 1: a **New Game** with the 2 free holy water. Ask whether a new player would know what holy water is for, and that crops go in the shipping box (finding 4). If it's unclear, suggest a fix (for example first-day hints), log it, and let them choose
+  4. Then sessions 2 to 7, finish release step 1's checks, and go on down the roadmap. Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes
+- **Android build:** the user has a working setup on Windows, and Claude can export it (see `docs/20_...`, "Making a test build"). No phone was connected by USB so far, so the user copies the APK over. If `project.godot` has `emulate_touch_from_mouse` on, 11 tests fail, so turn it off for tests, builds and commits and tell the user
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
 ### How the game works now
