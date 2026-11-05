@@ -24,12 +24,29 @@ const JOYSTICK_ANCHOR := Vector2(0, 1)
 ## Wide screens have room to keep the right-hand buttons away from the curved edge, and a thumb
 ## reaches them better there. A 16:9 screen has no room to spare.
 const MAX_SIDE_INSET := 20.0
+## The top right text moves left by this while the pause button sits in its corner.
+const PAUSE_TEXT_GAP := 40.0
+const TEXT_EDGE_GAP := 8.0
+const TOP_RIGHT_TEXT: Array[String] = ["DayLabel", "MoneyRow", "StatusLabel"]
+## Computers show a help line above the hearts. Phones don't, so these move up into its place.
+const HINT_ROOM := 24.0
+const TOP_LEFT_Y: Dictionary[String, float] = {"HeartsBar": 32.0, "ToolLabel": 52.0}
+## Messages near the bottom stay between the joystick and the seed arrows, wrapping if they must.
+## Each row is a label with its bottom edge on a computer, then on a phone, from the screen bottom.
+const MESSAGE_SIDE_GAP := 40.0
+const TOUCH_MESSAGE_SIDE_GAP := 181.0
+const MESSAGE_HEIGHT := 24.0
+const MESSAGES: Array[Array] = [["CropStatusLabel", -60.0, -36.0], ["NoticeLabel", -36.0, -84.0]]
 ## Where the Act button starts on the base screen.
 const ACT_LEFT := 501.0
 ## Text, action, center, size, and the edge it follows. Buttons with no text show an icon: Bag,
 ## Act and pause have their own, and Use shows the selected tool, so you can see what it will do.
 const BAG_ICON := preload("res://assets/ui/bag.png")
 const PAUSE_ICON := preload("res://assets/ui/pause_icon.png")
+## Smaller and lighter than other icons: full size, the dark bars hid the ring and sank into
+## the curse.
+const PAUSE_ICON_SIZE := 0.55
+const PAUSE_ICON_COLOR := Color(1.8, 1.7, 1.5)
 ## Act (interact): "you can do something here", unlike any tool icon.
 const ACT_ICON := preload("res://assets/ui/act_icon.png")
 const ACTION_BUTTONS: Array[Array] = [
@@ -38,8 +55,8 @@ const ACTION_BUTTONS: Array[Array] = [
 	["", "inventory", Vector2(526, 262), 42.0, Vector2.ONE],
 	["<", "seed_prev", Vector2(476, 300), 34.0, Vector2.ONE],
 	[">", "seed_next", Vector2(476, 340), 34.0, Vector2.ONE],
-	# Pause: Esc's action, so the pause menu doesn't need to know about touch.
-	["", "ui_cancel", Vector2(320, 22), 34.0, Vector2(0.5, 0)],
+	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
+	["", "ui_cancel", Vector2(614, 24), 34.0, Vector2(1, 0)],
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["use_tool", "interact", "inventory"]
@@ -74,7 +91,9 @@ func _ready() -> void:
 		if entry[1] == "inventory":
 			_add_icon(button, BAG_ICON)
 		elif entry[1] == "ui_cancel":
-			_add_icon(button, PAUSE_ICON)
+			var pause_icon := _add_icon(button, PAUSE_ICON)
+			pause_icon.scale *= PAUSE_ICON_SIZE
+			pause_icon.modulate = PAUSE_ICON_COLOR
 		elif entry[1] == "interact":
 			_add_icon(button, ACT_ICON)
 		elif entry[1] == "use_tool":
@@ -114,9 +133,10 @@ func _fit_screen() -> void:
 	var inset := side_inset(self)
 	for placed: Dictionary in _placed:
 		var at: Vector2 = placed["at"] + extra * placed["anchor"]
-		if placed["anchor"].x == 1.0:
+		if placed["anchor"] == Vector2.ONE:
 			at.x -= inset
 		placed["control"].position = at
+	_fit_messages()
 
 
 func set_active(value: bool) -> void:
@@ -124,11 +144,43 @@ func set_active(value: bool) -> void:
 	visible = value
 	GameState.touch_mode = value
 	hint.visible = not value
+	_make_room_for_pause(value)
+	_use_hint_room(value)
+	_fit_messages()
 	if not value:
 		_release_movement()
 	_show_selected_tool()
 	# Help text on screen depends on the controls in use.
 	GameState.inventory_changed.emit()
+
+
+func _make_room_for_pause(on: bool) -> void:
+	var right := -TEXT_EDGE_GAP - (PAUSE_TEXT_GAP if on else 0.0)
+	for text_name in TOP_RIGHT_TEXT:
+		var text: Control = get_parent().get_node(text_name)
+		var width := text.offset_right - text.offset_left
+		text.offset_right = right
+		text.offset_left = right - width
+
+
+func _fit_messages() -> void:
+	var side := TOUCH_MESSAGE_SIDE_GAP + side_inset(self) if active else MESSAGE_SIDE_GAP
+	for message in MESSAGES:
+		var label: Label = get_parent().get_node(message[0])
+		var bottom: float = message[2] if active else message[1]
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if active else TextServer.AUTOWRAP_OFF
+		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		label.offset_left = side
+		label.offset_right = -side
+		label.offset_top = bottom - MESSAGE_HEIGHT
+		label.offset_bottom = bottom
+
+
+func _use_hint_room(on: bool) -> void:
+	for item_name: String in TOP_LEFT_Y:
+		var item: Control = get_parent().get_node(item_name)
+		item.position.y = TOP_LEFT_Y[item_name] - (HINT_ROOM if on else 0.0)
 
 
 ## A hidden joystick can't see its finger lift, so it would keep the player walking.

@@ -62,7 +62,7 @@ func _run() -> void:
 	var controls: Node = main.get_node("HUD/TouchControls")
 	controls.set_active(true)
 	await process_frame
-	await tap(Vector2(320, 22))
+	await tap(Vector2(614, 24))
 	check("the pause button pauses", pause.visible and paused)
 	pause.resume_button.pressed.emit()
 	# The Use button shows the selected tool, so you can see what it will do.

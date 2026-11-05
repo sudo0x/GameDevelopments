@@ -44,6 +44,16 @@ func _run() -> void:
 	check("project keeps whole pixels", ProjectSettings.get_setting("display/window/stretch/scale_mode") == "integer")
 	var base: Vector2 = root.get_visible_rect().size
 	check("a 16:9 screen is unchanged", base == Vector2(640, 360))
+	# Long messages must clear the thumb controls, on the tightest screen.
+	var crop_text: Label = hud.get_node("CropStatusLabel")
+	crop_text.text = "Old lantern post: tap the glove, then Use to pick up."
+	await wait(2)
+	var text_rect: Rect2 = crop_text.get_global_rect()
+	check("a long message clears the joystick", text_rect.position.x >= 138.0)
+	check("a long message clears the seed arrows", text_rect.end.x <= 459.0)
+	check("a long message stays above the tool bar", text_rect.end.y <= 324.0)
+	check("notices sit above crop text", hud.get_node("NoticeLabel").get_global_rect().end.y <= text_rect.position.y)
+	crop_text.text = ""
 	var use_button: Node2D = controls.get_children().filter(
 		func(n: Node) -> bool: return n is TouchScreenButton and n.action == "use_tool")[0]
 	var use_at := use_button.position
@@ -58,9 +68,16 @@ func _run() -> void:
 	var stick: Control = controls.get_node("Joystick")
 	check("joystick is on the bottom edge", is_equal_approx(stick.get_global_rect().end.y, screen.y))
 	check("joystick stays on the left", stick.position.x == 0.0)
-	check("day stays in the top right", is_equal_approx(hud.get_node("DayLabel").get_global_rect().end.x, screen.x - 8.0))
-	check("status stays on the right", is_equal_approx(hud.get_node("StatusLabel").get_global_rect().end.x, screen.x - 8.0))
-	check("notices stay at the bottom", is_equal_approx(hud.get_node("NoticeLabel").get_global_rect().end.y, screen.y - 36.0))
+	var pause_button: Node2D = controls.get_node("ToolBar").get_children().filter(
+		func(n: Node) -> bool: return n is TouchScreenButton and n.action == "ui_cancel")[0]
+	check("pause stays in the top right corner", pause_button.position == Vector2(597 + extra.x, 7))
+	var bars: Sprite2D = pause_button.get_child(0)
+	check("pause icon leaves the ring showing", bars.texture.get_height() * bars.scale.y <= 64.0 * 0.5)
+	check("hearts use the empty hint line", hud.get_node("HeartsBar").position.y == 8.0)
+	check("tool text follows the hearts", hud.get_node("ToolLabel").position.y == 28.0)
+	check("day makes room for pause", is_equal_approx(hud.get_node("DayLabel").get_global_rect().end.x, screen.x - 48.0))
+	check("status lines up with day", is_equal_approx(hud.get_node("StatusLabel").get_global_rect().end.x, screen.x - 48.0))
+	check("notices follow the bottom edge", is_equal_approx(hud.get_node("NoticeLabel").get_global_rect().end.y, screen.y - 84.0))
 	check("the fade covers the screen", hud.get_node("Fade").get_global_rect().size.is_equal_approx(screen))
 
 	# Fingers have to land on the moved buttons, not where they were.
@@ -78,6 +95,8 @@ func _run() -> void:
 	controls.set_active(false)
 	var keys: Node2D = hud.get_node("KeyToolBar")
 	check("the computer tool bar moves", keys.position.is_equal_approx(extra * Vector2(0.5, 1)))
+	check("the text goes back on a computer", is_equal_approx(hud.get_node("DayLabel").get_global_rect().end.x, screen.x - 8.0))
+	check("hearts go back under the hint", hud.get_node("HeartsBar").position.y == 32.0)
 	root.size = Vector2i(1280, 720)
 	await wait(3)
 	check("back on 16:9 it's in place", keys.position.is_equal_approx(Vector2.ZERO))
