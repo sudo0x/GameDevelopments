@@ -20,3 +20,5 @@ max_hearts = 5
 faint_money_percent = 10
 shrine_cost = 3
 shrine_radius = 9
+curse_return_first_day = 4
+curse_return_per_night = 3

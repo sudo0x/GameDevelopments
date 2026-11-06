@@ -313,11 +313,18 @@ func _on_day_ended() -> void:
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
 	gathering.advance_day(is_tilled)
+	# Before lanterns heal, so they can push back the same night.
+	healing.curse_returns(_can_curse_take)
 	_heal_from_buildings()
 	_water_from_buildings()
 	_refresh_soil_edges()
 	_refresh_crop_needs()
 	GameState.farm_state = _to_state()
+
+
+## The curse only takes empty land: nothing the player made or planted is lost.
+func _can_curse_take(cell: Vector2i) -> bool:
+	return not is_tilled(cell) and not builder.placed.has(cell) and not gathering.spots.has(cell)
 
 
 ## Without this, every tile ever tilled would stay soil for good.
@@ -379,6 +386,7 @@ func _to_state() -> Dictionary:
 		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown})
 	return {
 		"cleansed": healing.cleansed.duplicate(),
+		"dug_finds": healing.dug_finds.duplicate(),
 		"tilled": soil.get_used_cells(),
 		"soil_idle": soil_idle.duplicate(),
 		"crops": saved_crops,
@@ -390,7 +398,7 @@ func _to_state() -> Dictionary:
 
 
 func _restore(state: Dictionary) -> void:
-	healing.restore(state.get("cleansed", []), state.get("shrine", false))
+	healing.restore(state.get("cleansed", []), state.get("shrine", false), state.get("dug_finds", []))
 	gathering.populate(ground, crops_parent, player)
 	gathering.restore(state.get("gathered", []))
 	builder.adopt_starting(state.get("starting_objects"))

@@ -16,6 +16,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
 	gs.buildings[&"lantern_post"] = 5
+	# This test is about lanterns alone: the curse taking land back would change its counts.
+	load("res://data/balance.tres").curse_return_per_night = 0
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

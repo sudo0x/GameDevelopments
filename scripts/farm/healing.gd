@@ -16,8 +16,10 @@ const GLIMMER_SCENE := preload("res://scenes/farm/find_glimmer.tscn")
 
 ## Cells healed so far. ground.tscn always starts cursed, so these are what gets saved.
 var cleansed: Array[Vector2i] = []
-## Finds by cell. A find is gone once its cell is in `cleansed`, so finds aren't saved.
+## Finds still buried, by cell.
 var finds: Dictionary[Vector2i, BuriedFind] = {}
+## Finds already dug up. Saved, because their land can turn cursed again and mustn't pay twice.
+var dug_finds: Array[Vector2i] = []
 ## How many cells could ever be healed.
 var _cursed_total := 0
 ## The glimmer over each find not dug up yet.
@@ -35,11 +37,14 @@ func _ready() -> void:
 
 
 ## Rebuilds healed land from a save, then sets up what depends on it.
-func restore(saved_cells: Array, shrine_restored: bool) -> void:
+func restore(saved_cells: Array, shrine_restored: bool, saved_dug_finds: Array = []) -> void:
 	_cursed_total = ground.get_used_cells_by_id(Farm.Source.CURSED).filter(is_cleansable).size()
 	shrine.restored = shrine_restored
 	for cell: Vector2i in saved_cells:
 		_heal(cell)
+	# Saves from before land could return only know a find is gone by its cell being healed.
+	for cell: Vector2i in saved_dug_finds + saved_cells:
+		_forget_find(cell)
 	_add_glimmers()
 	curse_edges.refresh(ground)
 	_report_progress()
@@ -100,6 +105,26 @@ func purify(cell: Vector2i) -> void:
 		_cleanse_cells([cell], cell)
 
 
+## Overnight, the curse takes back a few healed tiles along its edge. `can_take` says whether a
+## tile is free to lose. Seeded by the day, so a night always plays out the same way.
+func curse_returns(can_take: Callable) -> void:
+	if GameState.day < GameState.BALANCE.curse_return_first_day:
+		return
+	var at_risk: Array[Vector2i] = []
+	for cell in cleansed:
+		if _touches_curse(cell) and can_take.call(cell):
+			at_risk.append(cell)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = GameState.day
+	var count := mini(GameState.BALANCE.curse_return_per_night, at_risk.size())
+	if count == 0:
+		return
+	for i in count:
+		_curse(at_risk.pop_at(rng.randi_range(0, at_risk.size() - 1)))
+	curse_edges.refresh(ground)
+	_report_progress()
+
+
 ## `sound` lets the shrine play its own bigger sound instead.
 func _cleanse_cells(cells: Array[Vector2i], center: Vector2i, sound: StringName = &"cleanse") -> void:
 	Audio.play(sound)
@@ -144,20 +169,37 @@ func _heal(cell: Vector2i) -> void:
 	cleansed.append(cell)
 
 
+func _curse(cell: Vector2i) -> void:
+	ground.set_cell(cell, Farm.Source.CURSED, Farm.texture_coords(cell))
+	cleansed.erase(cell)
+
+
+func _touches_curse(cell: Vector2i) -> bool:
+	for next_door in ground.get_surrounding_cells(cell):
+		if ground.get_cell_source_id(next_door) == Farm.Source.CURSED:
+			return true
+	return false
+
+
 func _dig_up(cell: Vector2i) -> void:
 	GameState.give_find(finds[cell])
 	Audio.play(&"find")
 	_glimmers[cell].queue_free()
 	_glimmers.erase(cell)
+	_forget_find(cell)
+
+
+func _forget_find(cell: Vector2i) -> void:
+	if finds.erase(cell):
+		dug_finds.append(cell)
 
 
 func _add_glimmers() -> void:
 	for cell in finds:
-		if not cleansed.has(cell):
-			var glimmer: Node2D = GLIMMER_SCENE.instantiate()
-			glimmer.position = ground.map_to_local(cell)
-			add_child(glimmer)
-			_glimmers[cell] = glimmer
+		var glimmer: Node2D = GLIMMER_SCENE.instantiate()
+		glimmer.position = ground.map_to_local(cell)
+		add_child(glimmer)
+		_glimmers[cell] = glimmer
 
 
 func _report_progress() -> void:

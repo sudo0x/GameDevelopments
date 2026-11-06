@@ -55,7 +55,7 @@ for test_file in tests/test_*.gd; do
 done
 
 # These come in pairs: the first plays and saves, the second is a fresh start that loads it.
-for pair in save healed_land gathered buildings moved; do
+for pair in save healed_land gathered buildings moved curse_returns; do
 	clear_save
 	check "${pair}_1_play"
 	check "${pair}_2_check"

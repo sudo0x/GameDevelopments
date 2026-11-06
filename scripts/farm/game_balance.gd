@@ -33,3 +33,7 @@ extends Resource
 @export var shrine_cost: int = 3
 ## How many tiles out the restored shrine heals.
 @export var shrine_radius: int = 9
+## The first day whose night the curse takes healed land back.
+@export var curse_return_first_day: int = 4
+## Healed tiles the curse takes back each night. 0 turns this off.
+@export var curse_return_per_night: int = 3
