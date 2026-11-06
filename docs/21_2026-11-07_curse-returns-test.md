@@ -59,7 +59,7 @@ Say "curse step N" so these aren't mixed up with other plans.
 | Step | Work | Done when |
 |---|---|---|
 | 1 ✅ | Land returns: `Healing` picks and takes tiles at night (before lanterns heal), with the two numbers, the find fix and curse edge refresh. Picks are seeded by the day, like creatures. Empty-tile protection came forward from step 2, so no step can lose the player's work | Tests show tiles return, finds don't pay twice, and it survives a restart |
-| 2 | Protection: lanterns and the restored shrine | Tests show each protected tile stays clean |
+| 2 ✅ | Protection: lanterns and the restored shrine | Tests show each protected tile stays clean |
 | 3 | Warning: mark tonight's tiles each morning, and show a morning notice with how many tiles were lost | A screenshot shows marks that are easy to read on a phone |
 | 4 | Update `tools/balance_check.gd` for land lost each night, tune the numbers, and make a test APK | The shrine is still reachable at a sensible pace |
 | 5 | The user plays 5 to 7 game days, then we decide | A decision is in `docs/17_...` |

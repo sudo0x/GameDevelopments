@@ -148,9 +148,18 @@ func _on_shrine_activated() -> void:
 		GameState.notice.emit("The shrine needs %d holy water." % cost)
 	else:
 		shrine.restored = true
-		var center := ground.local_to_map(ground.to_local(shrine.global_position))
+		var center := _shrine_cell()
 		_cleanse_cells(_cursed_cells_around(center, GameState.BALANCE.shrine_radius), center, &"shrine")
 		GameState.notice.emit("The old shrine is restored! The land around it heals.")
+
+
+## A restored shrine keeps the curse away from all the land it healed.
+func shrine_protects(cell: Vector2i) -> bool:
+	return shrine.restored and Vector2(cell - _shrine_cell()).length() <= GameState.BALANCE.shrine_radius
+
+
+func _shrine_cell() -> Vector2i:
+	return ground.local_to_map(ground.to_local(shrine.global_position))
 
 
 ## Healable cells in a circle, for a cleanse bigger than holy water's square patch.

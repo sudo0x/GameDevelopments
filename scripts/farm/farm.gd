@@ -322,9 +322,20 @@ func _on_day_ended() -> void:
 	GameState.farm_state = _to_state()
 
 
-## The curse only takes empty land: nothing the player made or planted is lost.
+## The curse only takes empty land: nothing the player made or planted is lost. Healing
+## lanterns and a restored shrine keep it away from the land around them.
 func _can_curse_take(cell: Vector2i) -> bool:
-	return not is_tilled(cell) and not builder.placed.has(cell) and not gathering.spots.has(cell)
+	if is_tilled(cell) or builder.placed.has(cell) or gathering.spots.has(cell):
+		return false
+	return not healing.shrine_protects(cell) and not _lantern_protects(cell)
+
+
+func _lantern_protects(cell: Vector2i) -> bool:
+	for center in builder.placed:
+		var radius: int = builder.placed[center]["data"].heal_radius
+		if radius > 0 and Vector2(cell - center).length() <= radius:
+			return true
+	return false
 
 
 ## Without this, every tile ever tilled would stay soil for good.
