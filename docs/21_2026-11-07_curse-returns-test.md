@@ -78,7 +78,7 @@ After playing, answer these:
 | Result | What we do |
 |---|---|
 | Mostly yes | Keep it, add art and sound, then start the button redesign (finding 25) |
-| Good idea, wrong pace | Change the numbers and play again |
+| Good idea, wrong pace | Change the numbers and play again, but only once: two tries in total |
 | Annoying or no better | Set the nightly number to 0, log why, and try another idea |
 
 ## Risks

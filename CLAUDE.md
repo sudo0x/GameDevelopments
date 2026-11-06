@@ -16,15 +16,17 @@ Plans have their own step numbers, so **always say which plan you mean**: "relea
 |---|---|---|---|
 | 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to the playtest |
 | 2 | Layer 6 steps 1 to 6 (title, touch, phone UI, UI art, sound and settings, polish) | `docs/13_...`, `14_...`, `18_...` | ✅ Finished at step 6; the rest moved to the playtest and release plans |
-| 3 | **Playtest:** the user plays on the computer in sessions, reports problems; Claude logs, fixes, and runs the balance pass | `docs/19_...` | **👉 Next / ongoing.** Findings table and exit rules in the doc |
-| 3b | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | Planned, not started. Do it after the phone checks. It delays release (chosen 2026-11-07) |
-| 4 | Release step 1: Android build and phone checks | `docs/20_...` | Started early: the build runs on the user's phone, and first fixes are done (findings 14 to 20). The phone checks are still open |
-| 5 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
-| 6 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
-| 7 | Release step 4: Google Play, with the real title and logo | `docs/20_...` | Waiting. Needs a developer account and the real title |
-| 8 | Areas steps 1 to 10 (woods, marsh, ending), as a free update after release | `docs/15_...` | Waiting |
+| 3 | **Phone checks** (release step 1): the build runs on the user's phone, and findings 14 to 20 and 22 are fixed | `docs/20_...` | **👉 Next.** The checks on the phone are still open |
+| 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | Planned, not started. At most two tries, then keep it or move on |
+| 5 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26) | Write its plan when the curse test ends | Waiting |
+| 6 | **First 15 minutes:** simple hints, so a new player knows what to do (finding 4, playtest session 1) | `docs/19_...` | Waiting |
+| 7 | **Outside test:** 5 to 10 players who aren't the user, while the user plays sessions 2 to 7 | `docs/19_...`, `docs/20_...` | Waiting. Needs the real title and testers. Start the Google Play account before this |
+| 8 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
+| 9 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
+| 10 | Release step 4: Google Play, with the real title and logo | `docs/20_...` | Waiting. Needs a developer account and the real title |
+| 11 | Areas steps 1 to 10 (woods, marsh, ending), as a free update, only if real players stay and want more | `docs/15_...` | Waiting |
 
-The user chose this order on 2026-11-04 (see `docs/17_...`): finish Layer 6, play and fix, then release the smaller game, then the woods and marsh. Update this table whenever a step finishes. Anything found or left open goes in the playtest's findings table (`docs/19_...`); phone-only checks are in release step 1 (`docs/20_...`). A ✅ means built and passing automated tests, not tried on a phone or played by a person.
+The user chose this order on 2026-11-07 (see `docs/17_...`): prove the game is fun with the curse test, simpler controls and outside players, then balance and release the smaller game, then the woods and marsh. Small polish waits unless it bothers the user (findings 5, 6, 7 and 21). Each step gets a time limit, so nothing stays almost finished forever. Update this table whenever a step finishes. Anything found or left open goes in the playtest's findings table (`docs/19_...`); phone-only checks are in release step 1 (`docs/20_...`). A ✅ means built and passing automated tests, not tried on a phone or played by a person.
 
 ### How we work
 
@@ -45,7 +47,7 @@ The user is usually away from the code, and answers with short replies.
 - The user decides. Say so plainly when you disagree, but don't keep repeating it: they've chosen not to playtest for now, so mention untested balance only when it matters
 - Don't use a ✅ or "later" to hide a gap: if something is left over, add it to the playtest's findings table (`docs/19_...`), or to release step 1's checks if only a phone can show it
 - Art prompts by layer: `docs/02`, `05`, `08`, `10`, `12`, `14`. Art files are local until committed, so check `art_source/` before asking for art that may already exist
-- Open decisions for the user: the game's real title
+- Open decisions for the user: the game's real title (pick it before the outside test)
 
 ## Engine
 - Godot 4.7.2, GDScript, Compatibility renderer (for web and mobile)
@@ -76,13 +78,12 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-07 (playtest session 1 in progress, findings 8 to 20 and 22 fixed; the Android test build runs on the user's phone)
-- **Next (start here):** first check `git status -sb`: on Windows the user pushes, so make sure commits `1673257` and `f4ea380` reached GitHub. Then, in this order:
+- Last updated: 2026-11-07 (roadmap reordered, phone checks next, findings 8 to 20 and 22 fixed; the Android test build runs on the user's phone)
+- **Next (start here):** first check `git status -sb`: on Windows the user pushes, so make sure the latest commits reached GitHub. Then, in this order:
   1. The user installs `builds/cursed-island-test.apk` (not in git; includes the joystick fix for finding 22) and tries it on the phone. Ask for a screenshot and these checks: the game fills the screen, the camera hole or notch covers nothing, text and buttons are comfortable, the joystick no longer loses the thumb (if it does, try a bigger `joystick_size` on `HUD/TouchControls/Joystick`), the pause button and its icon look right, and long messages stay clear of the buttons. Log results in `docs/19_...` and `docs/20_...`
   2. Ask the two questions still open: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
-  3. Continue playtest session 1: a **New Game** with the 2 free holy water. Ask whether a new player would know what holy water is for, and that crops go in the shipping box (finding 4). If it's unclear, suggest a fix (for example first-day hints), log it, and let them choose
-  4. Then curse step 1 (`docs/21_...`), through to its play test and decision
-  5. Then sessions 2 to 7, finish release step 1's checks, and go on down the roadmap. Before areas step 1, after release, do the plan's math check on how long healing a path across 80 more columns takes
+  3. Then curse step 1 (`docs/21_...`), through to its play test and decision
+  4. Then go on down the roadmap. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Finding 4 (do new players understand holy water and the shipping box?) belongs to the First 15 minutes step
 - **Android build:** the user has a working setup on Windows, and Claude can export it (see `docs/20_...`, "Making a test build"). No phone was connected by USB so far, so the user copies the APK over. If `project.godot` has `emulate_touch_from_mouse` on, 11 tests fail, so turn it off for tests, builds and commits and tell the user
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
