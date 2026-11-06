@@ -16,8 +16,8 @@ Plans have their own step numbers, so **always say which plan you mean**: "relea
 |---|---|---|---|
 | 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to the playtest |
 | 2 | Layer 6 steps 1 to 6 (title, touch, phone UI, UI art, sound and settings, polish) | `docs/13_...`, `14_...`, `18_...` | ✅ Finished at step 6; the rest moved to the playtest and release plans |
-| 3 | **Phone checks** (release step 1): the build runs on the user's phone, and findings 14 to 20 and 22 are fixed | `docs/20_...` | **👉 Next.** The checks on the phone are still open |
-| 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | Planned, not started. At most two tries, then keep it or move on |
+| 3 | **Phone checks** (release step 1): the build runs on the user's phone, and findings 14 to 20 and 22 are fixed | `docs/20_...` | ✅ Main checks okay on the user's phone (2026-11-07). The rest are in the plan's checks table, each with when to do it |
+| 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | **👉 Next.** Planned, not started. At most two tries, then keep it or move on |
 | 5 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26) | Write its plan when the curse test ends | Waiting |
 | 6 | **First 15 minutes:** simple hints, so a new player knows what to do (finding 4, playtest session 1) | `docs/19_...` | Waiting |
 | 7 | **Outside test:** 5 to 10 players who aren't the user, while the user plays sessions 2 to 7 | `docs/19_...`, `docs/20_...` | Waiting. Needs the real title and testers. Start the Google Play account before this |
@@ -78,12 +78,11 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 - Lighting: art is neutral daylight; mood comes from `CanvasModulate` and `PointLight2D`, never baked into sprites
 
 ## Current status (keep this updated at the end of each work session)
-- Last updated: 2026-11-07 (roadmap reordered, phone checks next, findings 8 to 20 and 22 fixed; the Android test build runs on the user's phone)
+- Last updated: 2026-11-07 (roadmap reordered, main phone checks okay, curse test next, findings 8 to 20 and 22 fixed; the Android test build runs on the user's phone)
 - **Next (start here):** first check `git status -sb`: on Windows the user pushes, so make sure the latest commits reached GitHub. Then, in this order:
-  1. The user installs `builds/cursed-island-test.apk` (not in git; includes the joystick fix for finding 22) and tries it on the phone. Ask for a screenshot and these checks: the game fills the screen, the camera hole or notch covers nothing, text and buttons are comfortable, the joystick no longer loses the thumb (if it does, try a bigger `joystick_size` on `HUD/TouchControls/Joystick`), the pause button and its icon look right, and long messages stay clear of the buttons. Log results in `docs/19_...` and `docs/20_...`
-  2. Ask the two questions still open: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
-  3. Then curse step 1 (`docs/21_...`), through to its play test and decision
-  4. Then go on down the roadmap. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Finding 4 (do new players understand holy water and the shipping box?) belongs to the First 15 minutes step
+  1. Curse step 1 (`docs/21_...`), through to its play test and decision
+  2. Ask when it fits, both unanswered: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
+  3. Then go on down the roadmap. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes. Finding 4 (do new players understand holy water and the shipping box?) belongs to the First 15 minutes step
 - **Android build:** the user has a working setup on Windows, and Claude can export it (see `docs/20_...`, "Making a test build"). No phone was connected by USB so far, so the user copies the APK over. If `project.godot` has `emulate_touch_from_mouse` on, 11 tests fail, so turn it off for tests, builds and commits and tell the user
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 
