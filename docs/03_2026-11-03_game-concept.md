@@ -64,7 +64,7 @@ flowchart LR
 | **Cursed creatures** guard dark areas, stronger toward the center | Combat has a clear purpose |
 | Cleansed land **reveals** resources, ruins and secrets | Exploring feels rewarding |
 
-**Later (update ideas):** the curse creeps back at night unless protected (the Night raids idea), and more islands.
+**Later (update ideas):** more islands. The curse creeping back at night (the Night raids idea) moved up: it's being tried before release, see [the curse test plan](21_2026-11-07_curse-returns-test.md).
 
 ## Build roadmap
 

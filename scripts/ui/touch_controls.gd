@@ -20,7 +20,12 @@ const TOOL_COUNT := 7
 ## each control keeps its distance from the edge it belongs to.
 const BASE_SIZE := Vector2(640, 360)
 const TOOL_BAR_ANCHOR := Vector2(0.5, 1)
-const JOYSTICK_ANCHOR := Vector2(0, 1)
+## The stick wakes anywhere in this area, so a thumb never has to aim for it: the left side of the
+## screen, up to the tool bar and below the hearts.
+const JOYSTICK_BASE_WIDTH := 190.0
+const JOYSTICK_TOP_GAP := 60.0
+## Where the ring rests, from the bottom left corner.
+const JOYSTICK_REST := Vector2(96, 74)
 ## Wide screens have room to keep the right-hand buttons away from the curved edge, and a thumb
 ## reaches them better there. A 16:9 screen has no room to spare.
 const MAX_SIDE_INSET := 20.0
@@ -74,6 +79,7 @@ var _placed: Array[Dictionary] = []
 
 @onready var player: Player = get_node(player_path)
 @onready var tool_bar: Node2D = $ToolBar
+@onready var stick: VirtualJoystick = $Joystick
 @onready var hint: Label = get_parent().get_node("Hint")
 
 
@@ -98,7 +104,6 @@ func _ready() -> void:
 			_add_icon(button, ACT_ICON)
 		elif entry[1] == "use_tool":
 			_use_icon = _add_icon(button, tool_icon(0))
-	_follow_edge($Joystick, JOYSTICK_ANCHOR)
 	get_viewport().size_changed.connect(_fit_screen)
 	_fit_screen()
 	player.tool_changed.connect(_show_selected_tool)
@@ -107,7 +112,12 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	# Taps would go through an open menu to anything under it.
-	tool_bar.visible = not get_tree().paused
+	var paused := get_tree().paused
+	tool_bar.visible = not paused
+	if stick.visible == paused:
+		stick.visible = not paused
+		if paused and active:
+			_release_movement()
 
 
 ## How much bigger this screen is than the base one.
@@ -136,7 +146,16 @@ func _fit_screen() -> void:
 		if placed["anchor"] == Vector2.ONE:
 			at.x -= inset
 		placed["control"].position = at
+	_fit_joystick()
 	_fit_messages()
+
+
+func _fit_joystick() -> void:
+	var screen := get_viewport_rect().size
+	var zone := Vector2(JOYSTICK_BASE_WIDTH + extra_space(self).x / 2.0, screen.y - JOYSTICK_TOP_GAP)
+	stick.position = Vector2(0, JOYSTICK_TOP_GAP)
+	stick.size = zone
+	stick.initial_offset_ratio = Vector2(JOYSTICK_REST.x / zone.x, 1.0 - JOYSTICK_REST.y / zone.y)
 
 
 func set_active(value: bool) -> void:
