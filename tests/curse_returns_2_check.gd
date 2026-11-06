@@ -26,6 +26,10 @@ func _run() -> void:
 	check("returned land stays cursed", g.get_cell_source_id(find) == CURSED)
 	check("the dug find is remembered", healing.dug_finds.has(find) and not healing.finds.has(find))
 	check("no glimmer on it", not healing._glimmers.has(find))
+	var file := FileAccess.open("user://marked.txt", FileAccess.READ)
+	var marked_before: Array = file.get_var()
+	file.close()
+	check("a restart marks the same tiles", marked_before == Array(healing.marked))
 	var money: int = gs.money
 	gs.holy_water = 1
 	healing.cleanse(find)

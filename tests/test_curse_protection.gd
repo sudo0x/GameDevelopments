@@ -45,6 +45,8 @@ func _run() -> void:
 	healing.cleanse(Vector2i(36, 13))
 	var patch: Array = healing.cleansed.duplicate()
 	gs.end_day()
+	check("nothing lit is marked", healing.marked.is_empty())
+	gs.end_day()
 	check("a lit patch survives the night", patch.all(func(c: Vector2i) -> bool: return healing.cleansed.has(c)))
 	check("the lantern still heals", healing.cleansed.size() > patch.size())
 

@@ -76,13 +76,16 @@ func _ready() -> void:
 	healing.land_healed.connect(gathering.reveal)
 	# Healed land beside a field is new grass, so the field's edge changes.
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: _refresh_soil_edges())
+	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: healing.refresh_marks(_can_curse_take))
 	builder.setup(ground, crops_parent)
 	spawner.setup(self, crops_parent, player)
 	GameState.day_ended.connect(spawner.clear)
 	GameState.day_started.connect(spawner.spawn_for_today)
 	GameState.day_ended.connect(_on_day_ended)
+	GameState.day_started.connect(_on_day_started)
 	_limit_camera()
 	_restore(GameState.farm_state)
+	healing.mark_tonight(_can_curse_take)
 	spawner.spawn_for_today()
 	Audio.play_music(&"farm")
 
@@ -209,6 +212,8 @@ func _update_target_status() -> void:
 	if status.is_empty():
 		status = soil_status(target_cell)
 	if status.is_empty():
+		status = curse_status(target_cell)
+	if status.is_empty():
 		status = gathering.status(target_cell) + builder.status(target_cell)
 	if status != _target_status:
 		_target_status = status
@@ -232,6 +237,13 @@ func soil_status(cell: Vector2i) -> String:
 	if GameState.BALANCE.soil_idle_nights - soil_idle.get(cell, 0) > 1:
 		return ""
 	return "Empty soil: grass returns tonight."
+
+
+## How a player learns what the marks mean and what saves a tile.
+func curse_status(cell: Vector2i) -> String:
+	if not healing.is_at_risk(cell, _can_curse_take):
+		return ""
+	return "The curse takes this tile tonight. Farm it, build on it, or light it."
 
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
@@ -301,6 +313,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 			builder.place(target_cell, player.selected_building())
 			Audio.play(&"place")
 	_refresh_crop_needs()
+	healing.refresh_marks(_can_curse_take)
 
 
 ## Overnight: watered crops grow one day, empty soil slowly turns back into grass,
@@ -314,12 +327,24 @@ func _on_day_ended() -> void:
 		till(cell)
 	gathering.advance_day(is_tilled)
 	# Before lanterns heal, so they can push back the same night.
-	healing.curse_returns(_can_curse_take)
+	var lost := healing.curse_returns(_can_curse_take)
+	if lost > 0:
+		GameState.notice.emit("The curse took back %s overnight." % _tiles_text(lost))
 	_heal_from_buildings()
 	_water_from_buildings()
 	_refresh_soil_edges()
 	_refresh_crop_needs()
 	GameState.farm_state = _to_state()
+
+
+func _on_day_started() -> void:
+	healing.mark_tonight(_can_curse_take)
+	if not healing.marked.is_empty():
+		GameState.notice.emit("The curse has marked %s for tonight." % _tiles_text(healing.marked.size()))
+
+
+func _tiles_text(count: int) -> String:
+	return "1 tile" if count == 1 else "%d tiles" % count
 
 
 ## The curse only takes empty land: nothing the player made or planted is lost. Healing
@@ -386,8 +411,7 @@ func _heal_from_buildings() -> void:
 		if radius > 0 and healing.heal_nearest(cell, radius):
 			healed += 1
 	if healed > 0:
-		var tiles := "1 tile" if healed == 1 else "%d tiles" % healed
-		GameState.notice.emit("Your lanterns healed %s overnight." % tiles)
+		GameState.notice.emit("Your lanterns healed %s overnight." % _tiles_text(healed))
 
 
 ## Called after the soil dries, so only tilled cells need saving, not watered ones.
