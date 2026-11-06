@@ -120,9 +120,17 @@ func mark_tonight(can_take: Callable) -> void:
 				at_risk.append(cell)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = GameState.day
-		for i in mini(GameState.BALANCE.curse_return_per_night, at_risk.size()):
+		for i in mini(tiles_tonight(), at_risk.size()):
 			marked.append(at_risk.pop_at(rng.randi_range(0, at_risk.size() - 1)))
 	refresh_marks(can_take)
+
+
+## The more land the player holds, the harder the curse pushes back.
+func tiles_tonight() -> int:
+	var base := GameState.BALANCE.curse_return_per_night
+	if base == 0:
+		return 0
+	return base + floori(GameState.healed_percent / GameState.BALANCE.curse_growth_percent)
 
 
 ## Shows only what's still at risk: using a marked tile saves it, and the mark goes.
@@ -140,18 +148,21 @@ func is_at_risk(cell: Vector2i, can_take: Callable) -> bool:
 	return marked.has(cell) and cleansed.has(cell) and _touches_curse(cell) and can_take.call(cell)
 
 
-## Overnight, the curse takes the marked tiles still at risk. Returns how many it took.
-func curse_returns(can_take: Callable) -> int:
-	var taken := marked.filter(func(cell: Vector2i) -> bool: return is_at_risk(cell, can_take))
+## Overnight, the curse takes the marked tiles still at risk. Returns the tiles it took.
+func curse_returns(can_take: Callable) -> Array[Vector2i]:
+	var taken: Array[Vector2i] = []
+	for cell in marked:
+		if is_at_risk(cell, can_take):
+			taken.append(cell)
 	marked.clear()
 	refresh_marks(can_take)
 	if taken.is_empty():
-		return 0
-	for cell: Vector2i in taken:
+		return taken
+	for cell in taken:
 		_curse(cell)
 	curse_edges.refresh(ground)
 	_report_progress()
-	return taken.size()
+	return taken
 
 
 ## `sound` lets the shrine play its own bigger sound instead.

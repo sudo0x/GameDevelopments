@@ -75,7 +75,7 @@ func _run() -> void:
 	check("returned land blocks farming", not farm.is_farmable(lost[0]))
 	check("returned land can be healed", healing.is_cleansable(lost[0]))
 
-	# Using a marked tile saves it, and its mark goes at once.
+	# Planting on a marked tile saves it, and its mark goes at once. Bare soil alone doesn't.
 	var save_me: Vector2i = healing.marked[0]
 	var lose_me: Array = healing.marked.slice(1)
 	farm.target_cell = save_me
@@ -83,12 +83,17 @@ func _run() -> void:
 	farm.target_cell = save_me
 	farm._on_tool_used(0)
 	check("tilling a marked tile works", farm.is_tilled(save_me))
+	check("bare soil keeps its mark", healing._marks._rects.size() == 3)
+	farm._on_tool_used(2)
+	check("planting works", farm.crops.has(save_me))
 	check("its mark goes", healing._marks._rects.size() == 2)
+	var bare_soil: Vector2i = lose_me[0]
+	farm.till(bare_soil)
 	check("it stops warning", farm.curse_status(save_me).is_empty())
 	gs.end_day()
 	check("the saved tile stays", healing.cleansed.has(save_me) and g.get_cell_source_id(save_me) == GRASS)
 	check("the others go", lose_me.all(func(c: Vector2i) -> bool: return g.get_cell_source_id(c) == CURSED))
-	farm.untill(save_me)
+	check("bare soil goes with its tile", not farm.is_tilled(bare_soil))
 
 	# Healing around a marked tile saves it too.
 	var ringed: Vector2i = healing.marked[0]
@@ -116,11 +121,13 @@ func _run() -> void:
 	healing.curse_edges.refresh(g)
 
 	# Nothing the player made is taken.
-	var empty: Vector2i = healing.cleansed[0]
+	var empty: Vector2i = healing.cleansed.filter(farm._can_curse_take)[0]
 	check("empty land can be taken", farm._can_curse_take(empty))
 	farm.till(empty)
-	check("soil is safe", not farm._can_curse_take(empty))
-	farm.untill(empty)
+	check("bare soil can be taken", farm._can_curse_take(empty))
+	farm.plant(empty, gs.CROPS[0])
+	check("a crop is safe", not farm._can_curse_take(empty))
+	empty = healing.cleansed.filter(farm._can_curse_take)[0]
 	farm.builder.place(empty, gs.BUILDINGS[0])
 	check("a building is safe", not farm._can_curse_take(empty))
 	var spot: Vector2i = farm.gathering.spots.keys()[0]
@@ -130,8 +137,20 @@ func _run() -> void:
 	var kept: int = healing.cleansed.size()
 	gs.day = 10
 	healing.mark_tonight(all_free)
-	check("nothing free, nothing lost", healing.curse_returns(func(_c: Vector2i) -> bool: return false) == 0)
+	check("nothing free, nothing lost", healing.curse_returns(func(_c: Vector2i) -> bool: return false).is_empty())
 	check("nothing free, nothing taken", healing.cleansed.size() == kept)
+
+	# The more land is healed, the harder the curse pushes back.
+	var percent_now: float = gs.healed_percent
+	gs.set_healed_percent(0.0)
+	check("3 tiles at the start", healing.tiles_tonight() == 3)
+	gs.set_healed_percent(4.9)
+	check("still 3 under 5%", healing.tiles_tonight() == 3)
+	gs.set_healed_percent(5.0)
+	check("4 tiles at 5%", healing.tiles_tonight() == 4)
+	gs.set_healed_percent(50.0)
+	check("13 tiles at 50%", healing.tiles_tonight() == 13)
+	gs.set_healed_percent(percent_now)
 
 	# A find pays once, however many times its land is healed.
 	var find := Vector2i(53, 11)

@@ -66,7 +66,9 @@ func _run() -> void:
 
 	# Chasing. Fighting has its own test, so the player can't be hurt here.
 	player._safe_left = 9999.0
-	player.global_position = shade.global_position + Vector2(-90, 0)
+	# From its home, so where it wandered to can't put the player beside a lantern or an object.
+	shade.global_position = home
+	player.global_position = home + Vector2(-90, 0)
 	await wait(2)
 	check("sees a close player", shade.state == CHASE)
 	var start: float = shade.global_position.distance_to(player.global_position)

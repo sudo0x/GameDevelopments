@@ -51,7 +51,7 @@ func _run() -> void:
 	await press("interact")
 	check("shop open", menu.visible)
 	check("4 rows", menu._buttons.size() == 4)
-	check("holy row text", menu._labels[3].text == "Holy water: 0" and menu._buttons[3].text == "Buy for 30")
+	check("holy row text", menu._labels[3].text == "Holy water: 0 (3 left)" and menu._buttons[3].text == "Buy for 30")
 	menu._buttons[3].pressed.emit()
 	menu._buttons[3].pressed.emit()
 	check("bought 2", gs.holy_water == 2 and gs.money == 10)

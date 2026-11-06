@@ -243,7 +243,7 @@ func soil_status(cell: Vector2i) -> String:
 func curse_status(cell: Vector2i) -> String:
 	if not healing.is_at_risk(cell, _can_curse_take):
 		return ""
-	return "The curse takes this tile tonight. Farm it, build on it, or light it."
+	return "The curse takes this tile tonight. Plant on it, build on it, or light it."
 
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
@@ -328,8 +328,10 @@ func _on_day_ended() -> void:
 	gathering.advance_day(is_tilled)
 	# Before lanterns heal, so they can push back the same night.
 	var lost := healing.curse_returns(_can_curse_take)
-	if lost > 0:
-		GameState.notice.emit("The curse took back %s overnight." % _tiles_text(lost))
+	for cell in lost:
+		untill(cell)
+	if not lost.is_empty():
+		GameState.notice.emit("The curse took back %s overnight." % _tiles_text(lost.size()))
 	_heal_from_buildings()
 	_water_from_buildings()
 	_refresh_soil_edges()
@@ -347,10 +349,10 @@ func _tiles_text(count: int) -> String:
 	return "1 tile" if count == 1 else "%d tiles" % count
 
 
-## The curse only takes empty land: nothing the player made or planted is lost. Healing
-## lanterns and a restored shrine keep it away from the land around them.
+## Crops and buildings are never lost, but bare soil is: a hoe tap alone shouldn't stop the
+## curse. Healing lanterns and a restored shrine keep it away from the land around them.
 func _can_curse_take(cell: Vector2i) -> bool:
-	if is_tilled(cell) or builder.placed.has(cell) or gathering.spots.has(cell):
+	if crops.has(cell) or builder.placed.has(cell) or gathering.spots.has(cell):
 		return false
 	return not healing.shrine_protects(cell) and not _lantern_protects(cell)
 

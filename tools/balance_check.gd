@@ -11,6 +11,11 @@ extends SceneTree
 ## left on holy water, and uses it all on the path. Plots are the limit, because the game has
 ## no energy bar: only how many tiles you're willing to water by hand every day.
 ## Left out: gathering and crafting, creatures, walking time, lanterns and the purifying hoe.
+##
+## The curse takes land back each night, so holy water also goes on repairs. How much depends on
+## where the tiles fall, so two cases are shown: tiles close together (one use mends 9) and
+## scattered (one use mends 3). Not every lost tile really needs mending, so both lean cautious.
+## The curse growing with healed land isn't counted: this path heals too little for it to matter.
 
 const HOME := Vector2i(28, 9)
 const SHRINE := Vector2i(69, 12)
@@ -20,6 +25,8 @@ const TILES_PER_USE := 2
 const PLOT_COUNTS: Array[int] = [8, 12, 20, 40]
 const MAX_DAYS := 200
 const RESULT_TARGET := "10 to 15 days (the playtest plan's starting target)"
+## Tiles lost a night, and tiles one holy water mends. The first row is the game without the curse.
+const CURSE_CASES: Array[Array] = [[0, 9], [1, 9], [1, 3], [2, 9], [2, 3], [3, 9], [3, 3]]
 
 var _ground: TileMapLayer
 var _balance: Resource
@@ -37,10 +44,12 @@ func _init() -> void:
 	print("Holy water uses to open it: %d, plus %d for the shrine = %d" % [uses, _balance.shrine_cost, uses + _balance.shrine_cost])
 	print("Cost at %d each: %d money, before buried finds" % [_balance.holy_water_price, (uses + _balance.shrine_cost) * _balance.holy_water_price])
 	print("")
-	print("plots | first holy water | path open | shrine restored | money earned by then")
-	for plots in PLOT_COUNTS:
-		print(_simulate(plots, path))
-	print("")
+	for curse_case in CURSE_CASES:
+		print("Curse takes %d a night, one holy water mends %d:" % curse_case)
+		print("plots | first holy water | path open | shrine restored | money earned by then")
+		for plots in PLOT_COUNTS:
+			print(_simulate(plots, path, curse_case[0], curse_case[1]))
+		print("")
 	print("Target: ", RESULT_TARGET)
 	_ground.free()
 	quit()
@@ -77,7 +86,7 @@ func _cheapest_path() -> Array[Vector2i]:
 	return path
 
 
-func _simulate(plot_count: int, path: Array[Vector2i]) -> String:
+func _simulate(plot_count: int, path: Array[Vector2i], lost_per_night: int, mended_per_use: int) -> String:
 	var finds: Array = (load("res://data/buried_finds.tres") as Resource).get("finds")
 	var money := 0
 	var earned := 0
@@ -88,6 +97,8 @@ func _simulate(plot_count: int, path: Array[Vector2i]) -> String:
 	var at_path := 0
 	var first_water := 0
 	var path_open := 0
+	## Holy water owed for land the curse took back.
+	var repairs := 0.0
 	for day in range(1, MAX_DAYS + 1):
 		var shipped := 0
 		var kept: Array[Dictionary] = []
@@ -107,11 +118,16 @@ func _simulate(plot_count: int, path: Array[Vector2i]) -> String:
 				money -= crop.seed_price
 			plots.append({"crop": crop, "ripe": day + crop.days_to_grow})
 		if plots.size() == plot_count:
-			var bought: int = money / _balance.holy_water_price
+			var bought: int = mini(money / _balance.holy_water_price, _balance.holy_water_daily_limit)
 			money -= bought * _balance.holy_water_price
 			holy += bought
 		if holy > 0 and first_water == 0:
 			first_water = day
+		if at_path > 0 and day > _balance.curse_return_first_day:
+			repairs += float(lost_per_night) / mended_per_use
+		while holy > 0 and repairs >= 1.0:
+			holy -= 1
+			repairs -= 1.0
 		while holy > 0 and at_path < path.size():
 			holy -= 1
 			for find in finds:
@@ -125,7 +141,7 @@ func _simulate(plot_count: int, path: Array[Vector2i]) -> String:
 						2:
 							holy += find.amount
 			at_path += TILES_PER_USE
-		if at_path >= path.size() and path_open == 0:
+		if at_path >= path.size() and path_open == 0 and repairs < 1.0:
 			path_open = day
 		if path_open > 0 and holy >= _balance.shrine_cost:
 			return "%5d | day %12d | day %5d | day %11d | %d" % [plot_count, first_water, path_open, day, earned]

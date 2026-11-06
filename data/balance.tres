@@ -22,3 +22,5 @@ shrine_cost = 3
 shrine_radius = 9
 curse_return_first_day = 4
 curse_return_per_night = 3
+curse_growth_percent = 5.0
+holy_water_daily_limit = 3

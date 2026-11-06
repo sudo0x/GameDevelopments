@@ -47,8 +47,12 @@ func _refresh() -> void:
 		_labels[i].text = "%s seeds: %d" % [crop.display_name, GameState.seed_count(crop)]
 		_set_price(i, crop.seed_price)
 	var last := _labels.size() - 1
-	_labels[last].text = "Holy water: %d" % GameState.holy_water
+	var left := GameState.holy_water_left_today()
+	_labels[last].text = "Holy water: %d (%d left)" % [GameState.holy_water, left]
 	_set_price(last, GameState.BALANCE.holy_water_price)
+	if left <= 0:
+		_buttons[last].text = "Sold out"
+		_buttons[last].disabled = true
 
 
 func _set_price(row: int, price: int) -> void:

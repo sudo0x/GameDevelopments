@@ -81,7 +81,12 @@ func _run() -> void:
 	check("tool text follows the hearts", hud.get_node("ToolLabel").position.y == 28.0)
 	check("day makes room for pause", is_equal_approx(hud.get_node("DayLabel").get_global_rect().end.x, screen.x - 48.0))
 	check("status lines up with day", is_equal_approx(hud.get_node("StatusLabel").get_global_rect().end.x, screen.x - 48.0))
-	check("notices follow the bottom edge", is_equal_approx(hud.get_node("NoticeLabel").get_global_rect().end.y, screen.y - 84.0))
+	check("notices follow the bottom edge", is_equal_approx(hud.get_node("NoticeLabel").get_global_rect().end.y, screen.y - 92.0))
+	check("crop text clears the tool bar on phones", hud.get_node("CropStatusLabel").get_global_rect().end.y <= screen.y - 42.0)
+	controls.set_active(false)
+	check("notices clear the tool bar on computers", hud.get_node("NoticeLabel").get_global_rect().end.y <= screen.y - 42.0)
+	check("crop text clears the tool bar on computers", hud.get_node("CropStatusLabel").get_global_rect().end.y <= screen.y - 42.0)
+	controls.set_active(true)
 	check("the fade covers the screen", hud.get_node("Fade").get_global_rect().size.is_equal_approx(screen))
 
 	# Fingers have to land on the moved buttons, not where they were.

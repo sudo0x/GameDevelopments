@@ -62,10 +62,45 @@ Say "curse step N" so these aren't mixed up with other plans.
 | 1 ✅ | Land returns: `Healing` picks and takes tiles at night (before lanterns heal), with the two numbers, the find fix and curse edge refresh. Picks are seeded by the day, like creatures. Empty-tile protection came forward from step 2, so no step can lose the player's work | Tests show tiles return, finds don't pay twice, and it survives a restart |
 | 2 ✅ | Protection: lanterns and the restored shrine | Tests show each protected tile stays clean |
 | 3 ✅ | Warning: mark tonight's tiles each morning, and show a morning notice with how many tiles were lost | A screenshot shows marks that are easy to read on a phone |
-| 4 | Update `tools/balance_check.gd` for land lost each night, tune the numbers, and make a test APK | The shrine is still reachable at a sensible pace |
+| 4 ✅ | Update `tools/balance_check.gd` for land lost each night, tune the numbers, and make a test APK | The shrine is still reachable at a sensible pace |
 | 5 | The user plays 5 to 7 game days, then we decide | A decision is in `docs/17_...` |
 
 The marks use a tinted `tile_cursor.png` and a purple stain for the test, so **no new art is needed**. Facing a marked tile explains what saves it. If we keep the feature, it should get proper art and a sound.
+
+## Pace check (2026-11-07)
+
+`tools/balance_check.gd` now counts holy water spent mending lost land. Tiles close together are mended 9 per use, and scattered tiles 3 per use.
+
+| Plots watered each day | No curse | 3 a night, close together | 3 a night, scattered |
+|---|---|---|---|
+| 8 | Day 16 | Day 16 | Day 19 |
+| 12 | Day 14 | Day 14 | Day 14 |
+| 20 | Day 14 | Day 14 | Day 16 |
+| 40 | Day 19 | Day 19 | Day 19 |
+
+The shrine stays reachable, at most 3 days later. **The numbers stay at 3 tiles from day 4.** The math says this is safe, and may even be gentle, but it's a best case and can't show how it feels. Playing decides that.
+
+## Second try (2026-11-07)
+
+The first play, on a day 53 save with 4,695 money, had no pressure: one hoe tap saved any tile (finding 28), and money could buy enough holy water to heal the island in one sitting (finding 31). The second and last try changes the rules above like this:
+
+| Change | Rule |
+|---|---|
+| Daily holy water limit | The stall sells 3 a day (`holy_water_daily_limit`). The workbench recipe isn't limited, so crafting becomes a way past it |
+| The curse grows | 3 tiles a night, plus 1 for every 5% of the island healed (`curse_growth_percent`) |
+| What saves a tile | A crop, a building, a lantern's reach, or healing beside it. Bare soil doesn't, and it's lost with its tile. Crops take no damage |
+| How to test | Start a **New Game**, because a rich old save can't show the pace |
+
+Pace check with these rules, shrine restored at 3 tiles a night:
+
+| Plots watered each day | Tiles close together | Tiles scattered |
+|---|---|---|
+| 8 | Day 19 | Day 26 |
+| 12 | Day 17 | Day 23 |
+| 20 | Day 19 | Day 24 |
+| 40 | Day 24 | Day 31 |
+
+That's slower than the old 10 to 15 day target, on purpose. It's a rough estimate: it leaves out the curse growing, crafting, lanterns and creatures.
 
 ## How we decide
 
@@ -73,7 +108,7 @@ After playing, answer these:
 
 1. Did you make different choices because of the curse?
 2. Did you look forward to the next day more than before?
-3. Did losing land feel fair, or just annoying?
+3. Did losing land feel fair, or just annoying? Did the daily limit feel like a real choice, or just a wall?
 4. Did you still feel you were making progress?
 
 | Result | What we do |
@@ -86,5 +121,5 @@ After playing, answer these:
 
 - **Too punishing:** this game is meant to be calm and short per session. Losing land must feel like a push, never like losing your work.
 - **Busywork:** if protecting land becomes a daily chore, it swaps boredom for chores.
-- **Hand-tilling everything:** tilling a marked tile saves it, with no energy cost. Empty soil turns back to grass after 3 nights, which may be enough. Watch for this in play.
+- **Hand-tilling everything:** tilling a marked tile saves it, with no energy cost. Empty soil turns back to grass after 3 nights, which may be enough. Seen in the first play: it makes lanterns unnecessary (finding 28).
 - **Pace:** the release gets later by the length of this test.

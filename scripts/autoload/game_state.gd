@@ -80,6 +80,8 @@ var holy_water: int = BALANCE.start_holy_water
 var has_purifying_hoe := false
 ## Like holy water, but it heals a bigger patch.
 var strong_holy_water := 0
+## Not saved: saves happen in the morning, when this is always 0.
+var holy_water_sold_today := 0
 var has_sword := false
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
@@ -158,6 +160,7 @@ func end_day() -> void:
 	_pay_shipped()
 	day_ended.emit()
 	day += 1
+	holy_water_sold_today = 0
 	_refill_hoe()
 	_refill_hearts()
 	day_started.emit()
@@ -306,6 +309,7 @@ func _reset() -> void:
 	shipped.clear()
 	holy_water = BALANCE.start_holy_water
 	strong_holy_water = 0
+	holy_water_sold_today = 0
 	has_purifying_hoe = false
 	has_sword = false
 	hoe_uses_left = 0
@@ -335,11 +339,16 @@ func load_game() -> void:
 
 
 ## Buys one holy water. Returns false if there isn't enough money.
+func holy_water_left_today() -> int:
+	return BALANCE.holy_water_daily_limit - holy_water_sold_today
+
+
 func buy_holy_water() -> bool:
-	if money < BALANCE.holy_water_price:
+	if money < BALANCE.holy_water_price or holy_water_left_today() <= 0:
 		return false
 	money -= BALANCE.holy_water_price
 	holy_water += 1
+	holy_water_sold_today += 1
 	inventory_changed.emit()
 	return true
 

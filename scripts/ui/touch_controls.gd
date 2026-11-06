@@ -41,7 +41,7 @@ const TOP_LEFT_Y: Dictionary[String, float] = {"HeartsBar": 32.0, "ToolLabel": 5
 const MESSAGE_SIDE_GAP := 40.0
 const TOUCH_MESSAGE_SIDE_GAP := 181.0
 const MESSAGE_HEIGHT := 24.0
-const MESSAGES: Array[Array] = [["CropStatusLabel", -60.0, -36.0], ["NoticeLabel", -36.0, -84.0]]
+const MESSAGES: Array[Array] = [["CropStatusLabel", -68.0, -44.0], ["NoticeLabel", -44.0, -92.0]]
 ## Where the Act button starts on the base screen.
 const ACT_LEFT := 501.0
 ## Text, action, center, size, and the edge it follows. Buttons with no text show an icon: Bag,
