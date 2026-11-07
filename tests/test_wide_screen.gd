@@ -70,8 +70,8 @@ func _run() -> void:
 	check("joystick stays on the left", stick.position.x == 0.0)
 	check("joystick area reaches the tool bar on wide screens", is_equal_approx(stick.size.x, 190.0 + extra.x / 2.0))
 	check("joystick area stops short of the tool bar", stick.get_global_rect().end.x < 197.0 + extra.x / 2.0)
-	check("joystick area stays below the hearts", stick.position.y == 60.0)
-	check("ring rests in the same corner", stick.initial_offset_ratio.is_equal_approx(Vector2(96.0 / stick.size.x, 1.0 - 74.0 / stick.size.y)))
+	check("joystick area stays well below the hearts", stick.position.y >= 150.0)
+	check("ring rests in the same corner", (stick.rest + stick.position).is_equal_approx(Vector2(96.0, screen.y - 74.0)))
 	var pause_button: Node2D = controls.get_node("ToolBar").get_children().filter(
 		func(n: Node) -> bool: return n is TouchScreenButton and n.action == "ui_cancel")[0]
 	check("pause stays in the top right corner", pause_button.position == Vector2(597 + extra.x, 7))

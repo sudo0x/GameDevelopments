@@ -20,10 +20,10 @@ const TOOL_COUNT := 7
 ## each control keeps its distance from the edge it belongs to.
 const BASE_SIZE := Vector2(640, 360)
 const TOOL_BAR_ANCHOR := Vector2(0.5, 1)
-## The stick wakes anywhere in this area, so a thumb never has to aim for it: the left side of the
-## screen, up to the tool bar and below the hearts.
+## The stick wakes anywhere in this area, so a thumb never has to aim for it: the lower left of
+## the screen, up to the tool bar and well clear of the hearts.
 const JOYSTICK_BASE_WIDTH := 190.0
-const JOYSTICK_TOP_GAP := 60.0
+const JOYSTICK_TOP_SHARE := 0.4
 ## Where the ring rests, from the bottom left corner.
 const JOYSTICK_REST := Vector2(96, 74)
 ## Wide screens have room to keep the right-hand buttons away from the curved edge, and a thumb
@@ -79,7 +79,7 @@ var _placed: Array[Dictionary] = []
 
 @onready var player: Player = get_node(player_path)
 @onready var tool_bar: Node2D = $ToolBar
-@onready var stick: VirtualJoystick = $Joystick
+@onready var stick: ThumbStick = $Joystick
 @onready var hint: Label = get_parent().get_node("Hint")
 
 
@@ -152,10 +152,11 @@ func _fit_screen() -> void:
 
 func _fit_joystick() -> void:
 	var screen := get_viewport_rect().size
-	var zone := Vector2(JOYSTICK_BASE_WIDTH + extra_space(self).x / 2.0, screen.y - JOYSTICK_TOP_GAP)
-	stick.position = Vector2(0, JOYSTICK_TOP_GAP)
+	var top := roundf(screen.y * JOYSTICK_TOP_SHARE)
+	var zone := Vector2(JOYSTICK_BASE_WIDTH + extra_space(self).x / 2.0, screen.y - top)
+	stick.position = Vector2(0, top)
 	stick.size = zone
-	stick.initial_offset_ratio = Vector2(JOYSTICK_REST.x / zone.x, 1.0 - JOYSTICK_REST.y / zone.y)
+	stick.rest = Vector2(JOYSTICK_REST.x, zone.y - JOYSTICK_REST.y)
 
 
 func set_active(value: bool) -> void:

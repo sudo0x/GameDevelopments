@@ -111,7 +111,39 @@ func _run() -> void:
 
 	# The stick starts where the thumb lands, so there's room to push left even near the edge,
 	# and the ring follows a thumb that slides past it.
-	check("the stick follows the thumb", stick.joystick_mode == 2)
+	touch(Vector2(100, 250), 0, true)
+	await wait(2)
+	check("the ring starts under the thumb", stick.ring_center() + stick.position == Vector2(100, 250))
+	drag(Vector2(180, 250), 0)
+	await wait(2)
+	check("the ring follows the thumb", stick.ring_center().x + stick.position.x > 130.0)
+	touch(Vector2(180, 250), 0, false)
+	await wait(2)
+	check("the ring goes home", stick.ring_center() == stick.rest)
+
+	# A thumb at the very edge: nothing walks, and the whole stick stays on screen.
+	touch(Vector2(1, 359), 0, true)
+	await wait(2)
+	check("landing at the edge doesn't walk", not Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_up"))
+	drag(Vector2(0, 359), 0)
+	await wait(2)
+	var at_corner: Vector2 = stick.ring_center() + stick.position
+	check("the ring stays on screen", at_corner.x >= 42.0 and at_corner.y <= 318.0)
+	touch(Vector2(0, 359), 0, false)
+	await wait(2)
+
+	# Sliding up past the ring can't reach the hearts.
+	touch(Vector2(100, 200), 0, true)
+	await wait(2)
+	drag(Vector2(100, 2), 0)
+	await wait(2)
+	var top_ring: Vector2 = stick.ring_center() + stick.position
+	var top_knob: Vector2 = stick.knob_center() + stick.position
+	check("the ring stays clear of the hearts", top_ring.y - 42.0 >= 100.0)
+	check("the knob stays clear of the hearts", top_knob.y - 18.0 >= 60.0)
+	check("still walking up", Input.is_action_pressed("move_up"))
+	touch(Vector2(100, 2), 0, false)
+	await wait(2)
 	touch(Vector2(40, 300), 0, true)
 	await wait(2)
 	drag(Vector2(6, 300), 0)
@@ -130,12 +162,19 @@ func _run() -> void:
 	check("a short slide back turns left", Input.is_action_pressed("move_left") and not Input.is_action_pressed("move_right"))
 	touch(Vector2(100, 300), 0, false)
 	await wait(2)
-	# High on the left side still counts.
+	# Mid-screen on the left still counts, but up by the hearts doesn't.
+	touch(Vector2(100, 170), 0, true)
+	await wait(2)
+	drag(Vector2(140, 170), 0)
+	await wait(2)
+	check("a thumb mid-screen wakes the stick", Input.is_action_pressed("move_right"))
+	touch(Vector2(140, 170), 0, false)
+	await wait(2)
 	touch(Vector2(100, 90), 0, true)
 	await wait(2)
 	drag(Vector2(140, 90), 0)
 	await wait(2)
-	check("a thumb high on the left wakes the stick", Input.is_action_pressed("move_right"))
+	check("a touch by the hearts isn't the stick", not Input.is_action_pressed("move_right"))
 	touch(Vector2(140, 90), 0, false)
 	await wait(2)
 	touch(Vector2(320, 100), 0, true)
