@@ -8,6 +8,7 @@ const STEM_COLOR := Color(0.36, 0.55, 0.3)
 ## How high the need icon floats at each stage, so it sits just above the plant.
 const NEED_HEIGHTS: Array[float] = [-14.0, -22.0, -30.0, -40.0]
 const NEED_BOB_SPEED := 3.0
+const BLIGHT_COLOR := Color(0.55, 0.35, 0.7)
 
 var data: CropData
 ## 0 = seed, 1 = sprout, 2 = growing, 3 = ripe.
@@ -17,6 +18,12 @@ var stage := 0:
 		_update_look()
 ## Watered days so far. The crop is ripe when this reaches data.days_to_grow.
 var days_grown := 0
+
+## The curse reached it: it stops growing, and can only be harvested for a shard.
+var blighted := false:
+	set(value):
+		blighted = value
+		_update_look()
 
 ## The small icon above the crop for what it needs, or null when it needs nothing.
 var need_icon: Texture2D
@@ -55,8 +62,12 @@ func is_ripe() -> bool:
 	return stage == STAGES - 1
 
 
+func can_harvest() -> bool:
+	return is_ripe() or blighted
+
+
 func grow_one_day() -> void:
-	if not is_ripe():
+	if not is_ripe() and not blighted:
 		set_days_grown(days_grown + 1)
 
 
@@ -79,6 +90,7 @@ func _stage_for(days: int) -> int:
 func _update_look() -> void:
 	if not is_node_ready():
 		return
+	sprite.modulate = BLIGHT_COLOR if blighted else Color.WHITE
 	if data and data.stages_texture:
 		sprite.texture = data.stages_texture
 		sprite.hframes = STAGES

@@ -39,5 +39,7 @@ extends Resource
 @export var curse_return_per_night: int = 3
 ## The curse takes one more tile a night for each of these percent of the island healed.
 @export var curse_growth_percent: float = 5.0
+## Money from harvesting a crop the curse blighted, on top of a curse shard.
+@export var blighted_crop_money: int = 5
 ## Holy water the stall can sell in one day, so money alone can't beat the curse.
 @export var holy_water_daily_limit: int = 3

@@ -31,6 +31,9 @@ func _refresh() -> void:
 	crops_grid.add_child(Control.new())
 	_add_label(crops_grid, "Seeds")
 	for crop in GameState.CROPS:
+		# Ward plants are never harvested, so they go in the item list below.
+		if crop.burst_radius > 0:
+			continue
 		crops_grid.add_child(_icon(crop.icon))
 		_add_label(crops_grid, crop.display_name)
 		_add_label(crops_grid, str(GameState.harvest_count(crop)))
@@ -40,6 +43,9 @@ func _refresh() -> void:
 	lines.append(_add_item(HOLY_WATER_ICON, "Holy water: %d" % GameState.holy_water))
 	if GameState.strong_holy_water > 0:
 		lines.append(_add_item(STRONG_WATER_ICON, "Strong holy water: %d" % GameState.strong_holy_water))
+	for crop in GameState.CROPS:
+		if crop.burst_radius > 0 and GameState.seed_count(crop) > 0:
+			lines.append(_add_item(crop.seed_icon, "%s seeds: %d" % [crop.display_name, GameState.seed_count(crop)]))
 	for material in GameState.MATERIALS:
 		lines.append(_add_item(material.icon, "%s: %d" % [material.display_name, GameState.material_count(material)]))
 	for building in GameState.BUILDINGS:

@@ -30,6 +30,7 @@ func _run() -> void:
 	var marked_before: Array = file.get_var()
 	file.close()
 	check("a restart marks the same tiles", marked_before == Array(healing.marked))
+	check("a blighted crop stays blighted", farm.crops[Vector2i(20, 13)].blighted)
 	var money: int = gs.money
 	gs.holy_water = 1
 	healing.cleanse(find)

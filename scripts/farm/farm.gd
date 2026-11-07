@@ -162,7 +162,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.SEEDS:
 			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
-			return (crops.has(cell) and crops[cell].is_ripe()) or gathering.can_hit(cell) or builder.placed.has(cell)
+			return (crops.has(cell) and crops[cell].can_harvest()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
 			var owned := GameState.strong_holy_water if player.strong_water else GameState.holy_water
 			return owned > 0 and not healing.cleansable_cells(cell, player.strong_water).is_empty()
@@ -194,9 +194,15 @@ func plant(cell: Vector2i, data: CropData) -> void:
 ## Picks the crop. The soil stays tilled, so the cell can be planted again.
 func harvest(cell: Vector2i) -> void:
 	var crop: Crop = crops[cell]
-	GameState.add_harvest(crop.data)
 	crops.erase(cell)
 	crop.queue_free()
+	if crop.blighted:
+		GameState.take_blighted_crop()
+	elif crop.data.burst_radius > 0:
+		var healed := healing.burst(cell, crop.data.burst_radius)
+		GameState.notice.emit("The %s burst and healed %s!" % [crop.data.display_name.to_lower(), _tiles_text(healed)])
+	else:
+		GameState.add_harvest(crop.data)
 
 
 func _update_build_preview() -> void:
@@ -208,11 +214,11 @@ func _update_build_preview() -> void:
 
 
 func _update_target_status() -> void:
-	var status := crop_status(target_cell)
+	var status := curse_status(target_cell)
+	if status.is_empty():
+		status = crop_status(target_cell)
 	if status.is_empty():
 		status = soil_status(target_cell)
-	if status.is_empty():
-		status = curse_status(target_cell)
 	if status.is_empty():
 		status = gathering.status(target_cell) + builder.status(target_cell)
 	if status != _target_status:
@@ -225,6 +231,10 @@ func crop_status(cell: Vector2i) -> String:
 	if not crops.has(cell):
 		return ""
 	var crop := crops[cell]
+	if crop.blighted:
+		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press 4 to clear it for a curse shard.", "Tap the glove, then Use for a curse shard.")]
+	if crop.is_ripe() and crop.data.burst_radius > 0:
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4 to burst it and heal the land.", "Tap the glove, then Use to burst it.")]
 	if crop.is_ripe():
 		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the glove, then Use.")]
 	return _growing_status(cell, crop)
@@ -243,7 +253,9 @@ func soil_status(cell: Vector2i) -> String:
 func curse_status(cell: Vector2i) -> String:
 	if not healing.is_at_risk(cell, _can_curse_take):
 		return ""
-	return "The curse takes this tile tonight. Plant on it, build on it, or light it."
+	if crops.has(cell):
+		return "The curse will blight this crop tonight. Harvest it, or guard it."
+	return "The curse takes this tile tonight. Build on it, light it, or plant a wardthorn nearby."
 
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
@@ -323,20 +335,33 @@ func _on_day_ended() -> void:
 		if is_watered(cell):
 			crops[cell].grow_one_day()
 	_age_empty_soil()
+	# Before the soil dries, because a wardthorn only guards while it's watered.
+	_curse_comes_back()
 	for cell in soil.get_used_cells_by_id(Source.SOIL_WET):
 		till(cell)
 	gathering.advance_day(is_tilled)
-	# Before lanterns heal, so they can push back the same night.
-	var lost := healing.curse_returns(_can_curse_take)
-	for cell in lost:
-		untill(cell)
-	if not lost.is_empty():
-		GameState.notice.emit("The curse took back %s overnight." % _tiles_text(lost.size()))
+	# After the curse, so lanterns can push back the same night.
 	_heal_from_buildings()
 	_water_from_buildings()
 	_refresh_soil_edges()
 	_refresh_crop_needs()
 	GameState.farm_state = _to_state()
+
+
+## Food crops can't protect themselves: the curse blights them, and the land under them stays.
+func _curse_comes_back() -> void:
+	var blighted := 0
+	for cell in healing.marked:
+		if crops.has(cell) and healing.is_at_risk(cell, _can_curse_take):
+			crops[cell].blighted = true
+			blighted += 1
+	if blighted > 0:
+		GameState.notice.emit("The curse blighted %s." % ("1 crop" if blighted == 1 else "%d crops" % blighted))
+	var lost := healing.curse_returns(_can_curse_take)
+	for cell in lost:
+		untill(cell)
+	if not lost.is_empty():
+		GameState.notice.emit("The curse took back %s overnight." % _tiles_text(lost.size()))
 
 
 func _on_day_started() -> void:
@@ -349,12 +374,22 @@ func _tiles_text(count: int) -> String:
 	return "1 tile" if count == 1 else "%d tiles" % count
 
 
-## Crops and buildings are never lost, but bare soil is: a hoe tap alone shouldn't stop the
-## curse. Healing lanterns and a restored shrine keep it away from the land around them.
+## Buildings are never lost. Crops and bare soil can't protect themselves, so they need a
+## healing lantern, a restored shrine or a watered ward plant nearby.
 func _can_curse_take(cell: Vector2i) -> bool:
-	if crops.has(cell) or builder.placed.has(cell) or gathering.spots.has(cell):
+	if builder.placed.has(cell) or gathering.spots.has(cell):
 		return false
-	return not healing.shrine_protects(cell) and not _lantern_protects(cell)
+	if crops.has(cell) and (crops[cell].blighted or crops[cell].data.ward_radius > 0):
+		return false
+	return not healing.shrine_protects(cell) and not _lantern_protects(cell) and not _ward_protects(cell)
+
+
+func _ward_protects(cell: Vector2i) -> bool:
+	for center in crops:
+		var radius := crops[center].data.ward_radius
+		if radius > 0 and is_watered(center) and Vector2(cell - center).length() <= radius:
+			return true
+	return false
 
 
 func _lantern_protects(cell: Vector2i) -> bool:
@@ -380,7 +415,7 @@ func _age_empty_soil() -> void:
 func _refresh_crop_needs() -> void:
 	for cell in crops:
 		var crop := crops[cell]
-		if crop.is_ripe():
+		if crop.can_harvest():
 			crop.show_need(RIPE_ICON)
 		else:
 			crop.show_need(null if is_watered(cell) else WATER_ICON)
@@ -420,7 +455,7 @@ func _heal_from_buildings() -> void:
 func _to_state() -> Dictionary:
 	var saved_crops: Array[Dictionary] = []
 	for cell in crops:
-		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown})
+		saved_crops.append({"cell": cell, "id": crops[cell].data.id, "days": crops[cell].days_grown, "blighted": crops[cell].blighted})
 	return {
 		"cleansed": healing.cleansed.duplicate(),
 		"dug_finds": healing.dug_finds.duplicate(),
@@ -447,7 +482,9 @@ func _restore(state: Dictionary) -> void:
 	for saved: Dictionary in state.get("crops", []):
 		var data := GameState.crop_by_id(saved["id"])
 		if data:
-			_add_crop(saved["cell"], data).set_days_grown(saved["days"])
+			var crop := _add_crop(saved["cell"], data)
+			crop.set_days_grown(saved["days"])
+			crop.blighted = saved.get("blighted", false)
 	# Last, because restoring the soil above leaves it all dry.
 	_water_from_buildings()
 	_refresh_soil_edges()

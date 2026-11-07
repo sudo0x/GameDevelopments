@@ -98,6 +98,14 @@ func heal_nearest(center: Vector2i, radius: int) -> bool:
 	return true
 
 
+## A ripe ward plant bursting. Returns how many tiles it healed.
+func burst(center: Vector2i, radius: int) -> int:
+	var cells := _cursed_cells_around(center, radius)
+	if not cells.is_empty():
+		_cleanse_cells(cells, center)
+	return cells.size()
+
+
 ## Whether the purifying hoe would heal this cell.
 func can_purify(cell: Vector2i) -> bool:
 	return GameState.hoe_uses_left > 0 and is_cleansable(cell)

@@ -17,6 +17,13 @@ extends SceneTree
 ##   Optional: --crop-y 257 --crop-h 723 does the same up and down (the vertical fence).
 ##   Optional: --circle true then keeps only the circle that fills the cut (the joystick knob,
 ##   drawn on a base ring it doesn't need).
+##   Optional: --outline true reads each whole art pixel instead of only its center, and keeps thin
+##   dark lines. For art shrunk a lot, where center samples would lose the outline (wardthorn).
+
+const OUTLINE_DARKNESS := 0.22
+const OUTLINE_MIN_DARK := 0.2
+const OUTLINE_MIN_FILL := 0.3
+
 
 func _init() -> void:
 	var args := _parse_args(OS.get_cmdline_user_args())
@@ -71,6 +78,8 @@ func _init() -> void:
 				var sy := box.position.y + int((y + 0.5) * scale)
 				var c := src.get_pixel(min(sx, src.get_width() - 1), min(sy, src.get_height() - 1))
 				c.a = 1.0 if c.a > 0.5 else 0.0
+				if args.has("outline"):
+					c = _block_color(src, box.position + Vector2i(int(x * scale), int(y * scale)), ceili(scale))
 				var px := ox + x
 				var py := oy + y
 				if px >= i * frame_w and px < (i + 1) * frame_w and py >= 0:
@@ -80,6 +89,33 @@ func _init() -> void:
 	sheet.save_png(ProjectSettings.globalize_path("res://" + out_path))
 	print("saved ", out_path, " (", sheet.get_width(), "x", sheet.get_height(), ")")
 	quit()
+
+
+## One color for a whole art pixel. Dark outline wins if enough of it is there, and a mostly
+## empty block stays empty.
+func _block_color(src: Image, at: Vector2i, size: int) -> Color:
+	var dark := Color(0, 0, 0, 0)
+	var light := Color(0, 0, 0, 0)
+	var dark_count := 0
+	var light_count := 0
+	var total := 0
+	for y in range(at.y, mini(at.y + size, src.get_height())):
+		for x in range(at.x, mini(at.x + size, src.get_width())):
+			total += 1
+			var c := src.get_pixel(x, y)
+			if c.a <= 0.5:
+				continue
+			if c.get_luminance() < OUTLINE_DARKNESS:
+				dark += c
+				dark_count += 1
+			else:
+				light += c
+				light_count += 1
+	if total == 0 or float(dark_count + light_count) / total < OUTLINE_MIN_FILL:
+		return Color(0, 0, 0, 0)
+	var picked := dark / dark_count if float(dark_count) / total >= OUTLINE_MIN_DARK else light / maxi(light_count, 1)
+	picked.a = 1.0
+	return picked
 
 
 func _merged(boxes: Array[Rect2i]) -> Rect2i:

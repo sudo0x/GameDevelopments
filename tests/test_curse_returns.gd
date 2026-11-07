@@ -25,6 +25,7 @@ func _run() -> void:
 	gs.holy_water = 20
 	gs.strong_holy_water = 5
 	gs.buildings[&"lantern_post"] = 1
+	gs.buildings[&"fence"] = 1
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -75,7 +76,7 @@ func _run() -> void:
 	check("returned land blocks farming", not farm.is_farmable(lost[0]))
 	check("returned land can be healed", healing.is_cleansable(lost[0]))
 
-	# Planting on a marked tile saves it, and its mark goes at once. Bare soil alone doesn't.
+	# Building on a marked tile saves it, and its mark goes at once. Bare soil doesn't.
 	var save_me: Vector2i = healing.marked[0]
 	var lose_me: Array = healing.marked.slice(1)
 	farm.target_cell = save_me
@@ -84,8 +85,10 @@ func _run() -> void:
 	farm._on_tool_used(0)
 	check("tilling a marked tile works", farm.is_tilled(save_me))
 	check("bare soil keeps its mark", healing._marks._rects.size() == 3)
-	farm._on_tool_used(2)
-	check("planting works", farm.crops.has(save_me))
+	farm.untill(save_me)
+	var fence = gs.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
+	farm.builder.place(save_me, fence)
+	healing.refresh_marks(farm._can_curse_take)
 	check("its mark goes", healing._marks._rects.size() == 2)
 	var bare_soil: Vector2i = lose_me[0]
 	farm.till(bare_soil)
@@ -125,9 +128,7 @@ func _run() -> void:
 	check("empty land can be taken", farm._can_curse_take(empty))
 	farm.till(empty)
 	check("bare soil can be taken", farm._can_curse_take(empty))
-	farm.plant(empty, gs.CROPS[0])
-	check("a crop is safe", not farm._can_curse_take(empty))
-	empty = healing.cleansed.filter(farm._can_curse_take)[0]
+	farm.untill(empty)
 	farm.builder.place(empty, gs.BUILDINGS[0])
 	check("a building is safe", not farm._can_curse_take(empty))
 	var spot: Vector2i = farm.gathering.spots.keys()[0]

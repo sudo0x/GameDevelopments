@@ -19,6 +19,10 @@ func _run() -> void:
 	farm.healing.mark_tonight(only_find)
 	farm.healing.curse_returns(only_find)
 	farm.healing.mark_tonight(farm._can_curse_take)
+	var sick := Vector2i(20, 13)
+	farm.till(sick)
+	farm.plant(sick, gs.CROPS[0])
+	farm.crops[sick].blighted = true
 	gs.end_day()
 	# For the next run to compare: a restart must mark the same tiles.
 	var file := FileAccess.open("user://marked.txt", FileAccess.WRITE)

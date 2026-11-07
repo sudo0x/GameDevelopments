@@ -107,6 +107,7 @@ func _run() -> void:
 	gs.strong_holy_water = 99
 	gs.holy_water = 99
 	gs.harvest[&"pumpkin"] = 999
+	gs.seeds[&"wardthorn"] = 99
 	for material in gs.MATERIALS:
 		gs.materials[material.id] = 999
 	for building in gs.BUILDINGS:

@@ -13,3 +13,7 @@ extends Resource
 @export var stages_texture: Texture2D
 ## Placeholder color used until stages_texture exists.
 @export var color: Color = Color.WHITE
+## Above 0, the plant is poison to the curse: while watered, it guards land this many tiles away.
+@export var ward_radius: int = 0
+## Above 0, harvesting bursts the plant and heals cursed land this many tiles away.
+@export var burst_radius: int = 0

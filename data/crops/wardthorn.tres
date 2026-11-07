@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropData" format=3]
+
+[ext_resource type="Script" uid="uid://b01yi5bnjnwku" path="res://scripts/farm/crop_data.gd" id="1_crop"]
+[ext_resource type="Texture2D" path="res://assets/crops/wardthorn_stages.png" id="2_stages"]
+[ext_resource type="Texture2D" path="res://assets/items/seeds_wardthorn.png" id="icon_1"]
+
+[resource]
+script = ExtResource("1_crop")
+seed_icon = ExtResource("icon_1")
+icon = ExtResource("icon_1")
+id = &"wardthorn"
+display_name = "Wardthorn"
+days_to_grow = 4
+seed_price = 60
+sell_price = 0
+stages_texture = ExtResource("2_stages")
+color = Color(0.72, 0.5, 0.95, 1)
+ward_radius = 2
+burst_radius = 2

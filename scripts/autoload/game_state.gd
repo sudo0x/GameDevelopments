@@ -32,8 +32,10 @@ const CROPS: Array[CropData] = [
 	preload("res://data/crops/radish.tres"),
 	preload("res://data/crops/carrot.tres"),
 	preload("res://data/crops/pumpkin.tres"),
+	preload("res://data/crops/wardthorn.tres"),
 ]
 
+const CURSE_SHARD: MaterialData = preload("res://data/materials/curse_shard.tres")
 const MATERIALS: Array[MaterialData] = [
 	preload("res://data/materials/wood.tres"),
 	preload("res://data/materials/stone.tres"),
@@ -179,6 +181,13 @@ func use_seed(crop: CropData) -> bool:
 func add_harvest(crop: CropData) -> void:
 	harvest[crop.id] = harvest_count(crop) + 1
 	inventory_changed.emit()
+
+
+## A blighted crop can't be sold, but it leaves a little money and a curse shard.
+func take_blighted_crop() -> void:
+	money += BALANCE.blighted_crop_money
+	add_material(CURSE_SHARD, 1)
+	notice.emit("+%d money, +1 %s" % [BALANCE.blighted_crop_money, CURSE_SHARD.display_name])
 
 
 func add_material(material: MaterialData, amount: int) -> void:

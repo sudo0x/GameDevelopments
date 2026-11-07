@@ -88,7 +88,9 @@ The first play, on a day 53 save with 4,695 money, had no pressure: one hoe tap 
 |---|---|
 | Daily holy water limit | The stall sells 3 a day (`holy_water_daily_limit`). The workbench recipe isn't limited, so crafting becomes a way past it |
 | The curse grows | 3 tiles a night, plus 1 for every 5% of the island healed (`curse_growth_percent`) |
-| What saves a tile | A crop, a building, a lantern's reach, or healing beside it. Bare soil doesn't, and it's lost with its tile. Crops take no damage |
+| What saves a tile | A building, a lantern's reach, a watered wardthorn's reach, or healing beside it. Bare soil doesn't, and it's lost with its tile |
+| Food crops | They can't protect themselves (the user's idea). The curse blights a marked crop: it stops growing, and clearing it gives 5 money and a curse shard. The land under it stays clean that night |
+| Wardthorn | A plant that is poison to the curse. Seed 60 money, 4 watered days to ripen. While watered that day, it guards land within 2 tiles. Ripe, it can be burst with the Hand tool to heal cursed land within 2 tiles, which uses it up |
 | How to test | Start a **New Game**, because a rich old save can't show the pace |
 
 Pace check with these rules, shrine restored at 3 tiles a night:
@@ -101,6 +103,8 @@ Pace check with these rules, shrine restored at 3 tiles a night:
 | 40 | Day 24 | Day 31 |
 
 That's slower than the old 10 to 15 day target, on purpose. It's a rough estimate: it leaves out the curse growing, crafting, lanterns and creatures.
+
+The wardthorn's healing isn't in that estimate either. Its seeds have no daily limit, so watch whether bursts make the holy water limit pointless.
 
 ## How we decide
 
