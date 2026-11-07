@@ -65,6 +65,8 @@ var has_purifying_hoe := false
 var has_sword := false
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
+## Waters left in the can. Full every morning, so it isn't saved.
+var can_water: int = BALANCE.can_capacity
 
 
 func crop_by_id(id: StringName) -> CropData:
@@ -238,6 +240,20 @@ func use_building(building: BuildingData) -> bool:
 	return true
 
 
+## Spends one water from the can. Returns false if it's empty.
+func use_can_water() -> bool:
+	if can_water <= 0:
+		return false
+	can_water -= 1
+	inventory_changed.emit()
+	return true
+
+
+func fill_can() -> void:
+	can_water = BALANCE.can_capacity
+	inventory_changed.emit()
+
+
 ## Spends one of today's purifying uses. Returns false if there are none left.
 func use_purifying_hoe() -> bool:
 	if not has_purifying_hoe or hoe_uses_left <= 0:
@@ -297,6 +313,7 @@ func lose_faint_money() -> int:
 ## Refills what comes back every morning. Progress calls this as a new day starts.
 func start_day() -> void:
 	holy_water_sold_today = 0
+	can_water = BALANCE.can_capacity
 	_refill_hoe()
 
 
@@ -313,6 +330,7 @@ func reset() -> void:
 	has_purifying_hoe = false
 	has_sword = false
 	hoe_uses_left = 0
+	can_water = BALANCE.can_capacity
 
 
 ## The shipping box isn't saved: it's always empty here, because end_day() pays it first.

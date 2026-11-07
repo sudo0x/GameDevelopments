@@ -29,6 +29,8 @@ extends Resource
 ## After a farming tap, the Action button won't use objects for this many seconds, so tapping
 ## along a row can't open a menu by accident.
 @export var action_object_pause: float = 0.5
+## Waters the can holds. It's full each morning, and wells refill it.
+@export var can_capacity: int = 10
 ## Tilled soil with no crop turns back into grass after this many nights.
 @export var soil_idle_nights: int = 3
 ## Hearts the player starts each day with.

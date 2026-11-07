@@ -6,8 +6,8 @@ extends RefCounted
 
 const PAGES: Array[Array] = [
 	[0.0, "The last green land", "A curse is killing this island. Your farm is the last green land.\n\nThis book was left in the house. Its pages are stained black. Perhaps healing the land will clear them."],
-	[0.0, "Working the land", "Face the ground and use {action}. It tills grass, plants seeds, waters crops and picks them when ripe.\n\nCrops grow while you sleep, but only if watered. Put your harvest in the shipping box to sell it."],
-	[0.0, "Healing the land", "Holy water heals cursed land: use {heal} beside it. Buy more at the stall.\n\nThe curse returns at night and takes back what it can. Lanterns and watered wardthorn keep it away."],
+	[0.0, "Working the land", "Face the ground and use {action}. It tills grass, plants seeds, waters crops and picks them when ripe.\n\nCrops grow while you sleep, but only if watered. The can holds ten, and a well refills it. Sell your harvest in the shipping box."],
+	[0.0, "Healing the land", "Holy water heals cursed land: use {heal} beside it. Buy more at the stall.\n\nThe curse returns at night. Lanterns and watered wardthorn guard the land around them: face one to see how far."],
 	[0.0, "The night trader", "A note in fresh ink:\n\n\"Someone rows in after dark. I have never seen their face.\n\nWhat I leave in the box is gone by morning, with coins in its place. The stall is stocked too, but never with more than three bottles.\""],
 	[1.0, "The first page clears", "\"We came for the good soil. The harvests were heavy, and we thanked no one for them.\n\nThe shrines stood empty. Nobody noticed when their lights went out.\""],
 	[3.0, "Things in the dark", "\"Shades drift where the ground has died. They hate lantern light.\n\nHollows walk the old farmlands. They wear what is left of us, and they don't know our names.\""],

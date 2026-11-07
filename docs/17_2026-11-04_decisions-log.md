@@ -10,6 +10,9 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| What do lanterns and wardthorn each do? | **Lanterns are rare and permanent, wardthorn is cheap and needs care** (2026-11-07, Claude's design at the user's request) | Lanterns beat wardthorn at everything, so spamming them was the best plan and made the land messy. Now a lantern guards 5×5, must stand 6 tiles from another and costs curse shards. A wardthorn guards 7×7 while watered |
+| What limits farm size? | **Water, not soil** (2026-11-07, Claude's design at the user's request). The can holds 10, is full each morning and refills at wells | Energy bars just stop people playing. Water makes field size and well placement a choice, and gives wells a job |
+| Is the starting well movable? | **No, it's fixed like the house** (2026-11-07) | Saves list which map objects are still in place, so a new movable one would be removed from older saves. Loading clears any soil or crop under it |
 | How do popups grow with more items? | **`PickMenu` scrolls now. The Bag gets tabs just before the areas work** (2026-11-07) | Scrolling is small and fixes Seed and Build together. Tabs are a bigger job, and aren't needed until there's more to list |
 | Does the goal stay on the screen? | **No: a Tasks menu holds goals, and a new one shows for 6 seconds** (2026-11-07, the user's choice). This adds a small sixth button | A clear screen, and the user can read as much as they want. Claude advised keeping one line, so new players always know what's next: the fading line covers that, and the outside test will check it |
 | Who runs the shop and buys from the box? | **A night trader nobody has seen** (2026-11-07, the user's choice) | One book page explains the box, the stall and its limit of 3 holy water, with no new systems, and keeps the island lonely |

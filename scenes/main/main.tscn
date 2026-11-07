@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="pause_menu_scene"]
 [ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="settings_script"]
 [ext_resource type="PackedScene" path="res://scenes/farm/workbench.tscn" id="workbench_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/well.tscn" id="well_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
 
 [node name="Main" type="Node2D" unique_id=1909061381]
@@ -103,6 +104,9 @@ position = Vector2(816, 624)
 
 [node name="Workbench" parent="World" unique_id=1093386571 instance=ExtResource("workbench_scene")]
 position = Vector2(976, 384)
+
+[node name="StartingWell" parent="World" instance=ExtResource("well_scene")]
+position = Vector2(816, 284)
 
 [node name="Shrine" parent="World" unique_id=1264790358 instance=ExtResource("shrine_scene")]
 position = Vector2(2224, 412)

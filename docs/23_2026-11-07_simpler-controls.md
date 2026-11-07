@@ -89,7 +89,9 @@ Start a **New Game** for this if you can, because it tests the goals too. That e
 | 13 | Overall: does one thumb on each side feel right? | You'd keep these controls |
 | 14 | Press and hold a building, drag it, let go (needs the next build) | It lifts when you expect, and never by accident |
 | 15 | Open the Book in the bag and read it | It's easy to read, and you'd want the next page |
-| 16 | Tap Tasks, and watch a new goal fade (needs the next build) | You always know what to do next, and the screen feels clearer |
+| 16 | Tap Tasks, and watch a new goal fade | You always know what to do next, and the screen feels clearer |
+| 17 | Face a wardthorn and a lantern | The teal square clearly shows what's guarded, and red means water it |
+| 18 | Water until the can is empty, then refill at the well by the house | The trip feels like a fair limit, not a chore |
 
 Rows 10 to 12 need a sword, a hoe and strong holy water, so they can wait for a later save. Anything that fails goes in the playtest's findings table.
 

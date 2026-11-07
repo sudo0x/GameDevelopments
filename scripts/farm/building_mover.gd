@@ -85,11 +85,11 @@ func _show_target() -> void:
 	var ground := _farm.ground
 	_to = ground.local_to_map(ground.to_local(_world_point(_finger_at)))
 	var building: BuildingData = _farm.builder.placed[_from]["data"]
-	_farm.build_preview.show_at(building, ground.map_to_local(_to) + Farm.BUILDING_BASE, _farm.can_build(_to))
+	_farm.build_preview.show_at(building, ground.map_to_local(_to) + Farm.BUILDING_BASE, _farm.can_move(_from, _to))
 
 
 func _let_go() -> void:
-	if moving and _to != _from and _farm.can_build(_to):
+	if moving and _to != _from and _farm.can_move(_from, _to):
 		var from := _from
 		_stop()
 		_farm.move_building(from, _to)

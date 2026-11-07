@@ -72,11 +72,12 @@ func _run() -> void:
 
 	# Crafting one.
 	var recipe = inv.RECIPES[2]
-	inv.add_material(inv.MATERIALS[0], 3)
-	inv.add_material(inv.MATERIALS[1], 2)
+	inv.add_material(inv.MATERIALS[0], 5)
+	inv.add_material(inv.MATERIALS[1], 3)
+	inv.add_material(inv.CURSE_SHARD, 2)
 	check("recipe is the lantern", recipe.building == lantern)
 	check("crafted", inv.craft(recipe) and inv.building_count(lantern) == 1)
-	check("materials spent", inv.material_count(inv.MATERIALS[0]) == 0 and inv.material_count(inv.MATERIALS[1]) == 0)
+	check("materials spent", inv.material_count(inv.MATERIALS[0]) == 0 and inv.material_count(inv.MATERIALS[1]) == 0 and inv.material_count(inv.CURSE_SHARD) == 0)
 	check("can make more than one", not inv.already_made(recipe))
 	await physics_frame
 	await physics_frame

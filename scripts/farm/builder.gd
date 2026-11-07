@@ -49,6 +49,16 @@ func move(from: Vector2i, to: Vector2i) -> void:
 	fit_neighbors()
 
 
+## Whether this building's spacing rule allows it here. `ignoring` is the building being moved.
+func has_room(cell: Vector2i, building: BuildingData, ignoring := NO_CELL) -> bool:
+	if building.min_spacing <= 0:
+		return true
+	for other in placed:
+		if other != ignoring and placed[other]["data"] == building and Farm.tiles_apart(cell, other) < building.min_spacing:
+			return false
+	return true
+
+
 ## The cell of the building drawn at this world point, or NO_CELL. Buildings are taller than
 ## their tile, so this uses the art, and the one in front wins.
 func cell_at(point: Vector2) -> Vector2i:

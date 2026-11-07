@@ -1,9 +1,13 @@
 [gd_scene format=3]
 
 [ext_resource type="Texture2D" path="res://assets/objects/well.png" id="1_texture"]
+[ext_resource type="Script" path="res://scripts/farm/well.gd" id="2_script"]
 
 [sub_resource type="RectangleShape2D" id="Shape_well"]
 size = Vector2(30, 14)
+
+[sub_resource type="RectangleShape2D" id="Shape_reach"]
+size = Vector2(36, 36)
 
 [node name="Well" type="StaticBody2D"]
 
@@ -14,3 +18,10 @@ shape = SubResource("Shape_well")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_texture")
 offset = Vector2(0, -32)
+
+[node name="Interact" type="Area2D" parent="."]
+position = Vector2(0, -10)
+script = ExtResource("2_script")
+
+[node name="Shape" type="CollisionShape2D" parent="Interact"]
+shape = SubResource("Shape_reach")

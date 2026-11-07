@@ -100,7 +100,7 @@ func heal_nearest(center: Vector2i, radius: int) -> bool:
 
 ## A ripe ward plant bursting. Returns how many tiles it healed.
 func burst(center: Vector2i, radius: int) -> int:
-	var cells := _cursed_cells_around(center, radius)
+	var cells := cleansable_square(center, radius)
 	if not cells.is_empty():
 		_cleanse_cells(cells, center)
 	return cells.size()
@@ -211,6 +211,16 @@ func _shrine_cell() -> Vector2i:
 
 
 ## Healable cells in a circle, for a cleanse bigger than holy water's square patch.
+## The same square a ward plant guards, so a burst heals what the cursor showed.
+func cleansable_square(center: Vector2i, radius: int) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for y in range(-radius, radius + 1):
+		for x in range(-radius, radius + 1):
+			if is_cleansable(center + Vector2i(x, y)):
+				cells.append(center + Vector2i(x, y))
+	return cells
+
+
 func _cursed_cells_around(center: Vector2i, radius: int) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	for y in range(-radius, radius + 1):

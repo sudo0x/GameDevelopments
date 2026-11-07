@@ -31,19 +31,19 @@ func _run() -> void:
 	var lantern = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"lantern_post")[0]
 	var fence = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
 
-	# A lantern's reach, measured the same way as its healing.
+	# A lantern guards a square, corners included.
 	var at := Vector2i(34, 13)
-	var inside := at + Vector2i(4, 0)
-	var corner := at + Vector2i(3, 3)
-	var outside := at + Vector2i(5, 0)
+	var inside := at + Vector2i(2, 0)
+	var corner := at + Vector2i(2, 2)
+	var outside := at + Vector2i(3, 0)
 	check("land starts unprotected", farm._can_curse_take(inside))
 	farm.builder.place(at, lantern)
-	check("4 tiles from a lantern is safe", not farm._can_curse_take(inside))
-	check("past the circle's edge isn't", farm._can_curse_take(corner))
-	check("5 tiles from a lantern isn't", farm._can_curse_take(outside))
+	check("2 tiles from a lantern is safe", not farm._can_curse_take(inside))
+	check("so is the corner of its square", not farm._can_curse_take(corner))
+	check("3 tiles from a lantern isn't", farm._can_curse_take(outside))
 
 	# A whole night beside a lantern loses nothing.
-	healing.cleanse(Vector2i(36, 13))
+	healing.cleanse(Vector2i(35, 13))
 	var patch: Array = healing.cleansed.duplicate()
 	progress.end_day()
 	check("nothing lit is marked", healing.marked.is_empty())

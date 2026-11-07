@@ -10,6 +10,11 @@ extends Resource
 @export var preview_offset: Vector2
 ## If above 0, heals the nearest cursed tile within this many tiles each night.
 @export var heal_radius: int = 0
+## If above 0, the curse can't take land in the square this many tiles out: 2 makes a 5×5 area.
+@export var guard_radius: int = 0
+## If above 0, another of this building must be at least this many tiles away, so strong
+## buildings stay rare, and the land doesn't fill up with them.
+@export var min_spacing: int = 0
 ## Can't be crafted: it only exists because the map starts with one, so the Build tool
 ## skips it unless one is in the bag.
 @export var starting_only := false

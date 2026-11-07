@@ -84,14 +84,14 @@ func _run() -> void:
 	# A wardthorn guards the land around it while it's watered.
 	healing.cleanse(Vector2i(50, 3))
 	var thorn := Vector2i(50, 4)
-	var near := thorn + Vector2i(2, 0)
-	var far := thorn + Vector2i(3, 0)
+	var near := thorn + Vector2i(3, 0)
+	var far := thorn + Vector2i(4, 0)
 	farm.till(thorn)
 	farm.plant(thorn, ward)
 	check("a dry wardthorn guards nothing", farm._can_curse_take(near))
 	farm.water(thorn)
-	check("watered, it guards 2 tiles away", not farm._can_curse_take(near))
-	check("3 tiles away isn't guarded", farm._can_curse_take(far))
+	check("watered, it guards 3 tiles away", not farm._can_curse_take(near))
+	check("4 tiles away isn't guarded", farm._can_curse_take(far))
 	check("it can't be blighted", not farm._can_curse_take(thorn))
 
 	# The night's check comes before the soil dries, so today's water counts.

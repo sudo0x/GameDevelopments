@@ -143,7 +143,12 @@ func _physics_process(delta: float) -> void:
 	var rect := Rect2(ground.map_to_local(_shown_cell) - tile / 2.0, tile)
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * healing.radius_for(player.strong_water))
-	if by_action:
+	# Facing a guard shows what it protects, because nothing else on screen can.
+	var guard := guard_radius_at(_shown_cell)
+	if guard > 0:
+		highlight.show_area(rect.grow(tile.x * guard), _guard_is_active(_shown_cell))
+		highlight.visible = true
+	elif by_action:
 		highlight.show_cell(rect, action != Action.NONE)
 		# Swinging and using an object don't happen on the tile, so don't point at it.
 		highlight.visible = action != Action.SWING and action != Action.INTERACT
@@ -210,6 +215,30 @@ func is_farmable(cell: Vector2i) -> bool:
 	return ground.get_cell_source_id(cell) == Source.GRASS and not _has_solid_object(cell)
 
 
+## How far apart two cells are, counting a diagonal step as one. Everything with a square
+## area uses this: guards, spacing and bursts.
+static func tiles_apart(a: Vector2i, b: Vector2i) -> int:
+	return maxi(absi(a.x - b.x), absi(a.y - b.y))
+
+
+## How far the guard on this cell reaches, or the one about to be placed there. 0 if none.
+func guard_radius_at(cell: Vector2i) -> int:
+	if crops.has(cell):
+		return crops[cell].data.ward_radius
+	if builder.placed.has(cell):
+		return builder.placed[cell]["data"].guard_radius
+	if player.tool == Player.Tool.BUILD:
+		return player.selected_building().guard_radius
+	return 0
+
+
+## A dry ward plant shows red, to say it needs water. A new building shows if it can go there.
+func _guard_is_active(cell: Vector2i) -> bool:
+	if crops.has(cell):
+		return is_watered(cell)
+	return builder.placed.has(cell) or _can_place(cell)
+
+
 func is_tilled(cell: Vector2i) -> bool:
 	return soil.get_cell_source_id(cell) != -1
 
@@ -235,7 +264,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 				return not crops.has(cell)
 			return is_farmable(cell) or healing.can_purify(cell)
 		Player.Tool.WATERING_CAN:
-			return is_tilled(cell) and not is_watered(cell)
+			return is_tilled(cell) and not is_watered(cell) and Inventory.can_water > 0
 		Player.Tool.SEEDS:
 			return is_tilled(cell) and not crops.has(cell) and Inventory.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
@@ -305,7 +334,7 @@ func _tile_action(cell: Vector2i) -> Action:
 	if crops.has(cell):
 		if crops[cell].can_harvest():
 			return Action.HARVEST
-		return Action.NONE if is_watered(cell) else Action.WATER
+		return Action.WATER if can_use(Player.Tool.WATERING_CAN, cell) else Action.NONE
 	if is_tilled(cell):
 		return Action.PLANT if can_use(Player.Tool.SEEDS, cell) else Action.NONE
 	if gathering.can_hit(cell):
@@ -321,7 +350,13 @@ func move_building(from: Vector2i, to: Vector2i) -> void:
 
 
 func _can_place(cell: Vector2i) -> bool:
-	return Inventory.building_count(player.selected_building()) > 0 and can_build(cell)
+	var building := player.selected_building()
+	return Inventory.building_count(building) > 0 and can_build(cell) and builder.has_room(cell, building)
+
+
+## Whether a placed building can move to this cell. Its own spot doesn't count against it.
+func can_move(from: Vector2i, to: Vector2i) -> bool:
+	return can_build(to) and builder.has_room(to, builder.placed[from]["data"], from)
 
 
 ## What the Heal button would do on this cell. It changes nothing.
@@ -416,7 +451,9 @@ func _update_build_preview() -> void:
 
 
 func _update_target_status() -> void:
-	var status := curse_status(_shown_cell)
+	var status := spacing_status(_shown_cell)
+	if status.is_empty():
+		status = curse_status(_shown_cell)
 	if status.is_empty():
 		status = crop_status(_shown_cell)
 	if status.is_empty():
@@ -451,6 +488,16 @@ func soil_status(cell: Vector2i) -> String:
 	return "Empty soil: grass returns tonight."
 
 
+## Says why a building can't go here, since a red preview alone doesn't.
+func spacing_status(cell: Vector2i) -> String:
+	if player.tool != Player.Tool.BUILD or builder.placed.has(cell):
+		return ""
+	var building := player.selected_building()
+	if builder.has_room(cell, building):
+		return ""
+	return "%ss must stand %d tiles apart." % [building.display_name, building.min_spacing]
+
+
 ## How a player learns what the marks mean and what saves a tile.
 func curse_status(cell: Vector2i) -> String:
 	if not healing.is_at_risk(cell, _can_curse_take):
@@ -464,6 +511,8 @@ func _growing_status(cell: Vector2i, crop: Crop) -> String:
 	var progress := "%s: %d of %d days" % [crop.data.display_name, crop.days_grown, crop.data.days_to_grow]
 	if is_watered(cell):
 		return progress + ", watered. Sleep to grow."
+	if Inventory.can_water <= 0:
+		return progress + ", needs water. Refill at a well."
 	return progress + ", needs water."
 
 
@@ -511,6 +560,9 @@ func _use_tool(tool: Player.Tool, cell: Vector2i) -> void:
 			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
 			water(cell)
+			Inventory.use_can_water()
+			if Inventory.can_water == 0:
+				GameState.notice.emit("The watering can is empty. Refill it at a well.")
 			Progress.record_action("water")
 			Audio.play(&"water")
 			_refresh_soil_edges()
@@ -602,15 +654,15 @@ func _can_curse_take(cell: Vector2i) -> bool:
 func _ward_protects(cell: Vector2i) -> bool:
 	for center in crops:
 		var radius := crops[center].data.ward_radius
-		if radius > 0 and is_watered(center) and Vector2(cell - center).length() <= radius:
+		if radius > 0 and is_watered(center) and tiles_apart(cell, center) <= radius:
 			return true
 	return false
 
 
 func _lantern_protects(cell: Vector2i) -> bool:
 	for center in builder.placed:
-		var radius: int = builder.placed[center]["data"].heal_radius
-		if radius > 0 and Vector2(cell - center).length() <= radius:
+		var radius: int = builder.placed[center]["data"].guard_radius
+		if radius > 0 and tiles_apart(cell, center) <= radius:
 			return true
 	return false
 
@@ -700,10 +752,22 @@ func _restore(state: Dictionary) -> void:
 			var crop := _add_crop(saved["cell"], data)
 			crop.set_days_grown(saved["days"])
 			crop.blighted = saved.get("blighted", false)
+	_clear_under_starting_well()
 	# Last, because restoring the soil above leaves it all dry.
 	_water_from_buildings()
 	_refresh_soil_edges()
 	_refresh_crop_needs()
+
+
+## The starting well is newer than some saves, which may have farmed its tile. It's a fixed
+## object like the house, because the save's list of map objects would remove a movable one.
+func _clear_under_starting_well() -> void:
+	var well: Node2D = crops_parent.get_node("StartingWell")
+	var cell := ground.local_to_map(ground.to_local(well.global_position) - BUILDING_BASE)
+	if crops.has(cell):
+		crops[cell].queue_free()
+		crops.erase(cell)
+	untill(cell)
 
 
 func _limit_camera() -> void:

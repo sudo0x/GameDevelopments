@@ -200,6 +200,9 @@ func _status_text() -> String:
 		lines.append("Strong holy water: %d" % Inventory.strong_holy_water)
 	if not Inventory.shipped.is_empty():
 		lines.append("Shipping: %d overnight" % Inventory.shipped_value())
+	# Only once it matters, to keep the corner calm.
+	if Inventory.can_water < GameState.BALANCE.can_capacity:
+		lines.append("Water: %d of %d" % [Inventory.can_water, GameState.BALANCE.can_capacity])
 	lines.append("Island healed: %.1f%%" % Progress.healed_percent)
 	return "\n".join(lines)
 
