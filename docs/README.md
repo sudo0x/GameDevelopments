@@ -31,4 +31,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 23 | 2026-11-07 | [Simpler controls plan](23_2026-11-07_simpler-controls.md) |
 | 24 | 2026-11-07 | [Controls: our choice next to Hay Day and others](24_2026-11-07_controls-comparison.md) |
 | 25 | 2026-11-07 | [Art prompts: the old book](25_2026-11-07_art-prompts-book.md) |
-| 26 | 2026-11-07 | [Art prompts: purifying hoe and Tasks](26_2026-11-07_art-prompts-purifying-hoe.md) |
+| 26 | 2026-11-07 | [Art prompts: purifying hoe, Tasks, cancel and healing](26_2026-11-07_art-prompts-purifying-hoe.md) |

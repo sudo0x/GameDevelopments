@@ -80,7 +80,7 @@ func _run() -> void:
 	check("hearts use the empty hint line", hud.get_node("HeartsBar").position.y == 8.0)
 	check("tool text follows the hearts", hud.get_node("ToolLabel").position.y == 28.0)
 	check("day makes room for pause", is_equal_approx(hud.get_node("DayLabel").get_global_rect().end.x, screen.x - 48.0))
-	check("status lines up with day", is_equal_approx(hud.get_node("StatusLabel").get_global_rect().end.x, screen.x - 48.0))
+	check("status lines up with day", is_equal_approx(hud.get_node("StatusRows").get_global_rect().end.x, screen.x - 48.0))
 	check("notices follow the bottom edge", is_equal_approx(hud.get_node("NoticeLabel").get_global_rect().end.y, screen.y - 92.0))
 	check("crop text clears the tool bar on phones", hud.get_node("CropStatusLabel").get_global_rect().end.y <= screen.y - 42.0)
 	controls.set_active(false)

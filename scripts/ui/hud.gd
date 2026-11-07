@@ -16,13 +16,26 @@ const GOAL_COLOR := Color(1.0, 0.9, 0.6)
 const GOAL_OUTLINE_COLOR := Color(0.1, 0.07, 0.08)
 const GOAL_OUTLINE_SIZE := 6
 const TOOL_LINE_HEIGHT := 24.0
+## The top right corner: each row's name and picture, top to bottom. Pictures read faster than
+## words on a small screen, and leave more of the world showing.
+const STATUS_ROWS: Dictionary[StringName, Texture2D] = {
+	&"holy_water": preload("res://assets/items/holy_water.png"),
+	&"strong_water": preload("res://assets/items/strong_holy_water.png"),
+	&"shipping": preload("res://assets/objects/shipping_box.png"),
+	&"water": preload("res://assets/ui/need_water.png"),
+	&"healed": preload("res://assets/ui/healed_icon.png"),
+}
+const STATUS_ICON_SIZE := Vector2(24, 24)
 ## Phones keep the Tasks button here, so the goal starts to its right.
 const GOAL_TOUCH_INDENT := 52.0
 
 @export var player_path: NodePath
 @export var farm_path: NodePath
 
+## The corner in words, for tests: the rows themselves only hold pictures and numbers.
+var status_text := ""
 var _sleeping := false
+var _status_values: Dictionary[StringName, Label] = {}
 var _pick_menu := PickMenu.new()
 var _book_menu := BookMenu.new()
 var _tasks_menu := TasksMenu.new()
@@ -37,7 +50,7 @@ var _notice_left := 0.0
 @onready var tool_label: Label = $ToolLabel
 @onready var day_label: Label = $DayLabel
 @onready var money_label: Label = $MoneyRow/MoneyLabel
-@onready var status_label: Label = $StatusLabel
+@onready var status_rows: VBoxContainer = $StatusRows
 @onready var notice_label: Label = $NoticeLabel
 @onready var crop_status_label: Label = $CropStatusLabel
 @onready var fade: ColorRect = $Fade
@@ -60,7 +73,28 @@ func _ready() -> void:
 	farm.mover.is_free_spot = $TouchControls.is_free_spot
 	_add_goal_guide()
 	_add_menus()
+	_add_status_rows()
 	_refresh()
+
+
+func _add_status_rows() -> void:
+	status_rows.add_theme_constant_override("separation", 0)
+	for row_name in STATUS_ROWS:
+		var row := HBoxContainer.new()
+		row.name = row_name
+		row.alignment = BoxContainer.ALIGNMENT_END
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var icon := TextureRect.new()
+		icon.texture = STATUS_ROWS[row_name]
+		icon.custom_minimum_size = STATUS_ICON_SIZE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var value := Label.new()
+		row.add_child(icon)
+		row.add_child(value)
+		status_rows.add_child(row)
+		_status_values[row_name] = value
 
 
 func _add_goal_guide() -> void:
@@ -147,7 +181,7 @@ func _ask_water() -> void:
 func _refresh() -> void:
 	day_label.text = "Day %d" % Progress.day
 	money_label.text = str(Inventory.money)
-	status_label.text = _status_text()
+	_refresh_status()
 	if GameState.touch_mode:
 		tool_label.text = _touch_tool_text()
 		return
@@ -192,19 +226,23 @@ func _water_text() -> String:
 
 
 ## Only what changes often is shown here. The full list is in the bag (key I).
-func _status_text() -> String:
+func _refresh_status() -> void:
+	var capacity := GameState.BALANCE.can_capacity
 	var lines: PackedStringArray = []
-	if Inventory.holy_water > 0:
-		lines.append("Holy water: %d" % Inventory.holy_water)
-	if Inventory.strong_holy_water > 0:
-		lines.append("Strong holy water: %d" % Inventory.strong_holy_water)
-	if not Inventory.shipped.is_empty():
-		lines.append("Shipping: %d overnight" % Inventory.shipped_value())
+	_set_status(&"holy_water", Inventory.holy_water > 0, str(Inventory.holy_water), "Holy water: %d" % Inventory.holy_water, lines)
+	_set_status(&"strong_water", Inventory.strong_holy_water > 0, str(Inventory.strong_holy_water), "Strong holy water: %d" % Inventory.strong_holy_water, lines)
+	_set_status(&"shipping", not Inventory.shipped.is_empty(), "+%d" % Inventory.shipped_value(), "Shipping: %d overnight" % Inventory.shipped_value(), lines)
 	# Only once it matters, to keep the corner calm.
-	if Inventory.can_water < GameState.BALANCE.can_capacity:
-		lines.append("Water: %d of %d" % [Inventory.can_water, GameState.BALANCE.can_capacity])
-	lines.append("Island healed: %.1f%%" % Progress.healed_percent)
-	return "\n".join(lines)
+	_set_status(&"water", Inventory.can_water < capacity, "%d/%d" % [Inventory.can_water, capacity], "Water: %d of %d" % [Inventory.can_water, capacity], lines)
+	_set_status(&"healed", true, "%.1f%%" % Progress.healed_percent, "Island healed: %.1f%%" % Progress.healed_percent, lines)
+	status_text = "\n".join(lines)
+
+
+func _set_status(row_name: StringName, showing: bool, value: String, words: String, lines: PackedStringArray) -> void:
+	status_rows.get_node(NodePath(row_name)).visible = showing
+	_status_values[row_name].text = value
+	if showing:
+		lines.append(words)
 
 
 func _show_crop_status(text: String) -> void:

@@ -1,4 +1,4 @@
-# Art prompts: purifying hoe and Tasks
+# Art prompts: purifying hoe, Tasks, cancel and healing
 
 **Date:** 2026-11-07
 
@@ -71,4 +71,26 @@ wood, held together at the center by a small iron nail. The ends are slightly
 worn and uneven. Pale edge highlights, so it stands out on a dark round button.
 The shape must be simple, bold and easy to read at a very small size. One object
 only, centered, filling most of the image, with a little empty space around it.
+```
+
+## Healing icon
+
+✅ In the game (2026-11-07), in the top right corner. `art_source/ui/healed_icon.png` was shrunk with `tools/pixelize.gd --height 24 --frame-w 24 --frame-h 24 --single true`.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+One small fresh green sprout with two bright leaves, growing out of a cracked
+piece of dark purple cursed ground. The sprout is the brightest part, in a clear
+healthy green, and the ground is a small chunk at the bottom only. It should
+mean "healing the cursed land". The shape must be simple, bold and easy to read
+at a very small size. One object only, centered, filling most of the image, with
+a little empty space around it.
 ```

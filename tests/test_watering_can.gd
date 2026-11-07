@@ -76,14 +76,18 @@ func _run() -> void:
 
 	# Each water costs one.
 	check("the can starts full", inv.can_water == capacity)
-	check("a full can isn't shown", not hud.status_label.text.contains("Water:"))
+	check("a full can isn't shown", not hud.status_text.contains("Water:"))
 	var cell := Vector2i(23, 16)
 	farm.till(cell)
 	farm.plant(cell, inv.CROPS[0])
 	await stand(cell + Vector2i.LEFT)
 	await press("action")
 	check("watering uses the can", farm.is_watered(cell) and inv.can_water == capacity - 1)
-	check("the corner shows what's left", hud.status_label.text.contains("Water: %d of %d" % [capacity - 1, capacity]))
+	check("the corner shows what's left", hud.status_text.contains("Water: %d of %d" % [capacity - 1, capacity]))
+
+	var water_row: Node = hud.status_rows.get_node("water")
+	check("the row shows a picture and a number", water_row.visible and water_row.get_child(0).texture != null and water_row.get_child(1).text == "%d/%d" % [capacity - 1, capacity])
+	check("healing shows a number, not words", hud.status_rows.get_node("healed").get_child(1).text == "0.0%")
 
 	# Empty.
 	var notices: Array[String] = []
@@ -115,7 +119,8 @@ func _run() -> void:
 	check("an empty can makes the well usable", farm.smart_action(Vector2i(24, 14)) == INTERACT)
 	await press("action")
 	check("the well fills the can", inv.can_water == capacity)
-	check("and the corner goes quiet", not hud.status_label.text.contains("Water:"))
+	check("the row hides again", not hud.status_rows.get_node("water").visible)
+	check("and the corner goes quiet", not hud.status_text.contains("Water:"))
 	await wait(3)
 	check("a full can leaves the well alone", farm.smart_action(Vector2i(24, 14)) != INTERACT)
 

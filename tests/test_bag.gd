@@ -49,7 +49,7 @@ func _run() -> void:
 	key.pressed = true
 	check("physical I maps to inventory", key.is_action_pressed("inventory"))
 	check("starts closed", not bag.visible)
-	check("HUD no longer lists crops", not hud.status_label.text.contains("Radish"))
+	check("HUD no longer lists crops", not hud.status_text.contains("Radish"))
 
 	inv.add_material(wood, 3)
 	inv.add_material(stone, 2)

@@ -32,7 +32,7 @@ const MAX_SIDE_INSET := 20.0
 ## The top right text moves left by this while the pause button sits in its corner.
 const PAUSE_TEXT_GAP := 40.0
 const TEXT_EDGE_GAP := 8.0
-const TOP_RIGHT_TEXT: Array[String] = ["DayLabel", "MoneyRow", "StatusLabel"]
+const TOP_RIGHT_TEXT: Array[String] = ["DayLabel", "MoneyRow", "StatusRows"]
 ## Computers show a help line above the hearts. Phones don't, so these move up into its place.
 const HINT_ROOM := 24.0
 const TOP_LEFT_Y: Dictionary[String, float] = {"HeartsBar": 32.0, "ToolLabel": 52.0}
