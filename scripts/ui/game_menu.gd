@@ -70,6 +70,37 @@ func _icon(texture: Texture2D) -> TextureRect:
 	return rect
 
 
+## For menus built in code: the frame and help line that open() expects.
+func _build_frame() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+	set_anchors_preset(Control.PRESET_CENTER)
+	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	grow_vertical = Control.GROW_DIRECTION_BOTH
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	for side: String in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side, 12)
+	for side: String in ["top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 8)
+	add_child(margin)
+	var box := VBoxContainer.new()
+	box.name = "Box"
+	box.add_theme_constant_override("separation", 6)
+	margin.add_child(box)
+	var help := Label.new()
+	help.name = "Help"
+	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(help)
+
+
+## Adds to a menu from _build_frame(), keeping the help line last.
+func _add_above_help(item: Control) -> void:
+	var box: VBoxContainer = $Margin/Box
+	box.add_child(item)
+	box.move_child(box.get_node("Help"), -1)
+
+
 ## Override this to draw the menu's contents.
 func _refresh() -> void:
 	pass

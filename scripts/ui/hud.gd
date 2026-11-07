@@ -14,6 +14,7 @@ const MAX_WAITING_NOTICES := 4
 @export var farm_path: NodePath
 
 var _sleeping := false
+var _pick_menu := PickMenu.new()
 ## Notices waiting their turn, oldest first, and how long the one showing has left.
 var _waiting_notices: Array[String] = []
 var _notice_left := 0.0
@@ -38,8 +39,11 @@ func _ready() -> void:
 	Progress.fainted.connect(_faint)
 	farm.target_status_changed.connect(_show_crop_status)
 	farm.action_changed.connect($TouchControls.show_action)
+	farm.heal_changed.connect($TouchControls.show_heal)
+	farm.water_choice_needed.connect(_ask_water)
+	player.seed_menu_pressed.connect(_ask_seed)
 	_add_goal_guide()
-	_add_sleep_menu()
+	_add_menus()
 	_refresh()
 
 
@@ -53,16 +57,41 @@ func _add_goal_guide() -> void:
 
 
 ## With the other menus: under the fade, and over everything else.
-func _add_sleep_menu() -> void:
-	var menu := SleepMenu.new()
-	add_child(menu)
-	move_child(menu, fade.get_index())
+func _add_menus() -> void:
+	for menu: GameMenu in [SleepMenu.new(), _pick_menu]:
+		add_child(menu)
+		move_child(menu, fade.get_index())
+
+
+func _ask_seed() -> void:
+	var choices: Array[Dictionary] = []
+	for i in Inventory.CROPS.size():
+		var crop := Inventory.CROPS[i]
+		var count := Inventory.seed_count(crop)
+		choices.append({
+			"text": "%s seeds: %d" % [crop.display_name, count],
+			"icon": crop.seed_icon,
+			"dim": count == 0,
+			"pick": player.select_seed.bind(i),
+		})
+	_pick_menu.ask("Which seed?", choices)
+
+
+func _ask_water() -> void:
+	var choices: Array[Dictionary] = [
+		{"text": "Holy water: %d" % Inventory.holy_water, "icon": GameMenu.HOLY_WATER_ICON, "pick": farm.heal_with.bind(false)},
+		{"text": "Strong water: %d" % Inventory.strong_holy_water, "icon": GameMenu.STRONG_WATER_ICON, "pick": farm.heal_with.bind(true)},
+	]
+	_pick_menu.ask("Which water?", choices)
 
 
 func _refresh() -> void:
 	day_label.text = "Day %d" % Progress.day
 	money_label.text = str(Inventory.money)
 	status_label.text = _status_text()
+	if GameState.touch_mode and player.tool != Player.Tool.BUILD:
+		tool_label.text = _touch_tool_text()
+		return
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
@@ -77,6 +106,15 @@ func _refresh() -> void:
 	if player.tool == Player.Tool.HOE and Inventory.has_purifying_hoe:
 		text += "  |  Purify left today: %d" % Inventory.hoe_uses_left
 	tool_label.text = text
+
+
+## Phones have no tools to show, so this line holds what the buttons can't.
+func _touch_tool_text() -> String:
+	var crop := player.selected_seed()
+	var text := "%s seeds: %d" % [crop.display_name, Inventory.seed_count(crop)]
+	if Inventory.has_purifying_hoe:
+		text += "  |  Purify left today: %d" % Inventory.hoe_uses_left
+	return text
 
 
 func _change_hint() -> String:

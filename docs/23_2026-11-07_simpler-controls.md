@@ -61,9 +61,9 @@ Say "controls step N" so these aren't mixed up with other plans.
 | 1 ✅ | Split `GameState` (finding 26) into `Inventory`, `Progress` and `SaveGame`, with no change to how the game plays. Built 2026-11-07. A small `GameState` stays for what fits none of the three (see the decisions log) | All tests pass with only their paths updated |
 | 2 ✅ | `Farm.smart_action(cell)`: returns what Action would do, with one test per row of the chart. Nothing on screen changes yet. Built 2026-11-07 | Tests cover every row and the order between them |
 | 3 ✅ | Action button: replaces Act and takes Use's big spot, and its icon follows the player's target. At the door it asks "Sleep?" first. Built 2026-11-07, on key R too. A small Use stays in Act's old spot, because holy water, Build and the purifying hoe need it until steps 4 and 5. **Still to try on the phone** | Playing a full day on the phone needs no tool button |
-| 4 | Seed popup and Heal button; remove the arrows and tool bar on phones | 5 buttons plus the joystick (6 until step 5 removes Use). Menus still clear the buttons |
-| 5 | Move the Build tool into the Bag, as a Build mode, and remove Use | Placing and picking up buildings works on the phone |
-| 6 | Rewrite `GoalGuide.STEPS` and all help text for the new buttons | `tests/test_phone_ui.gd` passes, and goals match the buttons |
+| 4 ✅ | Seed popup and Heal button; remove the arrows and tool bar on phones. Built 2026-11-07. Heal uses the hoe first, then holy water, and asks which water if you own both. A small hammer turns on Build mode, where Use and the arrows show, so Build still works until step 5. **Still to try on the phone** | 5 buttons plus the joystick (6 until step 5 moves the hammer). Menus still clear the buttons |
+| 5 | Move the hammer into the Bag, so Build mode starts there. Placing and picking up already work | 5 buttons plus the joystick, and placing and picking up buildings works on the phone |
+| 6 | Rewrite the keyboard goals and help text for the new key. The phone's text moved to step 4, because the old goals became impossible there | `tests/test_phone_ui.gd` passes, and goals match the buttons |
 | 7 | The user plays on the phone, then the plan's checks | Findings are logged, and the old buttons are gone |
 
 Each step keeps the game playable, so we can stop or change direction between steps.

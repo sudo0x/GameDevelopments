@@ -40,7 +40,7 @@ func pick_up(cell: Vector2i) -> void:
 func status(cell: Vector2i) -> String:
 	if not placed.has(cell):
 		return ""
-	var how := GameState.controls("press 4, then Space to pick up.", "tap the glove, then Use to pick up.")
+	var how := GameState.controls("press 4, then Space to pick up.", "tap the hammer, then Use to pick up.")
 	return "%s: %s" % [placed[cell]["data"].display_name, how]
 
 

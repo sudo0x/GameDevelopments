@@ -90,8 +90,8 @@ func _run() -> void:
 	check("the fade covers the screen", hud.get_node("Fade").get_global_rect().size.is_equal_approx(screen))
 
 	# Fingers have to land on the moved buttons, not where they were.
-	await tap(Vector2(214, 340) + Vector2(extra.x / 2.0 + 36.0, extra.y))
-	check("a moved tool button works", player.tool == 1)
+	await tap(Vector2(476, 262) + extra - Vector2(20, 0))
+	check("a moved button works", player.tool == 5)
 
 	shop.open()
 	await wait(2)

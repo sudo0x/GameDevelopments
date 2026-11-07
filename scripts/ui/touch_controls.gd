@@ -5,7 +5,7 @@ extends Node2D
 ## TouchScreenButton is used because, unlike Button, it works while another finger is down.
 
 const BUTTON_TEXTURE := preload("res://assets/ui/touch_button.png")
-## Six tools side by side. The sword has its own image.
+## Six tools side by side. The sword has its own image. The computer's tool bar uses these too.
 const TOOL_ICONS := preload("res://assets/ui/tool_icons.png")
 const SWORD_ICON := preload("res://assets/objects/sword.png")
 const TOOL_ICON_SIZE := Vector2(36, 32)
@@ -44,9 +44,7 @@ const MESSAGE_HEIGHT := 24.0
 const MESSAGES: Array[Array] = [["CropStatusLabel", -68.0, -44.0], ["NoticeLabel", -44.0, -92.0]]
 ## How far right a menu can reach on the base screen, so Bag and Action stay showing.
 const ACT_LEFT := 501.0
-## Text, action, center, size, and the edge it follows. Buttons with no text show an icon: Bag
-## and pause have their own, Action shows what it will do, and Use shows the selected tool.
-## Use stays until the Heal button and Build mode replace it (docs/23_...).
+## Text, action, center, size, and the edge it follows. Buttons with no text show an icon.
 const BAG_ICON := preload("res://assets/ui/bag.png")
 const PAUSE_ICON := preload("res://assets/ui/pause_icon.png")
 ## Smaller and lighter than other icons: full size, the dark bars hid the ring and sank into
@@ -65,12 +63,19 @@ const ACTION_ICONS := {
 	Farm.Action.TILL: Player.Tool.HOE,
 }
 const ACTION_DIM_COLOR := Color(1, 1, 1, 0.45)
+const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
+const BUILD_TOOL_ICON := 5
 ## Stands for an open menu in _shown_action, where Action shows ACT_ICON.
 const MENU_OPEN := -1
 const ACTION_BUTTONS: Array[Array] = [
 	["", "action", Vector2(596, 296), 68.0, Vector2.ONE],
-	["", "use_tool", Vector2(526, 322), 50.0, Vector2.ONE],
+	# Well away from Action, so holy water is never spent by accident.
+	["", "heal", Vector2(596, 216), 42.0, Vector2.ONE],
+	["", "seed_menu", Vector2(526, 322), 50.0, Vector2.ONE],
 	["", "inventory", Vector2(526, 262), 42.0, Vector2.ONE],
+	["", "build_mode", Vector2(476, 262), 34.0, Vector2.ONE],
+	# In Seed's spot: they're never both showing.
+	["", "use_tool", Vector2(526, 322), 50.0, Vector2.ONE],
 	["<", "seed_prev", Vector2(476, 300), 34.0, Vector2.ONE],
 	[">", "seed_next", Vector2(476, 340), 34.0, Vector2.ONE],
 	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
@@ -78,6 +83,8 @@ const ACTION_BUTTONS: Array[Array] = [
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["action", "inventory"]
+## Only showing in Build mode, until it moves into the Bag (docs/23_...).
+const BUILD_MODE_BUTTONS: Array[String] = ["use_tool", "seed_prev", "seed_next"]
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -85,10 +92,10 @@ const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up"
 ## On screens without touch these stay hidden, and the keyboard hints stay on.
 var active := false
 
-var _tool_buttons: Array[TouchScreenButton] = []
-var _use_icon: Sprite2D
-var _action_button: TouchScreenButton
+## The buttons by their input action.
+var _buttons: Dictionary[String, TouchScreenButton] = {}
 var _action_icon: Sprite2D
+var _seed_icon: Sprite2D
 ## What Farm says Action would do, and what the button shows now.
 var _action := Farm.Action.NONE
 var _shown_action: int = Farm.Action.NONE
@@ -102,28 +109,23 @@ var _placed: Array[Dictionary] = []
 
 
 func _ready() -> void:
-	for i in TOOL_COUNT:
-		var at := Vector2(TOOL_BAR_START_X + i * TOOL_SPACING, TOOL_BAR_Y)
-		var button := _add_button(tool_bar, "", "tool_%d" % (i + 1), at, TOOL_SIZE)
-		_add_icon(button, tool_icon(i))
-		_tool_buttons.append(button)
-		_follow_edge(button, TOOL_BAR_ANCHOR)
 	for entry in ACTION_BUTTONS:
 		var keep_showing: bool = SHOWN_UNDER_MENUS.has(entry[1])
 		var button := _add_button(self if keep_showing else tool_bar, entry[0], entry[1], entry[2], entry[3])
 		_follow_edge(button, entry[4])
-		if entry[1] == "inventory":
-			_add_icon(button, BAG_ICON)
-		elif entry[1] == "ui_cancel":
-			var pause_icon := _add_icon(button, PAUSE_ICON)
-			pause_icon.scale *= PAUSE_ICON_SIZE
-			pause_icon.modulate = PAUSE_ICON_COLOR
-		elif entry[1] == "action":
-			_action_button = button
-			_action_icon = _add_icon(button, tool_icon(Player.Tool.HOE))
-			_action_button.modulate = ACTION_DIM_COLOR
-		elif entry[1] == "use_tool":
-			_use_icon = _add_icon(button, tool_icon(0))
+		_buttons[entry[1]] = button
+	_add_icon(_buttons["inventory"], BAG_ICON)
+	_add_icon(_buttons["heal"], HOLY_WATER_ICON)
+	_add_icon(_buttons["build_mode"], tool_icon(BUILD_TOOL_ICON))
+	_add_icon(_buttons["use_tool"], tool_icon(BUILD_TOOL_ICON))
+	var pause_icon := _add_icon(_buttons["ui_cancel"], PAUSE_ICON)
+	pause_icon.scale *= PAUSE_ICON_SIZE
+	pause_icon.modulate = PAUSE_ICON_COLOR
+	_action_icon = _add_icon(_buttons["action"], tool_icon(Player.Tool.HOE))
+	_buttons["action"].modulate = ACTION_DIM_COLOR
+	_buttons["heal"].modulate = ACTION_DIM_COLOR
+	_seed_icon = _add_icon(_buttons["seed_menu"], player.selected_seed().seed_icon)
+	Inventory.inventory_changed.connect(_show_seed)
 	get_viewport().size_changed.connect(_fit_screen)
 	_fit_screen()
 	player.tool_changed.connect(_show_selected_tool)
@@ -149,8 +151,13 @@ func show_action(action: Farm.Action) -> void:
 	_action = action
 
 
+## Called when what the Heal button would do changes.
+func show_heal(heal: Farm.Heal) -> void:
+	_buttons["heal"].modulate = ACTION_DIM_COLOR if heal == Farm.Heal.NONE else Color.WHITE
+
+
 func _update_action_button() -> void:
-	_action_button.modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE else Color.WHITE
+	_buttons["action"].modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE else Color.WHITE
 	if _shown_action == Farm.Action.NONE:
 		return
 	var icon: Texture2D = ACT_ICON
@@ -249,9 +256,19 @@ func _release_movement() -> void:
 
 
 func _show_selected_tool() -> void:
-	for i in _tool_buttons.size():
-		_tool_buttons[i].modulate = SELECTED_COLOR if i == player.tool else Color.WHITE
-	_fit_icon(_use_icon, tool_icon(player.tool))
+	var building := player.tool == Player.Tool.BUILD
+	for action in BUILD_MODE_BUTTONS:
+		_buttons[action].visible = building
+	_buttons["seed_menu"].visible = not building
+	_buttons["build_mode"].modulate = SELECTED_COLOR if building else Color.WHITE
+	_show_seed()
+
+
+## The seed's picture, dimmed when there are none left: tapping still opens the popup.
+func _show_seed() -> void:
+	var crop := player.selected_seed()
+	_fit_icon(_seed_icon, crop.seed_icon)
+	_buttons["seed_menu"].modulate = ACTION_DIM_COLOR if Inventory.seed_count(crop) == 0 else Color.WHITE
 
 
 static func tool_icon(index: int) -> Texture2D:

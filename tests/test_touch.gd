@@ -54,9 +54,7 @@ func _run() -> void:
 	var player: Node2D = main.get_node("World/Player")
 	var shop: Control = main.get_node("HUD/ShopMenu")
 	var bag: Control = main.get_node("HUD/BagMenu")
-	var tool_y := 340.0
-	var tool_x := func(i: int) -> Vector2: return Vector2(214.0 + i * 36.0, tool_y)
-	var use_at := Vector2(526, 322)
+	var build_at := Vector2(476, 262)
 	var interact_at := Vector2(596, 296)
 	var bag_at := Vector2(526, 262)
 	var prev_at := Vector2(476, 300)
@@ -181,33 +179,29 @@ func _run() -> void:
 	check("a touch elsewhere isn't the stick", not Input.is_action_pressed("move_right"))
 	touch(Vector2(320, 100), 0, false)
 
-	# Tool bar.
-	for i in 7:
-		await tap(tool_x.call(i))
-		check("tool button %d" % (i + 1), player.tool == i)
-	await tap(tool_x.call(1))
-	check("selected tool stands out", controls._tool_buttons[1].modulate != Color.WHITE and controls._tool_buttons[0].modulate == Color.WHITE)
-
 	# Two fingers: walking and acting together.
 	var used: Array = []
-	player.tool_used.connect(func(t: int) -> void: used.append(t))
+	player.action_pressed.connect(func() -> void: used.append(true))
 	touch(center, 0, true)
 	drag(center + Vector2(35, 0), 0)
 	await wait(4)
-	await tap(use_at)
-	check("Use works while walking", used.size() == 1)
+	await tap(interact_at)
+	check("Action works while walking", used.size() == 1)
 	check("still walking", Input.is_action_pressed("move_right"))
-	await tap(tool_x.call(3))
-	check("tools change while walking", player.tool == 3)
 	touch(center, 0, false)
 	await wait(2)
 
-	# Choosing seeds.
-	await tap(tool_x.call(2))
+	# Build mode: Use and the arrows only show here.
+	check("no Use outside Build mode", not controls._buttons["use_tool"].visible and controls._buttons["seed_menu"].visible)
+	await tap(build_at)
+	check("the hammer starts Build mode", player.tool == 5 and controls._buttons["use_tool"].visible and not controls._buttons["seed_menu"].visible)
+	var first_building: int = player.building_index
 	await tap(next_at)
-	check("> picks the next seed", player.seed_index == 1)
+	check("> picks the next building", player.building_index != first_building)
 	await tap(prev_at)
-	check("< picks the last one", player.seed_index == 0)
+	check("< goes back", player.building_index == first_building)
+	await tap(build_at)
+	check("the hammer ends Build mode", player.tool == 0 and not controls._buttons["use_tool"].visible)
 
 	# Menus.
 	var stall: Node2D = main.get_node("World/ShopStall")

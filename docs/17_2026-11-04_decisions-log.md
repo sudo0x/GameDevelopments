@@ -10,6 +10,7 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| What happens to strong holy water and Build without the tool bar? | **Heal asks which water, but only if you own both. A small hammer starts Build mode until step 5** (2026-11-07, controls step 4) | The plan missed that both needed the arrows. Asking costs a tap, but only for a limited item. Each step must stay playable |
 | Action button, tapping tiles, or Hay Day style? | **Keep the Action button** (2026-11-07, the user's choice after playing). Tapping nearby tiles is the fallback if outside players struggle. See `docs/24_...` | It felt strange at first, then good after more play. Hay Day has no walking character, so copying it would mean rebuilding walking, combat and the camera |
 | How do phones use the purifying hoe? | **The Heal button**, on one cursed tile, before holy water (2026-11-07, the user's choice) | The tool bar goes in controls step 4, and healing is what the hoe is for. Free daily uses go first, so holy water isn't spent while they last |
 | Does Use go in controls step 3, as planned? | **Not yet** (2026-11-07). It moves to Act's old spot, and goes in step 5 | Holy water, Build and the purifying hoe still need it. The plan says every step stays playable, and removing it early would mean throwaway code to reach them |

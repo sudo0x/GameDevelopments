@@ -7,6 +7,7 @@ const LEFT := 2
 const RIGHT := 3
 const HOE := 0
 const HOLY_WATER := 4
+const BUILD := 5
 const ACTION_AT := Vector2(596, 296)
 
 var fails := 0
@@ -250,16 +251,16 @@ func _run() -> void:
 	# The button.
 	controls.set_active(true)
 	await wait(3)
-	check("soil to plant lights the button", controls._shown_action == farm.Action.PLANT and controls._action_button.modulate == Color.WHITE)
+	check("soil to plant lights the button", controls._shown_action == farm.Action.PLANT and controls._buttons["action"].modulate == Color.WHITE)
 	var plant_icon: Texture2D = controls._action_icon.texture
 	check("it shows the seeds", plant_icon is AtlasTexture and plant_icon.region.position.x == 2 * 36.0)
 	check("the cursor follows Action", farm._shown_cell == empty)
 	inv.seeds[radish.id] = 0
 	await wait(3)
-	check("nothing to do dims it", controls._shown_action == farm.Action.NONE and controls._action_button.modulate.a < 1.0)
+	check("nothing to do dims it", controls._shown_action == farm.Action.NONE and controls._buttons["action"].modulate.a < 1.0)
 	inv.seeds.assign(kept)
 	await wait(3)
-	player.tool = HOLY_WATER
+	player.tool = BUILD
 	await wait(3)
 	check("the cursor follows the tool for Use", farm._shown_cell == farm.target_cell)
 	player.tool = HOE
@@ -281,7 +282,7 @@ func _run() -> void:
 	await tap(ACTION_AT, 1)
 	check("the button opens the shop", shop.visible)
 	await wait(3)
-	check("the button still shows ! under a menu", controls._action_icon.texture == controls.ACT_ICON and controls._action_button.modulate == Color.WHITE)
+	check("the button still shows ! under a menu", controls._action_icon.texture == controls.ACT_ICON and controls._buttons["action"].modulate == Color.WHITE)
 	await tap(ACTION_AT, 1)
 	check("and closes it", not shop.visible)
 	await wait(2)

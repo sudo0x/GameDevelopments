@@ -62,7 +62,7 @@ func _run() -> void:
 	farm._on_tool_used(1)
 	check("watering moves on to sleeping", guide.text.contains("sleep"))
 	controls.set_active(true)
-	check("touch screens get touch words", guide.text.contains("tap !"))
+	check("touch screens get touch words", guide.text.contains("big button"))
 	check("the goal sits under the tool text", guide.position.y == hud.tool_label.position.y + 24.0)
 	controls.set_active(false)
 	check("back to keyboard words", guide.text.contains("press F"))

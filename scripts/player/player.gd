@@ -7,6 +7,10 @@ signal tool_changed
 signal tool_used(tool: Tool)
 ## The Action button or key was pressed. Farm works out what it means.
 signal action_pressed
+## The phone's Heal button was pressed. Farm works out what it means.
+signal heal_pressed
+## The phone's Seed button was pressed. The HUD asks which seed.
+signal seed_menu_pressed
 
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
@@ -119,6 +123,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		tool_used.emit(tool)
 	if event.is_action_pressed("action"):
 		action_pressed.emit()
+	if event.is_action_pressed("heal"):
+		heal_pressed.emit()
+	if event.is_action_pressed("seed_menu"):
+		seed_menu_pressed.emit()
+	if event.is_action_pressed("build_mode"):
+		tool = Tool.HOE if tool == Tool.BUILD else Tool.BUILD
+		tool_changed.emit()
 	if event.is_action_pressed("interact"):
 		_interact()
 
@@ -142,6 +153,11 @@ func return_home() -> void:
 
 func selected_seed() -> CropData:
 	return Inventory.CROPS[seed_index]
+
+
+func select_seed(index: int) -> void:
+	seed_index = index
+	tool_changed.emit()
 
 
 func selected_building() -> BuildingData:

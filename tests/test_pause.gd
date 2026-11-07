@@ -68,12 +68,6 @@ func _run() -> void:
 	await tap(Vector2(614, 24))
 	check("the pause button pauses", pause.visible and paused)
 	pause.resume_button.pressed.emit()
-	# The Use button shows the selected tool, so you can see what it will do.
-	await press("tool_7")
-	check("Use shows the sword", controls._use_icon.texture == controls.SWORD_ICON)
-	await press("tool_2")
-	var shown: Texture2D = controls._use_icon.texture
-	check("then the watering can", shown is AtlasTexture and (shown as AtlasTexture).region == controls.tool_icon(1).region)
 	controls.set_active(false)
 	check("Resume button resumes", not pause.visible and not paused)
 

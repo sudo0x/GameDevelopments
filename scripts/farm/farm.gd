@@ -7,11 +7,17 @@ extends Node2D
 signal target_status_changed(text: String)
 ## What the Action button would do has changed, so its icon should too.
 signal action_changed(action: Action)
+## What the Heal button would do has changed.
+signal heal_changed(heal: Heal)
+## The player owns both kinds of holy water, so the HUD should ask which.
+signal water_choice_needed
 
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
 enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL }
+## What the Heal button would do. The hoe's free daily uses come before holy water.
+enum Heal { NONE, PURIFY, HOLY_WATER }
 
 ## Each ground texture is 128×128, a 4×4 block of 32×32 tiles.
 const TEXTURE_TILES := 4
@@ -33,7 +39,7 @@ const BUILDING_BASE := Vector2(0, 12)
 ## Tools that make something where you aim (soil, a building) never guess another tile.
 const EXACT_TOOLS: Array[Player.Tool] = [Player.Tool.HOE, Player.Tool.BUILD]
 ## Action can't do these, so on phones the cursor shows the tool's tile while one is selected.
-const USE_BUTTON_TOOLS: Array[Player.Tool] = [Player.Tool.HOLY_WATER, Player.Tool.BUILD]
+const USE_BUTTON_TOOLS: Array[Player.Tool] = [Player.Tool.BUILD]
 
 ## The tool behind each Action that uses one. Action only chooses: the tools do the work.
 const ACTION_TOOLS := {
@@ -56,6 +62,7 @@ var action_cell := Vector2i.ZERO
 var crops: Dictionary[Vector2i, Crop] = {}
 var _target_status := ""
 var _shown_action := Action.NONE
+var _shown_heal := Heal.NONE
 ## The tile the cursor is on, and the one the status text describes.
 var _shown_cell := Vector2i.ZERO
 ## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
@@ -95,6 +102,7 @@ func _ready() -> void:
 	_build_query.exclude = [player.get_node("Reach").get_rid(), player.get_node("Sword/Hitbox").get_rid()]
 	player.tool_used.connect(_on_tool_used)
 	player.action_pressed.connect(run_action)
+	player.heal_pressed.connect(run_heal)
 	healing.land_healed.connect(gathering.reveal)
 	# Healed land beside a field is new grass, so the field's edge changes.
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: _refresh_soil_edges())
@@ -114,11 +122,12 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	target_cell = smart_target_for(player)
-	action_cell = action_target_for(player)
-	var action := smart_action(action_cell)
-	if action != _shown_action:
-		_shown_action = action
-		action_changed.emit(action)
+	var action := Action.NONE
+	# Only the phone's buttons show these, so computers skip the work.
+	if GameState.touch_mode:
+		action_cell = action_target_for(player)
+		action = smart_action(action_cell)
+		_tell_buttons(action)
 	var by_action: bool = GameState.touch_mode and player.tool not in USE_BUTTON_TOOLS
 	_shown_cell = action_cell if by_action else target_cell
 	var tile := Vector2(ground.tile_set.tile_size)
@@ -135,6 +144,16 @@ func _physics_process(_delta: float) -> void:
 		highlight.visible = player.tool != Player.Tool.SWORD
 	_update_build_preview()
 	_update_target_status()
+
+
+func _tell_buttons(action: Action) -> void:
+	if action != _shown_action:
+		_shown_action = action
+		action_changed.emit(action)
+	var heal := smart_heal(heal_target_for(player))
+	if heal != _shown_heal:
+		_shown_heal = heal
+		heal_changed.emit(heal)
 
 
 ## The tile in front of the player's feet, in the direction they face.
@@ -216,7 +235,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 			var owned := Inventory.strong_holy_water if player.strong_water else Inventory.holy_water
 			return owned > 0 and not healing.cleansable_cells(cell, player.strong_water).is_empty()
 		Player.Tool.BUILD:
-			return Inventory.building_count(player.selected_building()) > 0 and can_build(cell)
+			# Phones pick buildings up here. Computers have the Hand tool for that.
+			return _can_place(cell) or (GameState.touch_mode and builder.placed.has(cell))
 	return false
 
 
@@ -266,6 +286,56 @@ func _tile_action(cell: Vector2i) -> Action:
 	return Action.TILL if is_farmable(cell) else Action.NONE
 
 
+func _can_place(cell: Vector2i) -> bool:
+	return Inventory.building_count(player.selected_building()) > 0 and can_build(cell)
+
+
+## What the Heal button would do on this cell. It changes nothing.
+func smart_heal(cell: Vector2i) -> Heal:
+	if healing.can_purify(cell):
+		return Heal.PURIFY
+	return Heal.HOLY_WATER if not _waters_for(cell).is_empty() else Heal.NONE
+
+
+## Which kinds of holy water would heal something here: false is normal, true is strong.
+func _waters_for(cell: Vector2i) -> Array[bool]:
+	var waters: Array[bool] = []
+	if Inventory.holy_water > 0 and not healing.cleansable_cells(cell, false).is_empty():
+		waters.append(false)
+	if Inventory.strong_holy_water > 0 and not healing.cleansable_cells(cell, true).is_empty():
+		waters.append(true)
+	return waters
+
+
+## Aim assist for the Heal button, like the holy water tool's.
+func heal_target_for(p: Player) -> Vector2i:
+	var ahead := target_cell_for(p)
+	if smart_heal(ahead) != Heal.NONE:
+		return ahead
+	return _beside(p, ahead, func(cell: Vector2i) -> bool: return smart_heal(cell) != Heal.NONE)
+
+
+## Does what smart_heal() says. Holy water is limited, so with two kinds the player chooses.
+func run_heal() -> void:
+	if Progress.day_changing:
+		return
+	var cell := heal_target_for(player)
+	match smart_heal(cell):
+		Heal.PURIFY:
+			_use_tool(Player.Tool.HOE, cell)
+		Heal.HOLY_WATER:
+			var waters := _waters_for(cell)
+			if waters.size() > 1:
+				water_choice_needed.emit()
+			else:
+				heal_with(waters[0])
+
+
+func heal_with(strong: bool) -> void:
+	player.strong_water = strong
+	_use_tool(Player.Tool.HOLY_WATER, heal_target_for(player))
+
+
 func till(cell: Vector2i) -> void:
 	soil.set_cell(cell, Source.SOIL_DRY, texture_coords(cell))
 
@@ -305,7 +375,7 @@ func _update_build_preview() -> void:
 		build_preview.hide()
 		return
 	var at := ground.map_to_local(target_cell) + BUILDING_BASE
-	build_preview.show_at(player.selected_building(), at, can_use(Player.Tool.BUILD, target_cell))
+	build_preview.show_at(player.selected_building(), at, _can_place(target_cell))
 
 
 func _update_target_status() -> void:
@@ -327,11 +397,11 @@ func crop_status(cell: Vector2i) -> String:
 		return ""
 	var crop := crops[cell]
 	if crop.blighted:
-		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press 4 to clear it for a curse shard.", "Tap the glove, then Use for a curse shard.")]
+		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press 4 to clear it for a curse shard.", "Tap the big button for a curse shard.")]
 	if crop.is_ripe() and crop.data.burst_radius > 0:
-		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4 to burst it and heal the land.", "Tap the glove, then Use to burst it.")]
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4 to burst it and heal the land.", "Tap the big button to burst it.")]
 	if crop.is_ripe():
-		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the glove, then Use.")]
+		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the big button.")]
 	return _growing_status(cell, crop)
 
 
@@ -426,8 +496,12 @@ func _use_tool(tool: Player.Tool, cell: Vector2i) -> void:
 			healing.cleanse(cell, player.strong_water)
 			Progress.record_action("heal")
 		Player.Tool.BUILD:
-			builder.place(cell, player.selected_building())
-			Audio.play(&"place")
+			if builder.placed.has(cell):
+				builder.pick_up(cell)
+				Audio.play(&"pick_up")
+			else:
+				builder.place(cell, player.selected_building())
+				Audio.play(&"place")
 	_refresh_crop_needs()
 	healing.refresh_marks(_can_curse_take)
 

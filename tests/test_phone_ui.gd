@@ -45,22 +45,22 @@ func _run() -> void:
 	await wait(2)
 	check("touch mode on", gs.touch_mode)
 
-	# The tool bar uses art.
-	for i in 7:
-		var button: Node2D = controls._tool_buttons[i]
+	# The buttons use art.
+	for action: String in ["action", "heal", "seed_menu", "inventory", "build_mode", "use_tool", "ui_cancel"]:
+		var button: Node2D = controls._buttons[action]
 		var icons := button.get_children().filter(func(n: Node) -> bool: return n is Sprite2D)
-		check("tool %d has an icon" % (i + 1), icons.size() == 1 and icons[0].texture != null)
-		check("tool %d has no word" % (i + 1), button.get_children().filter(func(n: Node) -> bool: return n is Label).is_empty())
-	var hoe: Sprite2D = controls._tool_buttons[0].get_child(0)
-	var can: Sprite2D = controls._tool_buttons[1].get_child(0)
-	check("each icon is its own picture", hoe.texture.region != can.texture.region)
-	check("the watering can isn't cut off", can.texture.region.size.x == 36.0)
+		check(action + " has an icon", icons.size() == 1 and icons[0].texture != null)
+		check(action + " has no word", button.get_children().filter(func(n: Node) -> bool: return n is Label).is_empty())
+	var hoe: AtlasTexture = controls.tool_icon(0)
+	var can: AtlasTexture = controls.tool_icon(1)
+	check("each icon is its own picture", hoe.region != can.region)
+	check("the watering can isn't cut off", can.region.size.x == 36.0)
 
 	# Tool help.
 	inv.strong_holy_water = 1
-	player.tool = 2
+	player.tool = 5
 	player.tool_changed.emit()
-	no_keys("seeds", hud.tool_label.text)
+	no_keys("build mode", hud.tool_label.text)
 	check("names the buttons", hud.tool_label.text.contains("< >"))
 	player.tool = 4
 	player.tool_changed.emit()
@@ -136,8 +136,8 @@ func _run() -> void:
 	craft.open()
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
-	# 7 tools, Use, < and >, and pause.
-	check("tool bar, < > and pause hide under a menu", not bar.visible and bar.get_child_count() == 11)
+	# Heal, Seed, Build, Use, < and >, and pause.
+	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 7)
 	craft.close()
 	await wait(2)
 
