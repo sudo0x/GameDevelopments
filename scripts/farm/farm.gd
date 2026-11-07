@@ -17,7 +17,7 @@ enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
 enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP }
 ## What the Heal button would do. The hoe's free daily uses come before holy water.
-enum Heal { NONE, PURIFY, HOLY_WATER }
+enum Heal { NONE, BURST, PURIFY, HOLY_WATER }
 
 ## Each ground texture is 128×128, a 4×4 block of 32×32 tiles.
 const TEXTURE_TILES := 4
@@ -142,10 +142,10 @@ func _physics_process(delta: float) -> void:
 	var rect := Rect2(ground.map_to_local(_shown_cell) - tile / 2.0, tile)
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * healing.radius_for(player.strong_water))
-	# Facing a guard shows what it protects, because nothing else on screen can.
-	var guard := guard_radius_at(_shown_cell)
+	# Placing a guard shows what it would protect. In play, light shows that instead.
+	var guard := _placing_guard_radius()
 	if guard > 0:
-		highlight.show_area(rect.grow(tile.x * guard), _guard_is_active(_shown_cell))
+		highlight.show_area(rect.grow(tile.x * guard), _can_place(_shown_cell))
 		highlight.visible = true
 	elif by_action:
 		highlight.show_cell(rect, action != Action.NONE)
@@ -220,20 +220,16 @@ static func tiles_apart(a: Vector2i, b: Vector2i) -> int:
 	return maxi(absi(a.x - b.x), absi(a.y - b.y))
 
 
-## How far the guard on this cell reaches, or the one about to be placed there. 0 if none.
-func guard_radius_at(cell: Vector2i) -> int:
-	if crops.has(cell):
-		return ward_reach(cell)
-	if builder.placed.has(cell):
-		return builder.placed[cell]["data"].guard_radius
-	if player.tool == Player.Tool.BUILD:
-		return player.selected_building().guard_radius
-	return 0
+## How far the building about to be placed would guard. 0 when not placing one.
+func _placing_guard_radius() -> int:
+	if player.tool != Player.Tool.BUILD or builder.placed.has(_shown_cell):
+		return 0
+	return player.selected_building().guard_radius
 
 
 ## How far a ward plant on this cell reaches right now. A seed guards only its own tile, so
-## planting can't save tonight's marks: guarding takes planning ahead. A ripe one needs no water,
-## because the big button only bursts it from then on, so it could never be watered on a phone.
+## planting can't save tonight's marks: guarding takes planning ahead. A ripe one has finished
+## growing, so it needs no water.
 func ward_reach(cell: Vector2i) -> int:
 	var crop := crops[cell]
 	if crop.data.ward_radius <= 0 or crop.stage == 0:
@@ -241,11 +237,6 @@ func ward_reach(cell: Vector2i) -> int:
 	if crop.is_ripe():
 		return crop.data.ward_ripe_radius
 	return crop.data.ward_radius if is_watered(cell) else crop.data.ward_dry_radius
-
-
-## Guards in place always show as working. A new building shows if it can go there.
-func _guard_is_active(cell: Vector2i) -> bool:
-	return crops.has(cell) or builder.placed.has(cell) or _can_place(cell)
 
 
 func is_tilled(cell: Vector2i) -> bool:
@@ -341,8 +332,9 @@ func _creature_to_swing_at() -> Creature:
 
 func _tile_action(cell: Vector2i) -> Action:
 	if crops.has(cell):
+		# Bursting can't be undone, so farming beside a ward plant must never do it. Heal does.
 		if crops[cell].can_harvest():
-			return Action.HARVEST
+			return Action.NONE if _is_ripe_ward(cell) else Action.HARVEST
 		return Action.WATER if can_use(Player.Tool.WATERING_CAN, cell) else Action.NONE
 	if is_tilled(cell):
 		return Action.PLANT if can_use(Player.Tool.SEEDS, cell) else Action.NONE
@@ -368,8 +360,14 @@ func can_move(from: Vector2i, to: Vector2i) -> bool:
 	return can_build(to) and builder.has_room(to, builder.placed[from]["data"], from)
 
 
+func _is_ripe_ward(cell: Vector2i) -> bool:
+	return crops.has(cell) and crops[cell].data.burst_radius > 0 and crops[cell].is_ripe()
+
+
 ## What the Heal button would do on this cell. It changes nothing.
 func smart_heal(cell: Vector2i) -> Heal:
+	if _is_ripe_ward(cell):
+		return Heal.BURST
 	if healing.can_purify(cell):
 		return Heal.PURIFY
 	return Heal.HOLY_WATER if not _waters_for(cell).is_empty() else Heal.NONE
@@ -399,6 +397,8 @@ func run_heal() -> void:
 		return
 	var cell := heal_target_for(player)
 	match smart_heal(cell):
+		Heal.BURST:
+			_use_tool(Player.Tool.HAND, cell)
 		Heal.PURIFY:
 			_use_tool(Player.Tool.HOE, cell)
 		Heal.HOLY_WATER:
@@ -482,7 +482,7 @@ func crop_status(cell: Vector2i) -> String:
 	if crop.blighted:
 		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press R to clear it for a curse shard.", "Tap the big button for a curse shard.")]
 	if crop.is_ripe() and crop.data.burst_radius > 0:
-		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press R to burst it, or leave it to guard.", "Tap the big button to burst it, or leave it to guard.")]
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4, then Space to burst it, or leave it to guard.", "Tap the bottle to burst it, or leave it to guard.")]
 	if crop.is_ripe():
 		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press R to harvest.", "Tap the big button.")]
 	return _growing_status(cell, crop)
@@ -694,6 +694,7 @@ func _refresh_crop_needs() -> void:
 	for cell in crops:
 		var crop := crops[cell]
 		crop.show_need(null if crop.can_harvest() or is_watered(cell) else WATER_ICON)
+		crop.show_guard(ward_reach(cell))
 
 
 ## Grass over the field's edge, and wet soil over dry. Call after any soil change:

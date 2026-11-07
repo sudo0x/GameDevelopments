@@ -23,7 +23,7 @@ flowchart TD
 	D -->|No| F{Facing an object with something to do, and not farming a moment ago?}
 	F -->|Yes| G[Use it. The door asks first]
 	F -->|No| H{What's on the tile you face?}
-	H -->|Ripe or blighted crop| I[Harvest]
+	H -->|Ripe or blighted food crop| I[Harvest]
 	H -->|Dry crop, and water in the can| J[Water]
 	H -->|Empty soil| K[Plant the selected seed]
 	H -->|Tree or rock| L[Gather]
@@ -36,6 +36,7 @@ flowchart TD
 | Action | How to do it |
 |---|---|
 | Spending holy water, or the hoe's uses | The Heal button, kept away from Action. It uses the hoe first, and asks which water if you own both |
+| Bursting a ripe wardthorn | The Heal button too, so you can farm right beside one |
 | Picking up a building | Build mode, from the Bag |
 | Hoeing soil back to grass | Empty soil turns back by itself |
 | Sleeping | The door asks "Sleep?" first. F on a computer sleeps at once |

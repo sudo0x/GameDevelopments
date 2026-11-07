@@ -68,20 +68,24 @@ func _run() -> void:
 	farm.plant(thorn, ward)
 	check("a seed guards nothing around it", guards_square(farm._ward_protects, thorn, -1))
 	farm.crops[thorn].set_days_grown(1)
+	farm._refresh_crop_needs()
 	check("a dry ward guards one tile around", guards_square(farm._ward_protects, thorn, ward.ward_dry_radius))
 	await stand(thorn + Vector2i.LEFT)
-	check("facing a dry ward shows its small area", highlight.visible and is_equal_approx(highlight._cell_rect.size.x, (ward.ward_dry_radius * 2 + 1) * tile))
+	check("facing a ward shows no square", not highlight._filled)
+	check("a dry sprout glows a little", farm.crops[thorn]._glow != null and farm.crops[thorn]._glow.visible)
+	var small_light: float = farm.crops[thorn]._glow.texture_scale
 	farm.water(thorn)
+	farm._refresh_crop_needs()
+	check("water makes its light reach further", farm.crops[thorn]._glow.texture_scale > small_light)
 	check("a watered ward guards a square", guards_square(farm._ward_protects, thorn, ward.ward_radius))
 	check("the corner is safe", farm._ward_protects(thorn + Vector2i(ward.ward_radius, ward.ward_radius)))
 	await wait(3)
-	var shown: Rect2 = highlight._cell_rect
-	check("the cursor covers the guarded square", is_equal_approx(shown.size.x, (ward.ward_radius * 2 + 1) * tile) and highlight._valid and highlight._filled)
 
 	# Ripe, it needs no water, because the big button can only burst it now.
 	var crop: Node = farm.crops[thorn]
 	crop.set_days_grown(ward.days_to_grow)
 	farm.till(thorn)
+	farm._refresh_crop_needs()
 	await wait(2)
 	check("a ripe ward is dry here", not farm.is_watered(thorn))
 	check("a ripe ward glows", crop._glow != null and crop._glow.visible and crop._motes.emitting)
@@ -100,7 +104,8 @@ func _run() -> void:
 	crop.blighted = false
 	check("it comes back", crop.sprite.texture == ward.ripe_animation)
 	check("other crops stay calm", inv.CROPS[0].ripe_glow.a == 0.0)
-	check("Action can only burst it", farm.smart_action(thorn) == farm.Action.HARVEST)
+	check("Action never bursts it", farm.smart_action(thorn) == farm.Action.NONE)
+	check("Heal does", farm.smart_heal(thorn) == farm.Heal.BURST)
 	check("it still guards without water", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
 	farm.water(thorn)
 	check("water doesn't change a ripe ward", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
@@ -117,7 +122,7 @@ func _run() -> void:
 	await wait(3)
 	check("a lantern guards a square", guards_square(farm._lantern_protects, post, lantern.guard_radius))
 	await stand(post + Vector2i.LEFT)
-	check("facing a lantern shows its area", highlight.visible and farm.guard_radius_at(post) == lantern.guard_radius)
+	check("facing a lantern shows no square", not highlight._filled)
 
 	# A burst heals the same square.
 	var healing: Node = farm.healing
@@ -132,10 +137,19 @@ func _run() -> void:
 	var healed: int = healing.burst(edge, ward.burst_radius)
 	check("a burst heals the whole square", healed == square.size() and healed > 0)
 
+	# Facing a ripe ward, the big button leaves it alone and the bottle bursts it.
+	await stand(thorn + Vector2i.LEFT)
+	farm.run_action()
+	check("Action leaves a ripe ward alone", farm.crops.has(thorn))
+	var water_before: int = inv.holy_water
+	farm.run_heal()
+	check("Heal bursts it", not farm.crops.has(thorn) and inv.holy_water == water_before)
+
 	# Lanterns stay apart.
 	player.tool = 5
 	inv.add_building(lantern, 2)
 	await stand(post + Vector2i(lantern.min_spacing - 2, 0))
+	check("placing a lantern shows its square", highlight._filled and is_equal_approx(highlight._cell_rect.size.x, (lantern.guard_radius * 2 + 1) * tile))
 	var near := post + Vector2i(lantern.min_spacing - 1, 0)
 	check("the near tile is free", farm.can_build(near))
 	check("too close can't be built", not farm.can_use(5, near))

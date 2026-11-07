@@ -9,12 +9,15 @@ const STEM_COLOR := Color(0.36, 0.55, 0.3)
 const NEED_HEIGHTS: Array[float] = [-14.0, -22.0, -30.0, -40.0]
 const NEED_BOB_SPEED := 3.0
 const BLIGHT_COLOR := Color(0.55, 0.35, 0.7)
-## The ripe glow breathes between these, this fast.
-const GLOW_LOW := 0.35
+## A guarding crop's glow breathes between these, this fast. It's stronger once ripe.
+const GLOW_LOW := 0.5
 const GLOW_HIGH := 0.85
+const RIPE_GLOW_LOW := 0.75
+const RIPE_GLOW_HIGH := 1.2
 const GLOW_SPEED := 2.4
-const GLOW_HEIGHT := -28.0
+const GLOW_HEIGHT := -14.0
 const GLOW_SIZE := 96
+const TILE_SIZE := 32.0
 
 var data: CropData
 ## 0 = seed, 1 = sprout, 2 = growing, 3 = ripe.
@@ -38,6 +41,8 @@ var _bob_time := 0.0
 var _glow: PointLight2D
 var _motes: CPUParticles2D
 var _ripe_time := 0.0
+## How many tiles out this crop guards right now. Its light shows that, instead of a marker.
+var _guard_reach := 0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -51,12 +56,13 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_bob_time += delta
 	_need_sprite.offset.y = roundf(sin(_bob_time * NEED_BOB_SPEED))
-	if _shows_ripe_life():
-		_ripe_time += delta
-		if _glow:
-			_glow.energy = lerpf(GLOW_LOW, GLOW_HIGH, 0.5 + 0.5 * sin(_ripe_time * GLOW_SPEED))
-		if data.ripe_animation:
-			sprite.frame = int(_ripe_time * data.ripe_fps) % data.ripe_frames
+	_ripe_time += delta
+	if _glow and _glow.visible:
+		var breath := 0.5 + 0.5 * sin(_ripe_time * GLOW_SPEED)
+		var ripe := _shows_ripe_life()
+		_glow.energy = lerpf(RIPE_GLOW_LOW if ripe else GLOW_LOW, RIPE_GLOW_HIGH if ripe else GLOW_HIGH, breath)
+	if _shows_ripe_life() and data.ripe_animation:
+		sprite.frame = int(_ripe_time * data.ripe_fps) % data.ripe_frames
 
 
 ## Shows what the crop needs (Farm decides). Crops loading from a save aren't ready yet.
@@ -66,11 +72,19 @@ func show_need(icon: Texture2D) -> void:
 		_update_need()
 
 
+## Sets how far the crop guards now (Farm decides), so its glow can match.
+func show_guard(reach: int) -> void:
+	_guard_reach = reach
+	if is_node_ready():
+		_update_ripe_glow()
+		_update_need()
+
+
 func _update_need() -> void:
 	_need_sprite.texture = need_icon
 	_need_sprite.visible = need_icon != null
 	_need_sprite.position.y = NEED_HEIGHTS[stage]
-	set_process(need_icon != null or _shows_ripe_life())
+	set_process(need_icon != null or _shows_ripe_life() or _guard_reach > 0)
 
 
 ## Ripe crops with art or a glow keep moving. Blight takes that away.
@@ -127,12 +141,14 @@ func _update_look() -> void:
 
 
 func _update_ripe_glow() -> void:
-	var glowing := _shows_ripe_life() and data.ripe_glow.a > 0.0
+	var glowing := data != null and data.ripe_glow.a > 0.0 and not blighted and _guard_reach > 0
 	if glowing and not _glow:
 		_add_ripe_glow()
 	if _glow:
 		_glow.visible = glowing
-		_motes.emitting = glowing
+		# The light reaches about as far as the guard, measured from the plant.
+		_glow.texture_scale = (_guard_reach + 1.0) * TILE_SIZE / (GLOW_SIZE / 2.0)
+		_motes.emitting = glowing and _shows_ripe_life()
 
 
 func _add_ripe_glow() -> void:

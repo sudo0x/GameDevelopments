@@ -42,7 +42,7 @@ flowchart TD
 | Tonight's tiles are marked in the morning, and land healed that day is safe tonight | A loss you can see coming feels fair; a surprise doesn't |
 | Starts on day 4 | The first days stay calm while the player learns |
 
-**The wardthorn:** seed 30 money, 4 watered days to ripen. It can't be blighted. Ripe, it guards without water until the player bursts it, which heals cursed land in a 7×7 square and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
+**The wardthorn:** seed 30 money, 4 watered days to ripen. It can't be blighted. Ripe, it guards without water until the player bursts it with the Heal button, which heals cursed land in a 7×7 square and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
 
 **Starting numbers, first guesses:** all of them are in `data/balance.tres` and `data/crops/wardthorn.tres`. Setting `curse_return_per_night` to 0 turns the returning curse off.
 

@@ -9,7 +9,7 @@ const SOURCE := "res://art_source/crops/wardthorn_ripe.png"
 const OUT := "res://assets/crops/wardthorn_ripe.png"
 const FRAMES := 4
 const SOURCE_FRAME := Rect2i(0, 14, 543, 690)
-const FRAME_SIZE := Vector2i(32, 40)
+const FRAME_SIZE := Vector2i(40, 50)
 ## Less solid than this is the art's soft fringe, which is cut away.
 const SOLID_FROM := 0.6
 
