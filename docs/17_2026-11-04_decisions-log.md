@@ -10,7 +10,9 @@ Newest first. The first choices from the finished layer plans are at the end.
 
 | Question | Decision | Why |
 |---|---|---|
-| What bursts a wardthorn? | **The Heal button, never the big button** (2026-11-07, after the user burst one by accident) | It can't be undone, and it's a healing action, so it belongs with holy water, away from everyday farming taps |
+| What marks a wardthorn's ground? | **Nothing. Facing a claimed tile explains it** (2026-11-07, the user's choice) | A tint, roots and a flower ring were all tried, and anything always on the ground distracted from the farm. A red cursor and one line of text appear only when it matters |
+| How rare is a wardthorn? | **Very: 150 money, 1 seed a day, 6 days to grow, claims 3×3 tiles, and bursts for 5×5** (2026-11-07, the user's choice) | It was cheap enough to unlock the curse too quickly. Rare makes it special, and costing field space makes planting it a real decision |
+| What bursts a wardthorn? | **Walking up, tapping the plant and saying yes. Never a button** (2026-11-07, the user's choice, after bursting one by accident) | It can't be undone, and the user wants it to feel unique. This is the one exception to not tapping the world, because the character is right there |
 | How do you see what's guarded? | **By the light. The square only shows while placing a lantern** (2026-11-07, the user's choice) | A square appearing near every guard got in the way of farming. A wardthorn's glow now grows with what it protects, and the square stays only when choosing a spot |
 | What shows a crop is ripe? | **The crop itself, with no star** (2026-11-07, the user's choice). Only the water drop remains as an icon | Fewer icons keep the field calm, and they'd get in the way of animation later |
 | Does a wardthorn seed guard? | **Only its own tile, until it sprouts** (2026-11-07, the user's catch) | A seed protecting land the moment it's planted isn't logical, and it let planting save tonight's marks. Now guarding takes planning ahead |

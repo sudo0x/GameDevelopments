@@ -42,7 +42,7 @@ flowchart TD
 | Tonight's tiles are marked in the morning, and land healed that day is safe tonight | A loss you can see coming feels fair; a surprise doesn't |
 | Starts on day 4 | The first days stay calm while the player learns |
 
-**The wardthorn:** seed 30 money, 4 watered days to ripen. It can't be blighted. Ripe, it guards without water until the player bursts it with the Heal button, which heals cursed land in a 7×7 square and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
+**The wardthorn:** seed 150 money, one a day, 6 watered days to ripen, and it claims the 8 tiles around it. It can't be blighted. Ripe, it guards without water until the player walks up and taps it to burst it, which heals cursed land in a 5×5 square and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
 
 **Starting numbers, first guesses:** all of them are in `data/balance.tres` and `data/crops/wardthorn.tres`. Setting `curse_return_per_night` to 0 turns the returning curse off.
 
@@ -100,7 +100,7 @@ The first play, on a day 53 save with 4,695 money, had no pressure: one hoe tap 
 | The curse grows | 3 tiles a night, plus 1 for every 5% of the island healed (`curse_growth_percent`) |
 | What saves a tile | A building, a lantern's reach, a watered wardthorn's reach, or healing beside it. Bare soil doesn't, and it's lost with its tile |
 | Food crops | They can't protect themselves (the user's idea). The curse blights a marked crop: it stops growing, and clearing it gives 5 money and a curse shard. The land under it stays clean that night |
-| Wardthorn | A plant that is poison to the curse. Seed 30 money, 4 watered days to ripen. While watered that day, it guards a 7×7 square (changed from the first numbers on 2026-11-07, see finding 57). Ripe, it can be burst with the Hand tool to heal cursed land within 2 tiles, which uses it up |
+| Wardthorn | A plant that is poison to the curse. Seed 150 money, one a day, 6 watered days to ripen. While watered that day, it guards a 7×7 square (changed from the first numbers on 2026-11-07, see finding 57). Ripe, it needs no water, and the player walks up and taps it to burst it, which heals a 5×5 square |
 | How to test | Start a **New Game**, because a rich old save can't show the pace |
 
 Pace check with these rules, shrine restored at 3 tiles a night:
@@ -128,6 +128,8 @@ After playing a New Game, answer these:
 6. Are lanterns and wardthorn each worth using, for different reasons?
 7. Did the watering can's limit feel fair, or like a chore?
 8. Is the hoe's 2 uses a day fair, and do a few lanterns beat the curse by themselves?
+9. Do all the limits together (water, holy water, wardthorn, lantern spacing, the hoe) feel like good choices, or like too many walls?
+10. Is a 150 money wardthorn, one a day, something you look forward to buying?
 
 | Result | What we do |
 |---|---|
@@ -139,5 +141,4 @@ After playing a New Game, answer these:
 
 - **Too punishing:** this game is meant to be calm and short per session. Losing land must feel like a push, never like losing your work.
 - **Busywork:** if protecting land becomes a daily chore, it swaps boredom for chores.
-- **Too many wardthorns:** seeds have no daily limit, so a rich player could buy many and get around the holy water limit. If so, limit the seeds too, or raise their price.
 - **Pace:** the release gets later by the length of this test.

@@ -27,4 +27,10 @@ extends Resource
 ## How far it guards once ripe, with no water needed.
 @export var ward_ripe_radius: int = 0
 ## Above 0, harvesting bursts the plant and heals cursed land this many tiles away.
+## Tiles around it that must stay clear of crops and buildings, so it costs field space.
+@export var space_radius: int = 0
+## How far the plant leans as it sways. 0 keeps it still.
+@export var sway: float = 0.0
+## Above 0, the stall only sells this many seeds a day.
+@export var daily_stock: int = 0
 @export var burst_radius: int = 0

@@ -36,7 +36,7 @@ flowchart TD
 | Action | How to do it |
 |---|---|
 | Spending holy water, or the hoe's uses | The Heal button, kept away from Action. It uses the hoe first, and asks which water if you own both |
-| Bursting a ripe wardthorn | The Heal button too, so you can farm right beside one |
+| Bursting a ripe wardthorn | Walk up, tap the plant itself, and say yes. It's the only tap on the world, because a burst is rare and personal |
 | Picking up a building | Build mode, from the Bag |
 | Hoeing soil back to grass | Empty soil turns back by itself |
 | Sleeping | The door asks "Sleep?" first. F on a computer sleeps at once |

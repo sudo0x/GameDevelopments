@@ -108,7 +108,7 @@ func _run() -> void:
 	check("the guarded tile stays clean", g.get_cell_source_id(guarded) == GRASS)
 
 	# Ripe, it keeps guarding until the player bursts it.
-	for i in 3:
+	for i in ward.days_to_grow:
 		farm.water(thorn)
 		progress.end_day()
 	var plant: Node = farm.crops[thorn]

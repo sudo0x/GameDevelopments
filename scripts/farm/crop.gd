@@ -18,6 +18,7 @@ const GLOW_SPEED := 2.4
 const GLOW_HEIGHT := -14.0
 const GLOW_SIZE := 96
 const TILE_SIZE := 32.0
+const SWAY_SPEED := 1.3
 
 var data: CropData
 ## 0 = seed, 1 = sprout, 2 = growing, 3 = ripe.
@@ -57,6 +58,8 @@ func _process(delta: float) -> void:
 	_bob_time += delta
 	_need_sprite.offset.y = roundf(sin(_bob_time * NEED_BOB_SPEED))
 	_ripe_time += delta
+	if data and data.sway > 0.0:
+		sprite.skew = sin(_ripe_time * SWAY_SPEED) * data.sway
 	if _glow and _glow.visible:
 		var breath := 0.5 + 0.5 * sin(_ripe_time * GLOW_SPEED)
 		var ripe := _shows_ripe_life()
@@ -84,7 +87,7 @@ func _update_need() -> void:
 	_need_sprite.texture = need_icon
 	_need_sprite.visible = need_icon != null
 	_need_sprite.position.y = NEED_HEIGHTS[stage]
-	set_process(need_icon != null or _shows_ripe_life() or _guard_reach > 0)
+	set_process(need_icon != null or _shows_ripe_life() or _guard_reach > 0 or (data != null and data.sway > 0.0))
 
 
 ## Ripe crops with art or a glow keep moving. Blight takes that away.

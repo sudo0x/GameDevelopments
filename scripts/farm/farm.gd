@@ -11,13 +11,15 @@ signal action_changed(action: Action)
 signal heal_changed(heal: Heal)
 ## The player owns both kinds of holy water, so the HUD should ask which.
 signal water_choice_needed
+## The player chose a ripe ward plant, so the HUD should ask before bursting it.
+signal burst_asked(cell: Vector2i)
 
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
 enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP }
 ## What the Heal button would do. The hoe's free daily uses come before holy water.
-enum Heal { NONE, BURST, PURIFY, HOLY_WATER }
+enum Heal { NONE, PURIFY, HOLY_WATER }
 
 ## Each ground texture is 128×128, a 4×4 block of 32×32 tiles.
 const TEXTURE_TILES := 4
@@ -70,6 +72,8 @@ var _object_pause := 0.0
 var _shown_cell := Vector2i.ZERO
 ## Phones: press and hold a building to move it.
 var mover := BuildingMover.new()
+## Phones: tap a ripe ward plant to burst it.
+var ward_tap := WardTap.new()
 ## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
 var soil_idle: Dictionary[Vector2i, int] = {}
 ## Reused to check whether a solid object stands on a cell.
@@ -115,6 +119,8 @@ func _ready() -> void:
 	builder.setup(ground, crops_parent)
 	mover.setup(self)
 	add_child(mover)
+	ward_tap.setup(self)
+	add_child(ward_tap)
 	spawner.setup(self, crops_parent, player)
 	Progress.day_ended.connect(spawner.clear)
 	Progress.day_started.connect(spawner.spawn_for_today)
@@ -211,7 +217,30 @@ func _beside(p: Player, ahead: Vector2i, usable: Callable) -> Vector2i:
 
 ## Any clean grass can be farmed, unless something solid stands on it.
 func is_farmable(cell: Vector2i) -> bool:
-	return ground.get_cell_source_id(cell) == Source.GRASS and not _has_solid_object(cell)
+	return ground.get_cell_source_id(cell) == Source.GRASS and not _has_solid_object(cell) and not in_ward_space(cell)
+
+
+## Whether this tile must stay clear because a ward plant grows beside it. Nothing marks these
+## tiles, so the ground stays calm: ward_space_status() explains when the player faces one.
+func in_ward_space(cell: Vector2i) -> bool:
+	for center in crops:
+		if center != cell and tiles_apart(cell, center) <= crops[center].data.space_radius:
+			return true
+	return false
+
+
+## Whether a crop that needs space has it here: no crops or buildings in it, and no overlap
+## with another's.
+func _has_room_for(crop: CropData, cell: Vector2i) -> bool:
+	if crop.space_radius <= 0:
+		return true
+	for other in crops:
+		if other != cell and tiles_apart(cell, other) <= crop.space_radius + crops[other].data.space_radius:
+			return false
+	for other in builder.placed:
+		if tiles_apart(cell, other) <= crop.space_radius:
+			return false
+	return true
 
 
 ## How far apart two cells are, counting a diagonal step as one. Everything with a square
@@ -249,7 +278,7 @@ func is_watered(cell: Vector2i) -> bool:
 
 ## Buildings need clean grass with nothing on it, and must keep doors, shops and the player clear.
 func can_build(cell: Vector2i) -> bool:
-	if ground.get_cell_source_id(cell) != Source.GRASS or is_tilled(cell) or gathering.spots.has(cell):
+	if ground.get_cell_source_id(cell) != Source.GRASS or is_tilled(cell) or gathering.spots.has(cell) or in_ward_space(cell):
 		return false
 	_build_query.transform = _cell_transform(cell)
 	return get_world_2d().direct_space_state.intersect_shape(_build_query, 1).is_empty()
@@ -266,7 +295,9 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.WATERING_CAN:
 			return is_tilled(cell) and not is_watered(cell) and Inventory.can_water > 0
 		Player.Tool.SEEDS:
-			return is_tilled(cell) and not crops.has(cell) and Inventory.seed_count(player.selected_seed()) > 0
+			var seed_crop := player.selected_seed()
+			return is_tilled(cell) and not crops.has(cell) and Inventory.seed_count(seed_crop) > 0 \
+					and not in_ward_space(cell) and _has_room_for(seed_crop, cell)
 		Player.Tool.HAND:
 			return (crops.has(cell) and crops[cell].can_harvest()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
@@ -332,7 +363,7 @@ func _creature_to_swing_at() -> Creature:
 
 func _tile_action(cell: Vector2i) -> Action:
 	if crops.has(cell):
-		# Bursting can't be undone, so farming beside a ward plant must never do it. Heal does.
+		# Bursting can't be undone, so farming beside a ward plant must never do it.
 		if crops[cell].can_harvest():
 			return Action.NONE if _is_ripe_ward(cell) else Action.HARVEST
 		return Action.WATER if can_use(Player.Tool.WATERING_CAN, cell) else Action.NONE
@@ -364,10 +395,30 @@ func _is_ripe_ward(cell: Vector2i) -> bool:
 	return crops.has(cell) and crops[cell].data.burst_radius > 0 and crops[cell].is_ripe()
 
 
+## The ripe ward plant drawn at this world point, or Builder.NO_CELL.
+func ripe_ward_at(point: Vector2) -> Vector2i:
+	for cell in crops:
+		if not _is_ripe_ward(cell):
+			continue
+		var art: Sprite2D = crops[cell].sprite
+		var size := art.texture.get_size() / Vector2(art.hframes, 1)
+		if Rect2(crops[cell].global_position - Vector2(size.x / 2.0, size.y), size).has_point(point):
+			return cell
+	return Builder.NO_CELL
+
+
+func player_cell() -> Vector2i:
+	return ground.local_to_map(ground.to_local(player.global_position + Vector2(0, -4)))
+
+
+## The player said yes to the question.
+func burst(cell: Vector2i) -> void:
+	if _is_ripe_ward(cell):
+		_use_tool(Player.Tool.HAND, cell)
+
+
 ## What the Heal button would do on this cell. It changes nothing.
 func smart_heal(cell: Vector2i) -> Heal:
-	if _is_ripe_ward(cell):
-		return Heal.BURST
 	if healing.can_purify(cell):
 		return Heal.PURIFY
 	return Heal.HOLY_WATER if not _waters_for(cell).is_empty() else Heal.NONE
@@ -397,8 +448,6 @@ func run_heal() -> void:
 		return
 	var cell := heal_target_for(player)
 	match smart_heal(cell):
-		Heal.BURST:
-			_use_tool(Player.Tool.HAND, cell)
 		Heal.PURIFY:
 			_use_tool(Player.Tool.HOE, cell)
 		Heal.HOLY_WATER:
@@ -462,6 +511,10 @@ func _update_build_preview() -> void:
 func _update_target_status() -> void:
 	var status := spacing_status(_shown_cell)
 	if status.is_empty():
+		status = ward_space_status(_shown_cell)
+	if status.is_empty():
+		status = ward_room_status(_shown_cell)
+	if status.is_empty():
 		status = curse_status(_shown_cell)
 	if status.is_empty():
 		status = crop_status(_shown_cell)
@@ -482,7 +535,7 @@ func crop_status(cell: Vector2i) -> String:
 	if crop.blighted:
 		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press R to clear it for a curse shard.", "Tap the big button for a curse shard.")]
 	if crop.is_ripe() and crop.data.burst_radius > 0:
-		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4, then Space to burst it, or leave it to guard.", "Tap the bottle to burst it, or leave it to guard.")]
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4, then Space to burst it, or leave it to guard.", "Walk up and tap it to burst it, or leave it to guard.")]
 	if crop.is_ripe():
 		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press R to harvest.", "Tap the big button.")]
 	return _growing_status(cell, crop)
@@ -505,6 +558,19 @@ func spacing_status(cell: Vector2i) -> String:
 	if builder.has_room(cell, building):
 		return ""
 	return "%ss must stand %d tiles apart." % [building.display_name, building.min_spacing]
+
+
+## Says why this tile can't be used. Only shown when it matters, so nothing marks the ground.
+func ward_space_status(cell: Vector2i) -> String:
+	return "This tile belongs to the wardthorn." if in_ward_space(cell) else ""
+
+
+## Says why a ward seed can't be planted on this soil, since it's easy to miss.
+func ward_room_status(cell: Vector2i) -> String:
+	var crop := player.selected_seed()
+	if crop.space_radius <= 0 or not is_tilled(cell) or crops.has(cell) or _has_room_for(crop, cell):
+		return ""
+	return "%s needs the tiles around it clear." % crop.display_name
 
 
 ## How a player learns what the marks mean and what saves a tile.
@@ -551,6 +617,9 @@ static func texture_coords(cell: Vector2i) -> Vector2i:
 
 
 func _on_tool_used(tool: Player.Tool) -> void:
+	if tool == Player.Tool.HAND and _is_ripe_ward(target_cell):
+		burst_asked.emit(target_cell)
+		return
 	_use_tool(tool, target_cell)
 
 

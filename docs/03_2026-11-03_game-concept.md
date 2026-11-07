@@ -49,7 +49,7 @@ Each day asks one question: earn money, heal new land, or protect what you have?
 | **Money** | The shipping box pays overnight. The stall sells seeds and 3 holy water a day |
 | **Healing** | Holy water heals a 3×3 patch, strong holy water 5×5. The purifying hoe heals one tile, twice a day, for free. A restored shrine heals a huge area |
 | **The curse** | From day 4 it marks healed tiles beside it each morning, and takes them that night. It grows as you heal. Food crops on marked tiles are blighted. This is still being tested |
-| **Guards** | Lanterns are rare and permanent: 5×5, 6 tiles apart. Wardthorn is cheap, and starts guarding once it sprouts: 3×3 while dry, 7×7 while watered, and 5×5 with no water once ripe, until you burst it with the Heal button. Its light shows about how far it guards |
+| **Guards** | Lanterns are rare and permanent: 5×5, 6 tiles apart. Wardthorn is rare: 150 money, 1 seed a day, 6 days to grow, and the 8 tiles around it must stay clear, which it explains when you face one. It guards once it sprouts: 3×3 while dry, 7×7 while watered, and 5×5 with no water once ripe. Walk up and tap a ripe one to burst it, which heals 5×5. Its light shows about how far it guards |
 | **Gathering and crafting** | Healed land reveals trees and rocks. The workbench turns wood, stone and curse shards into tools and buildings |
 | **Buildings** | Lanterns, fences and wells. Place from the Bag, and press and hold to move them. The house and stall stay fixed |
 | **Combat** | Shades and hollows appear near the curse from day 3, and avoid lantern light. The big button swings the crafted sword. Fainting costs money and the rest of the day |

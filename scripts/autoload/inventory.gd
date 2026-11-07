@@ -60,6 +60,8 @@ var holy_water: int = BALANCE.start_holy_water
 var strong_holy_water := 0
 ## Not saved: saves happen in the morning, when this is always 0.
 var holy_water_sold_today := 0
+## Seeds of limited crops sold today, by crop id. Not saved, for the same reason.
+var seeds_sold_today: Dictionary[StringName, int] = {}
 ## The crafted upgrade: the hoe also heals single cursed tiles, a few times a day.
 var has_purifying_hoe := false
 var has_sword := false
@@ -201,12 +203,18 @@ func ship_all() -> void:
 	inventory_changed.emit()
 
 
-## Buys one seed. Returns false if there isn't enough money.
+## How many more the stall will sell today, for a crop with a daily_stock.
+func seeds_left_today(crop: CropData) -> int:
+	return crop.daily_stock - seeds_sold_today.get(crop.id, 0)
+
+
+## Buys one seed. Returns false if there isn't enough money, or the stall has sold out.
 func buy_seed(crop: CropData) -> bool:
-	if money < crop.seed_price:
+	if money < crop.seed_price or (crop.daily_stock > 0 and seeds_left_today(crop) <= 0):
 		return false
 	money -= crop.seed_price
 	seeds[crop.id] = seed_count(crop) + 1
+	seeds_sold_today[crop.id] = seeds_sold_today.get(crop.id, 0) + 1
 	inventory_changed.emit()
 	return true
 
@@ -313,6 +321,7 @@ func lose_faint_money() -> int:
 ## Refills what comes back every morning. Progress calls this as a new day starts.
 func start_day() -> void:
 	holy_water_sold_today = 0
+	seeds_sold_today.clear()
 	can_water = BALANCE.can_capacity
 	_refill_hoe()
 
@@ -327,6 +336,7 @@ func reset() -> void:
 	holy_water = BALANCE.start_holy_water
 	strong_holy_water = 0
 	holy_water_sold_today = 0
+	seeds_sold_today.clear()
 	has_purifying_hoe = false
 	has_sword = false
 	hoe_uses_left = 0

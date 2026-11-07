@@ -46,13 +46,19 @@ func _refresh() -> void:
 		var crop := Inventory.CROPS[i]
 		_labels[i].text = "%s seeds: %d" % [crop.display_name, Inventory.seed_count(crop)]
 		_set_price(i, crop.seed_price)
+		if crop.daily_stock > 0 and Inventory.seeds_left_today(crop) <= 0:
+			_set_sold_out(i)
 	var last := _labels.size() - 1
 	var left := Inventory.holy_water_left_today()
 	_labels[last].text = "Holy water: %d (%d left)" % [Inventory.holy_water, left]
 	_set_price(last, GameState.BALANCE.holy_water_price)
 	if left <= 0:
-		_buttons[last].text = "Sold out"
-		_buttons[last].disabled = true
+		_set_sold_out(last)
+
+
+func _set_sold_out(row: int) -> void:
+	_buttons[row].text = "Sold out"
+	_buttons[row].disabled = true
 
 
 func _set_price(row: int, price: int) -> void:

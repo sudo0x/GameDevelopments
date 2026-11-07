@@ -56,7 +56,6 @@ func _run() -> void:
 
 	# The numbers the design depends on.
 	check("wardthorn guards more than a lantern", ward.ward_radius > lantern.guard_radius)
-	check("wardthorn is cheap", ward.seed_price <= 30)
 	var recipe: RecipeData = inv.RECIPES[2]
 	var shards := recipe.needs.filter(func(n: RecipeNeed) -> bool: return n.material == inv.CURSE_SHARD)
 	check("lanterns need curse shards", recipe.building == lantern and shards.size() == 1 and shards[0].amount == 2)
@@ -105,7 +104,6 @@ func _run() -> void:
 	check("it comes back", crop.sprite.texture == ward.ripe_animation)
 	check("other crops stay calm", inv.CROPS[0].ripe_glow.a == 0.0)
 	check("Action never bursts it", farm.smart_action(thorn) == farm.Action.NONE)
-	check("Heal does", farm.smart_heal(thorn) == farm.Heal.BURST)
 	check("it still guards without water", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
 	farm.water(thorn)
 	check("water doesn't change a ripe ward", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
@@ -137,13 +135,12 @@ func _run() -> void:
 	var healed: int = healing.burst(edge, ward.burst_radius)
 	check("a burst heals the whole square", healed == square.size() and healed > 0)
 
-	# Facing a ripe ward, the big button leaves it alone and the bottle bursts it.
+	# Facing a ripe ward, the big button leaves it alone.
 	await stand(thorn + Vector2i.LEFT)
 	farm.run_action()
 	check("Action leaves a ripe ward alone", farm.crops.has(thorn))
-	var water_before: int = inv.holy_water
-	farm.run_heal()
-	check("Heal bursts it", not farm.crops.has(thorn) and inv.holy_water == water_before)
+	farm.burst(thorn)
+	check("bursting takes the plant", not farm.crops.has(thorn))
 
 	# Lanterns stay apart.
 	player.tool = 5

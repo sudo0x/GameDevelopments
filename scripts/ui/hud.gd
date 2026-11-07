@@ -71,6 +71,8 @@ func _ready() -> void:
 	$BagMenu.build_pressed.connect(_ask_building)
 	$BagMenu.book_pressed.connect(_book_menu.open)
 	farm.mover.is_free_spot = $TouchControls.is_free_spot
+	farm.ward_tap.is_free_spot = $TouchControls.is_free_spot
+	farm.burst_asked.connect(_ask_burst)
 	_add_goal_guide()
 	_add_menus()
 	_add_status_rows()
@@ -168,6 +170,16 @@ func _ask_building() -> void:
 		GameState.notice.emit("Nothing to build. Craft something at the workbench.")
 	else:
 		_pick_menu.ask("What to build?", choices)
+
+
+## Bursting ends the plant's guard for good, so keeping it comes first.
+func _ask_burst(cell: Vector2i) -> void:
+	var icon: Texture2D = farm.crops[cell].data.seed_icon
+	var choices: Array[Dictionary] = [
+		{"text": "Keep it", "icon": icon, "pick": func() -> void: pass},
+		{"text": "Burst it", "icon": icon, "pick": farm.burst.bind(cell)},
+	]
+	_pick_menu.ask("Burst this wardthorn?", choices)
 
 
 func _ask_water() -> void:
