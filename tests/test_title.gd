@@ -37,6 +37,8 @@ func open_title() -> Node:
 func wait_for_game() -> void:
 	for i in 6:
 		await process_frame
+	# A New Game opens with the story, which pauses; this test is about what happens around it.
+	paused = false
 
 
 func _initialize() -> void:

@@ -59,6 +59,7 @@ func _run() -> void:
 	audio.load_settings()
 	check("settings load back", is_equal_approx(audio.music_volume, 0.5) and audio.effects_volume == 0.0)
 	gs.start_new_game()
+	gs.show_story = false
 	check("New Game keeps the volume", is_equal_approx(audio.music_volume, 0.5))
 	audio.set_effects_volume(0.8)
 

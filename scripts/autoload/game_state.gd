@@ -17,6 +17,8 @@ signal fainted(money_lost: int)
 ## The day is over: crops grow, soil dries. Shipped crops are paid just before this.
 signal day_ended
 signal day_started
+## The player finished something a goal in the guide may be waiting for.
+signal guide_changed
 
 const BALANCE: GameBalance = preload("res://data/balance.tres")
 
@@ -27,6 +29,8 @@ const SAVE_PATH := "user://save.cfg"
 const SAVE_TEMP_PATH := "user://save.tmp"
 ## Raise this when the save layout changes. Saves with another version are ignored.
 const SAVE_VERSION := 1
+## In guide_done, this means the lessons are over: saves from before the guide have it.
+const GUIDE_FINISHED := "finished"
 
 const CROPS: Array[CropData] = [
 	preload("res://data/crops/radish.tres"),
@@ -82,6 +86,10 @@ var holy_water: int = BALANCE.start_holy_water
 var has_purifying_hoe := false
 ## Like holy water, but it heals a bigger patch.
 var strong_holy_water := 0
+## Actions the player has done, for the goal guide. See GoalGuide.STEPS.
+var guide_done: Array[String] = []
+## Set by a New Game, so the first morning opens with the story.
+var show_story := false
 ## Not saved: saves happen in the morning, when this is always 0.
 var holy_water_sold_today := 0
 var has_sword := false
@@ -160,6 +168,7 @@ func request_crafting() -> void:
 
 func end_day() -> void:
 	_pay_shipped()
+	record_action("sleep")
 	day_ended.emit()
 	day += 1
 	holy_water_sold_today = 0
@@ -188,6 +197,12 @@ func take_blighted_crop() -> void:
 	money += BALANCE.blighted_crop_money
 	add_material(CURSE_SHARD, 1)
 	notice.emit("+%d money, +1 %s" % [BALANCE.blighted_crop_money, CURSE_SHARD.display_name])
+
+
+func record_action(action: String) -> void:
+	if not guide_done.has(action):
+		guide_done.append(action)
+		guide_changed.emit()
 
 
 func add_material(material: MaterialData, amount: int) -> void:
@@ -250,6 +265,8 @@ func craft(recipe: RecipeData) -> bool:
 
 ## Moves every harvested crop into the shipping box.
 func ship_all() -> void:
+	if not harvest.is_empty():
+		record_action("ship")
 	for id in harvest:
 		shipped[id] = shipped.get(id, 0) + harvest[id]
 	harvest.clear()
@@ -271,6 +288,7 @@ func save_game() -> void:
 	var file := ConfigFile.new()
 	file.set_value("game", "version", SAVE_VERSION)
 	file.set_value("game", "day", day)
+	file.set_value("game", "guide_done", guide_done)
 	file.set_value("game", "money", money)
 	file.set_value("game", "seeds", seeds)
 	file.set_value("game", "harvest", harvest)
@@ -299,6 +317,7 @@ func start_new_game() -> void:
 	DirAccess.remove_absolute(SAVE_PATH)
 	DirAccess.remove_absolute(SAVE_TEMP_PATH)
 	_reset()
+	show_story = true
 
 
 ## Throws away everything since the last save (the morning), as if the game had been closed.
@@ -310,6 +329,7 @@ func discard_unsaved() -> void:
 
 func _reset() -> void:
 	day = 1
+	guide_done.clear()
 	money = 0
 	seeds = START_SEEDS.duplicate()
 	harvest.clear()
@@ -334,6 +354,7 @@ func load_game() -> void:
 	if file.load(SAVE_PATH) != OK or file.get_value("game", "version", 0) != SAVE_VERSION:
 		return
 	day = file.get_value("game", "day", day)
+	guide_done.assign(file.get_value("game", "guide_done", [GUIDE_FINISHED]))
 	money = file.get_value("game", "money", money)
 	seeds.assign(file.get_value("game", "seeds", seeds))
 	harvest.assign(file.get_value("game", "harvest", harvest))

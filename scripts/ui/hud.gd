@@ -37,7 +37,17 @@ func _ready() -> void:
 	GameState.notice.connect(_show_notice)
 	GameState.fainted.connect(_faint)
 	farm.target_status_changed.connect(_show_crop_status)
+	_add_goal_guide()
 	_refresh()
+
+
+## Right after the tool text, so menus and the fade still draw over it.
+func _add_goal_guide() -> void:
+	var guide := GoalGuide.new()
+	guide.name = "GoalGuide"
+	guide.setup(tool_label)
+	add_child(guide)
+	move_child(guide, tool_label.get_index() + 1)
 
 
 func _refresh() -> void:

@@ -300,18 +300,22 @@ func _on_tool_used(tool: Player.Tool) -> void:
 					untill(target_cell)
 				else:
 					till(target_cell)
+					GameState.record_action("till")
 				Audio.play(&"till")
 			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
+			GameState.record_action("water")
 			Audio.play(&"water")
 			_refresh_soil_edges()
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
+			GameState.record_action("plant_ward" if player.selected_seed().ward_radius > 0 else "plant")
 			Audio.play(&"plant")
 		Player.Tool.HAND:
 			if crops.has(target_cell):
 				harvest(target_cell)
+				GameState.record_action("harvest")
 				Audio.play(&"harvest")
 			elif builder.placed.has(target_cell):
 				builder.pick_up(target_cell)
@@ -321,6 +325,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 				Audio.play(&"gather")
 		Player.Tool.HOLY_WATER:
 			healing.cleanse(target_cell, player.strong_water)
+			GameState.record_action("heal")
 		Player.Tool.BUILD:
 			builder.place(target_cell, player.selected_building())
 			Audio.play(&"place")
