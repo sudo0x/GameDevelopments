@@ -93,7 +93,7 @@ func _run() -> void:
 	check("in the menu", menu._labels[5].text == "Sword\n5 Wood (5), 3 Stone (3)")
 	menu._buttons[5].pressed.emit()
 	check("made", inv.has_sword and inv.material_count(inv.MATERIALS[0]) == 0)
-	check("done text", menu._labels[5].text == "Sword\nPress 7, then Space to swing." and menu._buttons[5].text == "Made")
+	check("done text", menu._labels[5].text == "Sword\nPress R when a creature is close." and menu._buttons[5].text == "Made")
 	check("hoe text comes from data", inv.RECIPES[1].made_text == "Use the hoe on cursed land.")
 	check("only once", not inv.can_craft(recipe))
 	menu.close()

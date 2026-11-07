@@ -192,16 +192,21 @@ func _run() -> void:
 	await wait(2)
 
 	# Build mode: Use and the arrows only show here.
-	check("no Use outside Build mode", not controls._buttons["use_tool"].visible and controls._buttons["seed_menu"].visible)
-	await tap(build_at)
-	check("the hammer starts Build mode", player.tool == 5 and controls._buttons["use_tool"].visible and not controls._buttons["seed_menu"].visible)
+	check("no Use or hammer outside Build mode", not controls._buttons["use_tool"].visible and not controls._buttons["build_mode"].visible and controls._buttons["seed_menu"].visible)
+	await tap(bag_at)
+	check("the bag offers Build", bag.build_button.visible)
+	bag.build_button.pressed.emit()
+	await wait(2)
+	check("Build closes the bag", not bag.visible and not paused)
+	check("and starts Build mode", player.tool == 5 and controls._buttons["use_tool"].visible and not controls._buttons["seed_menu"].visible)
+	check("the hammer shows to end it", controls._buttons["build_mode"].visible)
 	var first_building: int = player.building_index
 	await tap(next_at)
 	check("> picks the next building", player.building_index != first_building)
 	await tap(prev_at)
 	check("< goes back", player.building_index == first_building)
 	await tap(build_at)
-	check("the hammer ends Build mode", player.tool == 0 and not controls._buttons["use_tool"].visible)
+	check("the hammer ends Build mode", player.tool == 0 and not controls._buttons["use_tool"].visible and not controls._buttons["build_mode"].visible)
 
 	# Menus.
 	var stall: Node2D = main.get_node("World/ShopStall")

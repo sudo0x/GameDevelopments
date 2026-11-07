@@ -7,7 +7,7 @@ extends PanelContainer
 const BUTTON_SIZE := Vector2(92, 36)
 const ICON_SIZE := Vector2(24, 24)
 ## The gap kept between a menu and the buttons that stay showing under it.
-const ACT_GAP := 4.0
+const MENU_GAP := 4.0
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 
@@ -55,7 +55,7 @@ func _place() -> void:
 	var width := get_viewport_rect().size.x
 	var center := width / 2.0
 	if GameState.touch_mode:
-		center = minf(center, TouchControls.act_left(self) - ACT_GAP - size.x / 2.0)
+		center = minf(center, TouchControls.menu_limit(self) - MENU_GAP - size.x / 2.0)
 	anchor_left = center / width
 	anchor_right = anchor_left
 

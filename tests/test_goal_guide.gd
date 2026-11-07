@@ -49,6 +49,7 @@ func _run() -> void:
 
 	# Real tools tick goals off, in order.
 	check("the first goal is to till", guide.text.contains("till"))
+	check("it teaches the Action key", guide.text.contains("press R"))
 	var cell := Vector2i(26, 12)
 	farm.target_cell = cell
 	await wait(2)

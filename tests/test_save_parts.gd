@@ -2,7 +2,7 @@ extends SceneTree
 ## The save file is written by three parts (SaveGame, Progress, Inventory). This guards what
 ## must stay true between them: the same keys as always, nothing lost, nothing left over.
 const KEYS: Array[String] = [
-	"version", "day", "guide_done", "money", "seeds", "harvest", "materials", "buildings",
+	"version", "day", "guide_done", "book_pages", "money", "seeds", "harvest", "materials", "buildings",
 	"holy_water", "strong_holy_water", "purifying_hoe", "sword", "farm",
 ]
 
@@ -29,6 +29,7 @@ func _run() -> void:
 
 	progress.day = 7
 	progress.guide_done.assign(["till", "plant"])
+	progress.book_pages = 6
 	inv.money = 321
 	inv.seeds[radish.id] = 4
 	inv.harvest[radish.id] = 2
@@ -48,6 +49,7 @@ func _run() -> void:
 
 	saves._reset()
 	check("reset: day", progress.day == 1 and progress.guide_done.is_empty())
+	check("reset: book", progress.book_pages == 3)
 	check("reset: money", inv.money == 0)
 	check("reset: seeds", inv.seeds == inv.START_SEEDS)
 	check("reset: bag", inv.harvest.is_empty() and inv.materials.is_empty() and inv.buildings.is_empty())
@@ -57,6 +59,7 @@ func _run() -> void:
 
 	saves.load_game()
 	check("load: day", progress.day == 7 and progress.guide_done.size() == 2 and progress.guide_done.has("plant"))
+	check("load: book", progress.book_pages == 6)
 	check("load: money", inv.money == 321)
 	check("load: bag", inv.seed_count(radish) == 4 and inv.harvest_count(radish) == 2 \
 			and inv.material_count(wood) == 9 and inv.building_count(fence) == 3)

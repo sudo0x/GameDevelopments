@@ -72,7 +72,7 @@ func _run() -> void:
 	var tree_cell := Vector2i(22, 6)
 	await stand_left_of(player, g, tree_cell)
 	check("facing the tree", farm.target_cell == tree_cell)
-	check("status names it", hud.crop_status_label.text == "Tree: press 4, then Space to gather.")
+	check("status names it", hud.crop_status_label.text == "Tree: press R to gather.")
 	await press("tool_1")
 	await press("use_tool")
 	check("the hoe does nothing to a tree", gather.spots[tree_cell].hits_left == 3 and not farm.is_tilled(tree_cell))

@@ -19,6 +19,8 @@ const GUIDE_FINISHED := "finished"
 var day := 1
 ## Actions the player has done, for the goal guide. See GoalGuide.STEPS.
 var guide_done: Array[String] = []
+## Pages of the old book found so far. Saved, so pages stay if the curse takes land back.
+var book_pages := BookPages.count_for(0.0)
 ## Set by a New Game, so the first morning opens with the story.
 var show_story := false
 ## Health left today. Full every morning, and the game only saves in the morning, so it isn't saved.
@@ -49,6 +51,10 @@ func record_action(action: String) -> void:
 ## Also sends inventory_changed, because that's what makes the HUD redraw its numbers.
 func set_healed_percent(percent: float) -> void:
 	healed_percent = percent
+	var pages := BookPages.count_for(percent)
+	if pages > book_pages:
+		book_pages = pages
+		GameState.notice.emit("A page of the old book has cleared.")
 	Inventory.inventory_changed.emit()
 
 
@@ -65,6 +71,7 @@ func take_damage(amount: int) -> void:
 func reset() -> void:
 	day = 1
 	guide_done.clear()
+	book_pages = BookPages.count_for(0.0)
 	hearts = BALANCE.max_hearts
 	healed_percent = 0.0
 	day_changing = false
@@ -73,11 +80,13 @@ func reset() -> void:
 func save_to(file: ConfigFile) -> void:
 	file.set_value("game", "day", day)
 	file.set_value("game", "guide_done", guide_done)
+	file.set_value("game", "book_pages", book_pages)
 
 
 func load_from(file: ConfigFile) -> void:
 	day = file.get_value("game", "day", day)
 	guide_done.assign(file.get_value("game", "guide_done", [GUIDE_FINISHED]))
+	book_pages = file.get_value("game", "book_pages", book_pages)
 
 
 func _refill_hearts() -> void:

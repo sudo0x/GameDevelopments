@@ -65,6 +65,8 @@ var _shown_action := Action.NONE
 var _shown_heal := Heal.NONE
 ## The tile the cursor is on, and the one the status text describes.
 var _shown_cell := Vector2i.ZERO
+## Phones: press and hold a building to move it.
+var mover := BuildingMover.new()
 ## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
 var soil_idle: Dictionary[Vector2i, int] = {}
 ## Reused to check whether a solid object stands on a cell.
@@ -108,6 +110,8 @@ func _ready() -> void:
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: _refresh_soil_edges())
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: healing.refresh_marks(_can_curse_take))
 	builder.setup(ground, crops_parent)
+	mover.setup(self)
+	add_child(mover)
 	spawner.setup(self, crops_parent, player)
 	Progress.day_ended.connect(spawner.clear)
 	Progress.day_started.connect(spawner.spawn_for_today)
@@ -246,6 +250,9 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 func smart_action(cell: Vector2i) -> Action:
 	if _creature_to_swing_at():
 		return Action.SWING
+	# While building on a phone, a stray tap mustn't till the tile you're about to build on.
+	if GameState.touch_mode and player.tool == Player.Tool.BUILD:
+		return Action.NONE
 	if player.interact_target(true):
 		return Action.INTERACT
 	return _tile_action(cell)
@@ -284,6 +291,13 @@ func _tile_action(cell: Vector2i) -> Action:
 	if gathering.can_hit(cell):
 		return Action.GATHER
 	return Action.TILL if is_farmable(cell) else Action.NONE
+
+
+## A lantern's or ward's cover moves with it, so tonight's marks can change.
+func move_building(from: Vector2i, to: Vector2i) -> void:
+	builder.move(from, to)
+	Audio.play(&"place")
+	healing.refresh_marks(_can_curse_take)
 
 
 func _can_place(cell: Vector2i) -> bool:
@@ -371,6 +385,9 @@ func harvest(cell: Vector2i) -> void:
 
 
 func _update_build_preview() -> void:
+	# The mover draws the preview while it's dragging.
+	if mover.moving:
+		return
 	if player.tool != Player.Tool.BUILD:
 		build_preview.hide()
 		return
@@ -397,11 +414,11 @@ func crop_status(cell: Vector2i) -> String:
 		return ""
 	var crop := crops[cell]
 	if crop.blighted:
-		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press 4 to clear it for a curse shard.", "Tap the big button for a curse shard.")]
+		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press R to clear it for a curse shard.", "Tap the big button for a curse shard.")]
 	if crop.is_ripe() and crop.data.burst_radius > 0:
-		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press 4 to burst it and heal the land.", "Tap the big button to burst it.")]
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press R to burst it and heal the land.", "Tap the big button to burst it.")]
 	if crop.is_ripe():
-		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press 4 to harvest.", "Tap the big button.")]
+		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press R to harvest.", "Tap the big button.")]
 	return _growing_status(cell, crop)
 
 

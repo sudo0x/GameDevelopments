@@ -155,6 +155,12 @@ func selected_seed() -> CropData:
 	return Inventory.CROPS[seed_index]
 
 
+## Starts Build mode on phones. The hammer button ends it.
+func start_building() -> void:
+	tool = Tool.BUILD
+	tool_changed.emit()
+
+
 func select_seed(index: int) -> void:
 	seed_index = index
 	tool_changed.emit()

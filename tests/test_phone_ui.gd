@@ -88,14 +88,14 @@ func _run() -> void:
 	for entry in controls.ACTION_BUTTONS:
 		if entry[1] == "use_tool":
 			act = {"center": entry[2], "size": entry[3]}
-	var act_left: float = act["center"].x - act["size"] / 2.0
+	var menu_limit: float = act["center"].x - act["size"] / 2.0
 	shop.open()
 	await process_frame
 	no_keys("shop help", shop.get_node("Margin/Box/Help").text)
 	for button: Button in shop._buttons:
 		check("shop button fits a thumb", button.size.y >= 34.0)
 	check("the shop fits the screen", shop.get_global_rect().size.y <= 360.0 and shop.get_global_rect().position.y >= 0.0)
-	check("the shop leaves Act showing", shop.get_global_rect().end.x <= act_left)
+	check("the shop leaves the buttons showing", shop.get_global_rect().end.x <= menu_limit)
 	check("the shop is centered when it fits", is_equal_approx(shop.get_global_rect().get_center().x, 320.0))
 	shop.close()
 	bag.open()
@@ -118,7 +118,7 @@ func _run() -> void:
 	await process_frame
 	print("full bag ", bag.get_global_rect())
 	check("a full bag fits the screen", bag.get_global_rect().size.y <= 360.0 and bag.get_global_rect().position.y >= 0.0)
-	check("a full bag leaves Act showing", bag.get_global_rect().end.x <= act_left)
+	check("a full bag leaves the buttons showing", bag.get_global_rect().end.x <= menu_limit)
 	bag.close()
 	inv.has_sword = true
 	craft.open()
@@ -128,8 +128,8 @@ func _run() -> void:
 	for button: Button in craft._buttons:
 		check("crafting button fits a thumb", button.size.y >= 34.0)
 	check("the workbench fits the screen", craft.get_global_rect().size.y <= 360.0 and craft.get_global_rect().position.y >= 0.0)
-	print("workbench right edge ", craft.get_global_rect().end.x, ", Act left edge ", act_left)
-	check("the workbench leaves Act showing", craft.get_global_rect().end.x <= act_left)
+	print("workbench right edge ", craft.get_global_rect().end.x, ", menu limit ", menu_limit)
+	check("the workbench leaves the buttons showing", craft.get_global_rect().end.x <= menu_limit)
 	craft.close()
 
 	# Nothing tappable sits under a menu, except what closes it.

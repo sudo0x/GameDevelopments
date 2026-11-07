@@ -1,14 +1,30 @@
 extends GameMenu
 ## The bag: everything the player owns on one screen. Key I opens and closes it.
+## On phones it's also the way into Build mode, which is used too rarely to need its own button.
+
+## The phone's Build button was tapped.
+signal build_pressed
+signal book_pressed
 
 const SWORD_ICON := preload("res://assets/objects/sword.png")
 const HOE_ICON := preload("res://assets/items/purifying_hoe.png")
+const BOOK_ICON := preload("res://assets/ui/book_icon.png")
 
 ## Everything listed, one per line.
 var items_text := ""
 
 @onready var crops_grid: GridContainer = $Margin/Box/Crops
 @onready var items_grid: GridContainer = $Margin/Box/Items
+@onready var build_button: Button = $Margin/Box/Top/Build
+@onready var title: Label = $Margin/Box/Top/Title
+@onready var book_button: Button = $Margin/Box/Top/Book
+
+
+func _ready() -> void:
+	super()
+	build_button.pressed.connect(_start_building)
+	book_button.icon = BOOK_ICON
+	book_button.pressed.connect(_open_book)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -19,10 +35,21 @@ func _unhandled_input(event: InputEvent) -> void:
 		super(event)
 
 
+func _open_book() -> void:
+	close()
+	book_pressed.emit()
+
+
+func _start_building() -> void:
+	close()
+	build_pressed.emit()
+
+
 ## Skipped while closed: open() refreshes anyway, so there's no need to rebuild the list.
 func _refresh() -> void:
 	if not visible:
 		return
+	_fit_top_row()
 	_clear(crops_grid)
 	_clear(items_grid)
 	crops_grid.add_child(Control.new())
@@ -56,6 +83,13 @@ func _refresh() -> void:
 	if Inventory.has_purifying_hoe:
 		lines.append(_add_item(HOE_ICON, "Hoe: %d of %d left" % [Inventory.hoe_uses_left, GameState.BALANCE.hoe_daily_uses]))
 	items_text = "\n".join(lines)
+
+
+## A full bag fills the screen, so the help shares a row with the buttons.
+func _fit_top_row() -> void:
+	build_button.visible = GameState.touch_mode
+	title.text = GameState.controls(keyboard_help, touch_help)
+	$Margin/Box/Help.hide()
 
 
 func _clear(grid: GridContainer) -> void:

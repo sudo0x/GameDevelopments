@@ -5,14 +5,14 @@ extends Label
 ## the goal (see Progress.record_action), then its text for keyboards and for touch screens.
 
 const STEPS: Array[Array] = [
-	["till", "Goal: press 1, then Space to till the soil.", "Goal: face the grass and tap the big button to till it."],
-	["plant", "Goal: press 3, then Space to plant a seed in the soil.", "Goal: tap the big button again to plant a seed."],
-	["water", "Goal: press 2, then Space to water your seed.", "Goal: tap the big button again to water your seed."],
+	["till", "Goal: face the grass and press R to till it.", "Goal: face the grass and tap the big button to till it."],
+	["plant", "Goal: press R again to plant a seed.", "Goal: tap the big button again to plant a seed."],
+	["water", "Goal: press R again to water your seed.", "Goal: tap the big button again to water your seed."],
 	["sleep", "Goal: go to your house door and press F to sleep.", "Goal: go to your house door and tap the big button to sleep."],
 	["heal", "Goal: stand by the curse. Press 5, then Space to heal it.", "Goal: stand by the curse and tap the bottle to heal it."],
-	["harvest", "Goal: water and sleep until it's ripe, then press 4 and Space.", "Goal: water and sleep until it's ripe, then tap the big button."],
-	["ship", "Goal: press F at the shipping box to sell your harvest.", "Goal: tap the big button at the shipping box to sell your harvest."],
-	["plant_ward", "Goal: buy a wardthorn seed at the stall. Plant it by the curse to guard your land.", "Goal: buy a wardthorn seed at the stall. Plant it by the curse to guard your land."],
+	["harvest", "Goal: water and sleep until it's ripe, then press R.", "Goal: water and sleep until it's ripe, then tap the big button."],
+	["ship", "Goal: press R at the shipping box to sell your harvest.", "Goal: tap the big button at the shipping box to sell your harvest."],
+	["plant_ward", "Goal: buy a wardthorn seed at the stall, pick it with Q or E, and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, pick it with the seed bag, and plant it by the curse."],
 ]
 const SHRINE_GOAL := "Long goal: heal a path east and restore the old shrine."
 const LAST_GOAL := "Long goal: keep healing the island."

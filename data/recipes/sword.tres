@@ -23,5 +23,5 @@ display_name = "Sword"
 needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("need_stone")])
 result = 3
 result_amount = 1
-made_text = "Press 7, then Space to swing."
+made_text = "Press R when a creature is close."
 made_text_touch = "Tap the big button when a creature is close."

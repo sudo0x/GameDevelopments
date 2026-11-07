@@ -30,10 +30,25 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Title" type="Label" parent="Margin/Box"]
+[node name="Top" type="HBoxContainer" parent="Margin/Box"]
 layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Box/Top"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Bag"
 horizontal_alignment = 1
+
+[node name="Book" type="Button" parent="Margin/Box/Top"]
+custom_minimum_size = Vector2(92, 36)
+layout_mode = 2
+text = "Book"
+
+[node name="Build" type="Button" parent="Margin/Box/Top"]
+visible = false
+custom_minimum_size = Vector2(92, 36)
+layout_mode = 2
+text = "Build"
 
 [node name="Crops" type="GridContainer" parent="Margin/Box"]
 layout_mode = 2

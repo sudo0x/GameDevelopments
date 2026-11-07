@@ -15,7 +15,7 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shop")
-keyboard_help = "Enter: buy   F / Esc: close"
+keyboard_help = "Enter: buy   F / R / Esc: close"
 touch_help = "Tap to buy   Tap ! to close"
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -44,5 +44,5 @@ layout_mode = 2
 
 [node name="Help" type="Label" parent="Margin/Box"]
 layout_mode = 2
-text = "Enter: buy   F / Esc: close"
+text = "Enter: buy   F / R / Esc: close"
 horizontal_alignment = 1

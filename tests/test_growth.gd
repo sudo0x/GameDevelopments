@@ -85,7 +85,7 @@ func _run() -> void:
 		farm.crops[target].grow_one_day()
 	await physics_frame
 	await physics_frame
-	check("ripe message", hud.crop_status_label.text == "Pumpkin is ripe! Press 4 to harvest.")
+	check("ripe message", hud.crop_status_label.text == "Pumpkin is ripe! Press R to harvest.")
 	await press("tool_4")
 	await press("use_tool")
 	await physics_frame

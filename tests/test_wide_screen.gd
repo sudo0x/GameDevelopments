@@ -90,13 +90,14 @@ func _run() -> void:
 	check("the fade covers the screen", hud.get_node("Fade").get_global_rect().size.is_equal_approx(screen))
 
 	# Fingers have to land on the moved buttons, not where they were.
-	await tap(Vector2(476, 262) + extra - Vector2(20, 0))
-	check("a moved button works", player.tool == 5)
+	await tap(Vector2(526, 262) + extra - Vector2(20, 0))
+	check("a moved button works", hud.get_node("BagMenu").visible)
+	await tap(Vector2(526, 262) + extra - Vector2(20, 0))
 
 	shop.open()
 	await wait(2)
-	var act_left: float = 501.0 + extra.x - 20.0
-	check("a menu fits the wide screen", shop.get_global_rect().position.x >= 0.0 and shop.get_global_rect().end.x <= act_left)
+	var menu_limit: float = 501.0 + extra.x - 20.0
+	check("a menu fits the wide screen", shop.get_global_rect().position.x >= 0.0 and shop.get_global_rect().end.x <= menu_limit)
 	check("a menu is centered when it fits", is_equal_approx(shop.get_global_rect().get_center().x, screen.x / 2.0))
 	shop.close()
 

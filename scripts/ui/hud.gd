@@ -15,6 +15,7 @@ const MAX_WAITING_NOTICES := 4
 
 var _sleeping := false
 var _pick_menu := PickMenu.new()
+var _book_menu := BookMenu.new()
 ## Notices waiting their turn, oldest first, and how long the one showing has left.
 var _waiting_notices: Array[String] = []
 var _notice_left := 0.0
@@ -42,6 +43,9 @@ func _ready() -> void:
 	farm.heal_changed.connect($TouchControls.show_heal)
 	farm.water_choice_needed.connect(_ask_water)
 	player.seed_menu_pressed.connect(_ask_seed)
+	$BagMenu.build_pressed.connect(player.start_building)
+	$BagMenu.book_pressed.connect(_book_menu.open)
+	farm.mover.is_free_spot = $TouchControls.is_free_spot
 	_add_goal_guide()
 	_add_menus()
 	_refresh()
@@ -58,7 +62,7 @@ func _add_goal_guide() -> void:
 
 ## With the other menus: under the fade, and over everything else.
 func _add_menus() -> void:
-	for menu: GameMenu in [SleepMenu.new(), _pick_menu]:
+	for menu: GameMenu in [SleepMenu.new(), _pick_menu, _book_menu]:
 		add_child(menu)
 		move_child(menu, fade.get_index())
 

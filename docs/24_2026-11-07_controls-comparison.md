@@ -57,6 +57,10 @@ These are the rules we should protect, whichever controls we use:
 5. **Free things go before paid things:** the hoe's daily uses before holy water.
 6. **Input is separate from rules.** Buttons only press input actions, so game rules never know about touch. That's like keeping logic out of an Angular template.
 
+## Tile tapping was considered and dropped
+
+On 2026-11-07 the user asked for Hay Day style tile selection, then decided against it: with a walking character, tapping a tile makes the character stand idle. Pressing and holding to move buildings stays, because that's arranging the farm, not the character's work. The flowchart below only applies if outside players really struggle.
+
 ## When to change our minds
 
 The feeling that changed after a while is useful, but you know the game well. New players won't have that time, so the outside test (`docs/19_...`) decides.

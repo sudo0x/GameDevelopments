@@ -4,6 +4,7 @@ const SEED_AT := Vector2(526, 322)
 const HEAL_AT := Vector2(596, 216)
 const ACTION_AT := Vector2(596, 296)
 const BUILD_AT := Vector2(476, 262)
+const BAG_AT := Vector2(526, 262)
 const RIGHT := 3
 
 var fails := 0
@@ -65,13 +66,13 @@ func _run() -> void:
 	controls.set_active(true)
 	await wait(3)
 
-	# 5 buttons, plus the hammer until Build mode moves into the Bag.
+	# The plan's 5 buttons.
 	var showing: Array = []
 	for action: String in controls._buttons:
 		if controls._buttons[action].is_visible_in_tree():
 			showing.append(action)
 	showing.sort()
-	check("the planned buttons show", showing == ["action", "build_mode", "heal", "inventory", "seed_menu", "ui_cancel"])
+	check("the planned buttons show", showing == ["action", "heal", "inventory", "seed_menu", "ui_cancel"])
 	var rects: Array[Rect2] = []
 	for action: String in showing:
 		var b: Node2D = controls._buttons[action]
@@ -198,8 +199,15 @@ func _run() -> void:
 	inv.add_building(fence)
 	player.building_index = inv.BUILDINGS.find(fence)
 	await stand(Vector2i(22, 16))
-	await tap(BUILD_AT)
+	var bag: Control = main.get_node("HUD/BagMenu")
+	await tap(BAG_AT)
+	bag.build_button.pressed.emit()
+	await wait(2)
 	check("Build mode is on", player.tool == 5)
+	await wait(2)
+	check("Action dims in Build mode", controls._buttons["action"].modulate.a < 1.0)
+	await tap(ACTION_AT)
+	check("and can't till", not farm.is_tilled(Vector2i(23, 16)))
 	await tap(SEED_AT)
 	var cell := Vector2i(23, 16)
 	check("Use places", farm.builder.placed.has(cell) and inv.building_count(fence) == 0)

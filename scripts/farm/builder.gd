@@ -5,6 +5,9 @@ extends Node
 ## so they can be picked up and moved. The house and shop stall stay fixed.
 ## The map's lanterns are "old lantern posts": light, but no healing, as before they could move.
 
+## What cell_at() returns when no building is there.
+const NO_CELL := Vector2i(-9999, -9999)
+
 ## What stands on each cell: the BuildingData under "data", and its node under "node".
 ## The map's own objects also have their node name under "starting".
 var placed: Dictionary[Vector2i, Dictionary] = {}
@@ -36,11 +39,37 @@ func pick_up(cell: Vector2i) -> void:
 	GameState.notice.emit("Picked up: %s" % entry["data"].display_name)
 
 
+## Moves a building to a free cell, without it passing through the bag. A map object becomes
+## a saved one, so it stays where the player put it. Check Farm.can_build() first.
+func move(from: Vector2i, to: Vector2i) -> void:
+	var entry := placed[from]
+	placed.erase(from)
+	entry["node"].queue_free()
+	_spawn(to, entry["data"])
+	fit_neighbors()
+
+
+## The cell of the building drawn at this world point, or NO_CELL. Buildings are taller than
+## their tile, so this uses the art, and the one in front wins.
+func cell_at(point: Vector2) -> Vector2i:
+	var found := NO_CELL
+	var front := -INF
+	for cell in placed:
+		var node: Node2D = placed[cell]["node"]
+		var data: BuildingData = placed[cell]["data"]
+		var size := data.preview_texture.get_size()
+		var art := Rect2(node.global_position + data.preview_offset - size / 2.0, size)
+		if art.has_point(point) and node.global_position.y > front:
+			found = cell
+			front = node.global_position.y
+	return found
+
+
 ## Text for the HUD when the player faces this cell, or empty if nothing's built there.
 func status(cell: Vector2i) -> String:
 	if not placed.has(cell):
 		return ""
-	var how := GameState.controls("press 4, then Space to pick up.", "tap the hammer, then Use to pick up.")
+	var how := GameState.controls("press 4, then Space to pick up.", "hold it to move it.")
 	return "%s: %s" % [placed[cell]["data"].display_name, how]
 
 

@@ -43,7 +43,7 @@ const TOUCH_MESSAGE_SIDE_GAP := 181.0
 const MESSAGE_HEIGHT := 24.0
 const MESSAGES: Array[Array] = [["CropStatusLabel", -68.0, -44.0], ["NoticeLabel", -44.0, -92.0]]
 ## How far right a menu can reach on the base screen, so Bag and Action stay showing.
-const ACT_LEFT := 501.0
+const MENU_LIMIT := 501.0
 ## Text, action, center, size, and the edge it follows. Buttons with no text show an icon.
 const BAG_ICON := preload("res://assets/ui/bag.png")
 const PAUSE_ICON := preload("res://assets/ui/pause_icon.png")
@@ -83,8 +83,8 @@ const ACTION_BUTTONS: Array[Array] = [
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["action", "inventory"]
-## Only showing in Build mode, until it moves into the Bag (docs/23_...).
-const BUILD_MODE_BUTTONS: Array[String] = ["use_tool", "seed_prev", "seed_next"]
+## Only showing in Build mode, which starts from the Bag. The hammer ends it.
+const BUILD_MODE_BUTTONS: Array[String] = ["use_tool", "seed_prev", "seed_next", "build_mode"]
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -151,6 +151,17 @@ func show_action(action: Farm.Action) -> void:
 	_action = action
 
 
+## Whether a screen position is free of the joystick and every showing button.
+func is_free_spot(at: Vector2) -> bool:
+	if stick.get_global_rect().has_point(at):
+		return false
+	for action: String in _buttons:
+		var button := _buttons[action]
+		if button.is_visible_in_tree() and Rect2(button.global_position, button.texture_normal.get_size() * button.scale).has_point(at):
+			return false
+	return true
+
+
 ## Called when what the Heal button would do changes.
 func show_heal(heal: Farm.Heal) -> void:
 	_buttons["heal"].modulate = ACTION_DIM_COLOR if heal == Farm.Heal.NONE else Color.WHITE
@@ -176,8 +187,8 @@ static func side_inset(item: CanvasItem) -> float:
 	return clampf(extra_space(item).x / 4.0, 0.0, MAX_SIDE_INSET)
 
 
-static func act_left(item: CanvasItem) -> float:
-	return ACT_LEFT + extra_space(item).x - side_inset(item)
+static func menu_limit(item: CanvasItem) -> float:
+	return MENU_LIMIT + extra_space(item).x - side_inset(item)
 
 
 func _follow_edge(control: CanvasItem, anchor: Vector2) -> void:
