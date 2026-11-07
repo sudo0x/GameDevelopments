@@ -10,16 +10,19 @@ Right now the curse waits forever and sleeping costs nothing, so no day has a ha
 
 ## The rules to test
 
+These are the rules in the game now, after the first play (see "Second try" below for what changed and why).
+
 ```mermaid
 flowchart TD
 	A[Morning: tonight's tiles are marked] --> B{Player's day}
-	B -->|Farm or build on a marked tile| C[That tile is safe]
+	B -->|Build on a marked tile| C[That tile is safe]
 	B -->|Place a lantern nearby| C
+	B -->|Water a wardthorn nearby| C
 	B -->|Heal the curse beside it| C
 	B -->|Do nothing| D[Tile stays marked]
 	C --> E[Sleep]
 	D --> E
-	E --> F[Night: marked tiles turn cursed]
+	E --> F[Night: food crops on marked tiles are blighted, other marked tiles turn cursed]
 	F --> G[Lanterns heal their nearest tile]
 	G --> A
 ```
@@ -28,18 +31,24 @@ flowchart TD
 |---|---|
 | Only land the player healed can return | The shore and the map's clean clearings stay safe, so nobody can lose their home |
 | Only healed tiles beside the curse are at risk | The curse creeps from its edge, so the player can see where it's coming from |
-| Only empty tiles are taken | Nothing is destroyed: no crop, soil, building or object is lost in this test |
+| The curse takes 3 tiles a night, plus 1 for every 5% of the island healed | The more land the player holds, the harder it pushes back |
+| Bare soil is lost with its tile | A hoe tap alone shouldn't stop the curse |
+| A food crop on a marked tile is blighted, and its land stays clean that night | A normal plant can't protect itself, but losing it outright could make players quit |
+| Buildings, gatherable spots and ward plants are never taken | Nothing the player built is destroyed |
 | Tiles within 4 of a healing lantern are safe (about 50 tiles) | Gives lanterns a clear job |
+| Tiles within 2 of a watered wardthorn are safe | Plants that are poison to the curse make the field a defense |
 | Tiles within 9 of a restored shrine are safe | Makes the shrine feel like a real victory |
-| Tonight's tiles are marked in the morning | A loss you can see coming feels fair; a surprise doesn't |
+| Tonight's tiles are marked in the morning, and land healed that day is safe tonight | A loss you can see coming feels fair; a surprise doesn't |
 | Starts on day 4 | The first days stay calm while the player learns |
 
-**Starting numbers, first guesses:** 3 tiles a night, starting on day 4. One holy water heals up to 9 tiles for 30 money, so holding your ground costs about one holy water every 3 nights. Both numbers go in `data/balance.tres`, and setting the tiles to 0 turns the whole feature off.
+**The wardthorn:** seed 60 money, 4 watered days to ripen. It can't be blighted. Ripe, it keeps guarding until the player bursts it with the Hand tool, which heals cursed land within 2 tiles and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
+
+**Starting numbers, first guesses:** all of them are in `data/balance.tres` and `data/crops/wardthorn.tres`. Setting `curse_return_per_night` to 0 turns the returning curse off.
 
 ## What this does and doesn't fix
 
 - **Boring days:** this is the main thing we're testing.
-- **Sleeping for free:** sleeping now risks healed land. A player who has healed nothing, or protected everything, still loses nothing. That's fine in a single-player game, because they aren't moving towards the goal. If it spoils the game, the next idea is the curse also harming crops.
+- **Sleeping for free:** sleeping now risks healed land and crops near the curse. A player who has healed nothing, or protected everything, still loses nothing. That's fine in a single-player game, because they aren't moving towards the goal.
 - **Too many buttons:** not part of this test (finding 25).
 
 ## Traps found in the code
@@ -48,6 +57,7 @@ flowchart TD
 |---|---|---|
 | A find counts as gone when its cell is in `cleansed` | Land that returns would bring its find back, so healing it again pays again: free money | Save a new `dug_finds` list in `farm_state`. For older saves, any find already in `cleansed` counts as dug |
 | Gatherable spots on healed land | An object could end up on cursed ground, or vanish | Never take a gatherable spot's tile |
+| Crops on returning land | A crop would sit on cursed ground | The curse blights the crop instead, and leaves the tile clean that night |
 | Saves | Older saves must keep loading | `cleansed` just gets shorter, and `dug_finds` defaults to empty, so `SAVE_VERSION` stays at 1. `tests/fixtures/save_v1.cfg` must still pass |
 | Fainting | The player could stand on a tile that turns cursed | Already safe: `return_home()` runs before `end_day()`, and a test checks it |
 | Blocked paths | Returning land could cut off a building or the way east | Allowed: this is the threat, and the player can heal back through. The house, shop and shipping box must never be cut off from each other |
@@ -63,7 +73,7 @@ Say "curse step N" so these aren't mixed up with other plans.
 | 2 ✅ | Protection: lanterns and the restored shrine | Tests show each protected tile stays clean |
 | 3 ✅ | Warning: mark tonight's tiles each morning, and show a morning notice with how many tiles were lost | A screenshot shows marks that are easy to read on a phone |
 | 4 ✅ | Update `tools/balance_check.gd` for land lost each night, tune the numbers, and make a test APK | The shrine is still reachable at a sensible pace |
-| 5 | The user plays 5 to 7 game days, then we decide | A decision is in `docs/17_...` |
+| 5 | The user starts a New Game, plays 5 to 7 game days, then we decide | A decision is in `docs/17_...` |
 
 The marks use a tinted `tile_cursor.png` and a purple stain for the test, so **no new art is needed**. Facing a marked tile explains what saves it. If we keep the feature, it should get proper art and a sound.
 
@@ -108,12 +118,13 @@ The wardthorn's healing isn't in that estimate either. Its seeds have no daily l
 
 ## How we decide
 
-After playing, answer these:
+After playing a New Game, answer these:
 
 1. Did you make different choices because of the curse?
 2. Did you look forward to the next day more than before?
 3. Did losing land feel fair, or just annoying? Did the daily limit feel like a real choice, or just a wall?
 4. Did you still feel you were making progress?
+5. Was the wardthorn worth buying, or did it make the game too easy?
 
 | Result | What we do |
 |---|---|
@@ -125,5 +136,6 @@ After playing, answer these:
 
 - **Too punishing:** this game is meant to be calm and short per session. Losing land must feel like a push, never like losing your work.
 - **Busywork:** if protecting land becomes a daily chore, it swaps boredom for chores.
-- **Hand-tilling everything:** tilling a marked tile saves it, with no energy cost. Empty soil turns back to grass after 3 nights, which may be enough. Seen in the first play: it makes lanterns unnecessary (finding 28).
+- **Too many wardthorns:** seeds have no daily limit, so a rich player could buy many and get around the holy water limit. If so, limit the seeds too, or raise their price.
+- **Unclear controls:** the first play showed that needing the Hoe first, and switching seeds, isn't obvious (finding 33).
 - **Pace:** the release gets later by the length of this test.

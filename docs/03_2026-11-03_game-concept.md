@@ -61,10 +61,12 @@ flowchart LR
 | You can only **build on clean land** | Building pushes you to expand |
 | **Cleansing tools** (purifying hoe, holy water, lanterns) clean cursed tiles | Crafting has a clear purpose |
 | **Lantern light** keeps nearby land safe | The warm-light-in-darkness look becomes a mechanic |
+| The curse **takes healed land back** at night, and **blights food crops** in its way (being tested) | Each day has a hard choice: earn, heal or protect |
+| **Ward plants** are poison to the curse: they guard land, and burst to heal it (being tested) | The field becomes the player's defense, which makes this game different from other farming games |
 | **Cursed creatures** guard dark areas, stronger toward the center | Combat has a clear purpose |
 | Cleansed land **reveals** resources, ruins and secrets | Exploring feels rewarding |
 
-**Later (update ideas):** more islands. The curse creeping back at night (the Night raids idea) moved up: it's being tried before release, see [the curse test plan](21_2026-11-07_curse-returns-test.md).
+**Later (update ideas):** more islands. The curse creeping back at night (the Night raids idea) moved up, and became the curse test with ward plants, see [the curse test plan](21_2026-11-07_curse-returns-test.md).
 
 ## Build roadmap
 
@@ -106,4 +108,4 @@ flowchart LR
 
 - Game title
 - How much story (light notes and ruins, or characters with dialogue)?
-- Does the curse spread back in the MVP, or only in updates? (Its creatures fight back from Layer 5.)
+- Does the curse spread back in the first release? It's being tested now, and the play test decides.

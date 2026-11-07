@@ -58,6 +58,10 @@ func _run() -> void:
 	check("the morning says so", notices.has("The curse has marked 3 tiles for tonight."))
 	check("a marked tile explains itself", farm.curse_status(healing.marked[0]).contains("tonight"))
 	check("other tiles say nothing", farm.curse_status(middle).is_empty())
+	# Computers don't wrap this text, so a long line would run off the screen.
+	var label: Label = hud.get_node("CropStatusLabel")
+	var width: float = label.get_theme_font("font").get_string_size(farm.curse_status(healing.marked[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, label.get_theme_font_size("font_size")).x
+	check("the warning fits a computer screen", width <= 560.0)
 	var tonight: Array = healing.marked.duplicate()
 	var before: Array = healing.cleansed.duplicate()
 	var percent: float = gs.healed_percent

@@ -255,7 +255,7 @@ func curse_status(cell: Vector2i) -> String:
 		return ""
 	if crops.has(cell):
 		return "The curse will blight this crop tonight. Harvest it, or guard it."
-	return "The curse takes this tile tonight. Build on it, light it, or plant a wardthorn nearby."
+	return "The curse takes this tile tonight. Use a lantern or wardthorn."
 
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
