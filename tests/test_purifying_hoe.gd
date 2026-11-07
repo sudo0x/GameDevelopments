@@ -124,7 +124,7 @@ func _run() -> void:
 	check("full again in the morning", inv.hoe_uses_left == 2)
 
 	bag.open()
-	check("bag shows it", bag.items_text.contains("Hoe: 2 of 2 left"))
+	check("bag shows it", bag.items_text.contains("Purifying hoe: 2 of 2"))
 	bag.close()
 
 	# Saved, with full uses after loading.

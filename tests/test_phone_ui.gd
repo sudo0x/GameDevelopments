@@ -46,7 +46,7 @@ func _run() -> void:
 	check("touch mode on", gs.touch_mode)
 
 	# The buttons use art.
-	for action: String in ["action", "heal", "seed_menu", "inventory", "ui_cancel"]:
+	for action: String in ["action", "heal", "seed_menu", "inventory", "tasks", "ui_cancel"]:
 		var button: Node2D = controls._buttons[action]
 		var icons := button.get_children().filter(func(n: Node) -> bool: return n is Sprite2D)
 		check(action + " has an icon", icons.size() == 1 and icons[0].texture != null)
@@ -132,8 +132,8 @@ func _run() -> void:
 	craft.open()
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
-	# Heal, Seed, X and pause.
-	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 4)
+	# Heal, Seed, Tasks, X and pause.
+	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 5)
 	craft.close()
 	await wait(2)
 

@@ -88,7 +88,8 @@ Start a **New Game** for this if you can, because it tests the goals too. That e
 | 12 | Own both kinds of water, tap the bottle | It asks which, and the popup looks right |
 | 13 | Overall: does one thumb on each side feel right? | You'd keep these controls |
 | 14 | Press and hold a building, drag it, let go (needs the next build) | It lifts when you expect, and never by accident |
-| 15 | Open the Book in the bag and read it (needs the next build) | It's easy to read, and you'd want the next page |
+| 15 | Open the Book in the bag and read it | It's easy to read, and you'd want the next page |
+| 16 | Tap Tasks, and watch a new goal fade (needs the next build) | You always know what to do next, and the screen feels clearer |
 
 Rows 10 to 12 need a sword, a hoe and strong holy water, so they can wait for a later save. Anything that fails goes in the playtest's findings table.
 

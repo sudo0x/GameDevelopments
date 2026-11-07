@@ -81,7 +81,7 @@ func _refresh() -> void:
 	if Inventory.has_sword:
 		lines.append(_add_item(SWORD_ICON, "Sword"))
 	if Inventory.has_purifying_hoe:
-		lines.append(_add_item(HOE_ICON, "Hoe: %d of %d left" % [Inventory.hoe_uses_left, GameState.BALANCE.hoe_daily_uses]))
+		lines.append(_add_item(HOE_ICON, "Purifying hoe: %d of %d" % [Inventory.hoe_uses_left, GameState.BALANCE.hoe_daily_uses]))
 	items_text = "\n".join(lines)
 
 

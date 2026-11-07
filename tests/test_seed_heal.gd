@@ -65,13 +65,13 @@ func _run() -> void:
 	controls.set_active(true)
 	await wait(3)
 
-	# The plan's 5 buttons.
+	# The plan's 5 buttons, and Tasks.
 	var showing: Array = []
 	for action: String in controls._buttons:
 		if controls._buttons[action].is_visible_in_tree():
 			showing.append(action)
 	showing.sort()
-	check("the planned buttons show", showing == ["action", "heal", "inventory", "seed_menu", "ui_cancel"])
+	check("the planned buttons show", showing == ["action", "heal", "inventory", "seed_menu", "tasks", "ui_cancel"])
 	var rects: Array[Rect2] = []
 	for action: String in showing:
 		var b: Node2D = controls._buttons[action]

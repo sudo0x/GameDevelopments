@@ -49,7 +49,7 @@ func _run() -> void:
 
 	saves._reset()
 	check("reset: day", progress.day == 1 and progress.guide_done.is_empty())
-	check("reset: book", progress.book_pages == 3)
+	check("reset: book", progress.book_pages == 4)
 	check("reset: money", inv.money == 0)
 	check("reset: seeds", inv.seeds == inv.START_SEEDS)
 	check("reset: bag", inv.harvest.is_empty() and inv.materials.is_empty() and inv.buildings.is_empty())

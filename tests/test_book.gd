@@ -46,19 +46,22 @@ func _run() -> void:
 	var bag: Control = main.get_node("HUD/BagMenu")
 	var pages: Array = load("res://scripts/ui/book_pages.gd").PAGES
 
-	check("a new game starts with 3 pages", progress.book_pages == 3)
+	check("a new game starts with 4 pages", progress.book_pages == 4)
 
 	# Key B.
 	await press("book")
 	check("B opens the book", book.visible and paused)
-	check("it opens on the newest page", book.page == 2)
+	check("it opens on the newest page", book.page == 3)
 	check("no page past the last found", book._next.disabled)
+	await press("ui_left")
+	check("turning back shows the page before", book.page == 2 and book._title.text == pages[2][1])
 	await press("ui_left")
 	check("Left turns back", book.page == 1 and book._title.text == pages[1][1])
 	check("keyboard text names the key", book._text.text.contains("use R"))
-	await press("ui_right")
-	await press("ui_right")
-	check("Right stops at the last found page", book.page == 2)
+	for i in 3:
+		await press("ui_right")
+	check("Right stops at the last found page", book.page == 3)
+	check("the newest page is the trader's", book._title.text == "The night trader")
 	await press("book")
 	check("B closes it", not book.visible and not paused)
 	await wait(2)
@@ -77,14 +80,14 @@ func _run() -> void:
 	var notices: Array[String] = []
 	gs.notice.connect(func(text: String) -> void: notices.append(text))
 	progress.set_healed_percent(0.5)
-	check("a little healing reveals nothing", progress.book_pages == 3 and notices.is_empty())
+	check("a little healing reveals nothing", progress.book_pages == 4 and notices.is_empty())
 	progress.set_healed_percent(1.0)
-	check("healing reveals a page", progress.book_pages == 4)
+	check("healing reveals a page", progress.book_pages == 5)
 	check("it says so", notices.size() == 1 and notices[0].contains("old book"))
 	progress.set_healed_percent(1.5)
 	check("it only says so once", notices.size() == 1)
 	progress.set_healed_percent(0.0)
-	check("the curse can't take a page back", progress.book_pages == 4)
+	check("the curse can't take a page back", progress.book_pages == 5)
 	progress.set_healed_percent(100.0)
 	check("all pages can be found", progress.book_pages == pages.size())
 

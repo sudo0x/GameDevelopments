@@ -9,6 +9,15 @@ const QUEUED_NOTICE_SECONDS := 1.5
 const NOTICE_FADE_SECONDS := 0.5
 ## Older waiting notices are dropped past this, so the queue never lags far behind play.
 const MAX_WAITING_NOTICES := 4
+## A new goal shows this long, then fades. The Tasks menu keeps it after that.
+const GOAL_SECONDS := 6.0
+const GOAL_WIDTH := 340.0
+const GOAL_COLOR := Color(1.0, 0.9, 0.6)
+const GOAL_OUTLINE_COLOR := Color(0.1, 0.07, 0.08)
+const GOAL_OUTLINE_SIZE := 6
+const TOOL_LINE_HEIGHT := 24.0
+## Phones keep the Tasks button here, so the goal starts to its right.
+const GOAL_TOUCH_INDENT := 52.0
 
 @export var player_path: NodePath
 @export var farm_path: NodePath
@@ -16,6 +25,9 @@ const MAX_WAITING_NOTICES := 4
 var _sleeping := false
 var _pick_menu := PickMenu.new()
 var _book_menu := BookMenu.new()
+var _tasks_menu := TasksMenu.new()
+var _goal_line := Label.new()
+var _goal_fade: Tween
 ## Notices waiting their turn, oldest first, and how long the one showing has left.
 var _waiting_notices: Array[String] = []
 var _notice_left := 0.0
@@ -51,18 +63,43 @@ func _ready() -> void:
 	_refresh()
 
 
-## Right after the tool text, so menus and the fade still draw over it.
 func _add_goal_guide() -> void:
+	_goal_line.name = "GoalLine"
+	_goal_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_goal_line.custom_minimum_size.x = GOAL_WIDTH
+	_goal_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# It sits over trees and grass, so it needs more help to read than other text.
+	_goal_line.add_theme_color_override("font_color", GOAL_COLOR)
+	_goal_line.add_theme_color_override("font_outline_color", GOAL_OUTLINE_COLOR)
+	_goal_line.add_theme_constant_override("outline_size", GOAL_OUTLINE_SIZE)
+	_goal_line.hide()
+	add_child(_goal_line)
+	move_child(_goal_line, tool_label.get_index() + 1)
 	var guide := GoalGuide.new()
 	guide.name = "GoalGuide"
-	guide.setup(tool_label)
+	guide.announced.connect(_show_goal)
 	add_child(guide)
-	move_child(guide, tool_label.get_index() + 1)
+	_tasks_menu.setup(guide)
+
+
+## Under the tool text for a moment, so the screen stays clear the rest of the time.
+func _show_goal(goal: String) -> void:
+	_goal_line.text = goal
+	var indent := GOAL_TOUCH_INDENT if GameState.touch_mode else 0.0
+	_goal_line.position = tool_label.position + Vector2(indent, TOOL_LINE_HEIGHT)
+	_goal_line.modulate.a = 1.0
+	_goal_line.show()
+	if _goal_fade:
+		_goal_fade.kill()
+	_goal_fade = create_tween()
+	_goal_fade.tween_interval(GOAL_SECONDS)
+	_goal_fade.tween_property(_goal_line, "modulate:a", 0.0, NOTICE_FADE_SECONDS)
+	_goal_fade.tween_callback(_goal_line.hide)
 
 
 ## With the other menus: under the fade, and over everything else.
 func _add_menus() -> void:
-	for menu: GameMenu in [SleepMenu.new(), _pick_menu, _book_menu]:
+	for menu: GameMenu in [SleepMenu.new(), _pick_menu, _book_menu, _tasks_menu]:
 		add_child(menu)
 		move_child(menu, fade.get_index())
 

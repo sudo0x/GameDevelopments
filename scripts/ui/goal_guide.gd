@@ -1,70 +1,105 @@
 class_name GoalGuide
-extends Label
-## Teaches the game by doing: one goal at a time under the tool text, ticked off by playing, then
-## the long goal. A New Game opens with a short story panel. Each row is the action that finishes
-## the goal (see Progress.record_action), then its text for keyboards and for touch screens.
+extends Node
+## Teaches the game by doing: one goal at a time, ticked off by playing, then the long goal. Goals
+## stay off the screen, so a new one shows for a moment and TasksMenu lists them all. A New
+## Game opens with a short story panel. Each row is the action that finishes the goal (see
+## Progress.record_action), its text for keyboards and for touch screens, and its name once done.
 
 const STEPS: Array[Array] = [
-	["till", "Goal: face the grass and press R to till it.", "Goal: face the grass and tap the big button to till it."],
-	["plant", "Goal: press R again to plant a seed.", "Goal: tap the big button again to plant a seed."],
-	["water", "Goal: press R again to water your seed.", "Goal: tap the big button again to water your seed."],
-	["sleep", "Goal: go to your house door and press F to sleep.", "Goal: go to your house door and tap the big button to sleep."],
-	["heal", "Goal: stand by the curse. Press 5, then Space to heal it.", "Goal: stand by the curse and tap the bottle to heal it."],
-	["harvest", "Goal: water and sleep until it's ripe, then press R.", "Goal: water and sleep until it's ripe, then tap the big button."],
-	["ship", "Goal: press R at the shipping box to sell your harvest.", "Goal: tap the big button at the shipping box to sell your harvest."],
-	["plant_ward", "Goal: buy a wardthorn seed at the stall, pick it with Q or E, and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, pick it with the seed bag, and plant it by the curse."],
+	["till", "Goal: face the grass and press R to till it.", "Goal: face the grass and tap the big button to till it.", "Till the soil"],
+	["plant", "Goal: press R again to plant a seed.", "Goal: tap the big button again to plant a seed.", "Plant a seed"],
+	["water", "Goal: press R again to water your seed.", "Goal: tap the big button again to water your seed.", "Water your seed"],
+	["sleep", "Goal: go to your house door and press F to sleep.", "Goal: go to your house door and tap the big button to sleep.", "Sleep"],
+	["heal", "Goal: stand by the curse. Press 5, then Space to heal it.", "Goal: stand by the curse and tap the bottle to heal it.", "Heal the curse"],
+	["harvest", "Goal: water and sleep until it's ripe, then press R.", "Goal: water and sleep until it's ripe, then tap the big button.", "Harvest a crop"],
+	["ship", "Goal: press R at the shipping box to sell your harvest.", "Goal: tap the big button at the shipping box to sell your harvest.", "Sell your harvest"],
+	["plant_ward", "Goal: buy a wardthorn seed at the stall, pick it with Q or E, and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, pick it with the seed bag, and plant it by the curse.", "Plant a wardthorn"],
 ]
 const SHRINE_GOAL := "Long goal: heal a path east and restore the old shrine."
 const LAST_GOAL := "Long goal: keep healing the island."
+## A new goal to show for a moment. The HUD draws it.
+signal announced(goal: String)
+
 const STORY := "A curse is killing this island. Your farm is the last green land.\n\nGrow crops, earn holy water, and heal the island, one tile at a time."
-const TEXT_COLOR := Color(1.0, 0.9, 0.6)
-const WIDTH := 340.0
-const OUTLINE_COLOR := Color(0.1, 0.07, 0.08)
-const OUTLINE_SIZE := 6
 const STORY_MARGIN := 16
-const TOOL_LINE_HEIGHT := 24.0
 const STORY_WIDTH := 400.0
 const PANEL_STYLE := preload("res://data/ui/menu_panel.tres")
 
-var _tool_label: Label
+## The goal right now.
+var text := ""
+
 var _story: PanelContainer
-
-
-func setup(tool_label: Label) -> void:
-	_tool_label = tool_label
+## Which goal was last shown, so rewording it for touch screens isn't news.
+var _shown_goal := ""
 
 
 func _ready() -> void:
-	autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	custom_minimum_size.x = WIDTH
-	size.x = WIDTH
-	modulate = TEXT_COLOR
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Goals sit over trees and grass, so they need more help to read than other text.
-	add_theme_color_override("font_outline_color", OUTLINE_COLOR)
-	add_theme_constant_override("outline_size", OUTLINE_SIZE)
 	Progress.guide_changed.connect(_refresh)
 	Inventory.inventory_changed.connect(_refresh)
 	Progress.day_started.connect(_refresh)
-	_refresh()
+	text = current_text()
+	_shown_goal = _goal_id()
 	if Progress.show_story:
 		Progress.show_story = false
 		_open_story.call_deferred()
+	elif not lesson_text().is_empty():
+		_announce.call_deferred()
 
 
 ## The goal to show now.
 func current_text() -> String:
+	var step := _next_step()
+	if not step.is_empty():
+		return GameState.controls(step[1], step[2])
+	return LAST_GOAL if SaveGame.farm_state.get("shrine", false) else SHRINE_GOAL
+
+
+## The lesson to do now without its "Goal:", or empty once they're over.
+func lesson_text() -> String:
+	var step := _next_step()
+	return _sentence(GameState.controls(step[1], step[2]).trim_prefix("Goal: ")) if not step.is_empty() else ""
+
+
+func long_goal_text() -> String:
+	var goal := LAST_GOAL if SaveGame.farm_state.get("shrine", false) else SHRINE_GOAL
+	return _sentence(goal.trim_prefix("Long goal: "))
+
+
+## Names of the lessons finished so far. Older saves skipped them, so they have none.
+func done_names() -> PackedStringArray:
+	var names: PackedStringArray = []
+	for step in STEPS:
+		if Progress.guide_done.has(step[0]):
+			names.append(step[3])
+	return names
+
+
+func _sentence(text_part: String) -> String:
+	return text_part.left(1).to_upper() + text_part.substr(1)
+
+
+func _next_step() -> Array:
 	if not Progress.guide_done.has(Progress.GUIDE_FINISHED):
 		for step in STEPS:
 			if not Progress.guide_done.has(step[0]):
-				return GameState.controls(step[1], step[2])
-	return LAST_GOAL if SaveGame.farm_state.get("shrine", false) else SHRINE_GOAL
+				return step
+	return []
+
+
+func _goal_id() -> String:
+	var step := _next_step()
+	return step[0] if not step.is_empty() else current_text()
 
 
 func _refresh() -> void:
 	text = current_text()
-	# Phones move the tool text up, and this follows it.
-	position = Vector2(_tool_label.position.x, _tool_label.position.y + TOOL_LINE_HEIGHT)
+	if _goal_id() != _shown_goal:
+		_shown_goal = _goal_id()
+		_announce()
+
+
+func _announce() -> void:
+	announced.emit(text)
 
 
 func _open_story() -> void:
@@ -102,3 +137,4 @@ func _close_story() -> void:
 	_story.queue_free()
 	_story = null
 	get_tree().paused = false
+	_announce()

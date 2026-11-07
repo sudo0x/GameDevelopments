@@ -10,6 +10,8 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| Does the goal stay on the screen? | **No: a Tasks menu holds goals, and a new one shows for 6 seconds** (2026-11-07, the user's choice). This adds a small sixth button | A clear screen, and the user can read as much as they want. Claude advised keeping one line, so new players always know what's next: the fading line covers that, and the outside test will check it |
+| Who runs the shop and buys from the box? | **A night trader nobody has seen** (2026-11-07, the user's choice) | One book page explains the box, the stall and its limit of 3 holy water, with no new systems, and keeps the island lonely |
 | How many free heals does the purifying hoe give? | **2 a day, down from 5** (2026-11-07, the user's catch) | 5 beat the curse's 3 to 5 tiles a night, so one cheap tool made holy water, lanterns and wardthorn optional early on. At 2 it helps, but can't win alone |
 | How should Build work on phones? | **Pick from a list of what you own, then the big button places it, with an X to leave** (2026-11-07, after the user disliked the hammer and arrows) | It works like the Seed popup, never shows something you can't place, and ends by itself when you run out |
 | Should a tap on a tile farm it? | **No** (2026-11-07, the user's choice). The character walks there and the big button does the work. Holding a building to move it stays | The user felt it was wrong with a walking character, and that's right: tapping would make the character stand idle, and walking into the curse is part of the game. Moving buildings is arranging the farm, not the character's work |
