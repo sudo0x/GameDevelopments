@@ -6,7 +6,7 @@ extends PanelContainer
 ## Big enough for a thumb on a phone.
 const BUTTON_SIZE := Vector2(92, 36)
 const ICON_SIZE := Vector2(24, 24)
-## The gap kept between a menu and the Act button, which closes it on touch screens.
+## The gap kept between a menu and the buttons that stay showing under it.
 const ACT_GAP := 4.0
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
@@ -23,10 +23,15 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and (event.is_action_pressed(close_action) or event.is_action_pressed("ui_cancel")):
+	if visible and (_is_close(event) or event.is_action_pressed("ui_cancel")):
 		# Handled, so the same key press can't reach the player and reopen the menu.
 		get_viewport().set_input_as_handled()
 		close()
+
+
+## Menus opened by using an object close with the same button that opened them.
+func _is_close(event: InputEvent) -> bool:
+	return event.is_action_pressed(close_action) or (close_action == &"interact" and event.is_action_pressed("action"))
 
 
 func open() -> void:
@@ -45,7 +50,7 @@ func close() -> void:
 	Audio.play(&"menu_close")
 
 
-## Centered, unless that would cover the Act button: then only as far left as it takes.
+## Centered, unless that would cover the buttons on the right: then only as far left as it takes.
 func _place() -> void:
 	var width := get_viewport_rect().size.x
 	var center := width / 2.0

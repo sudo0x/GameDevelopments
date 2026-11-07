@@ -5,6 +5,8 @@ extends CharacterBody2D
 
 signal tool_changed
 signal tool_used(tool: Tool)
+## The Action button or key was pressed. Farm works out what it means.
+signal action_pressed
 
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
@@ -115,6 +117,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if tool == Tool.SWORD and Inventory.has_sword:
 			sword.swing(FACING_DIRECTIONS[facing])
 		tool_used.emit(tool)
+	if event.is_action_pressed("action"):
+		action_pressed.emit()
 	if event.is_action_pressed("interact"):
 		_interact()
 
@@ -157,6 +161,30 @@ func _change_selection(step: int) -> void:
 	else:
 		seed_index = posmod(seed_index + step, Inventory.CROPS.size())
 	tool_changed.emit()
+
+
+## Turns to a point and swings straight at it, because a creature can come from any side.
+func swing_at(point: Vector2) -> void:
+	var direction := global_position.direction_to(point)
+	if direction == Vector2.ZERO:
+		direction = FACING_DIRECTIONS[facing]
+	if absf(direction.x) >= absf(direction.y):
+		facing = Facing.RIGHT if direction.x > 0.0 else Facing.LEFT
+	else:
+		facing = Facing.DOWN if direction.y > 0.0 else Facing.UP
+	sword.swing(direction)
+
+
+## What the Action button does with an object. An object with action_interact() can treat
+## Action differently from F, like the door, which asks first.
+func use_nearby() -> void:
+	var target := interact_target(true)
+	if not target:
+		return
+	if target.has_method("action_interact"):
+		target.action_interact(self)
+	else:
+		target.interact(self)
 
 
 ## Interacts with the first nearby area that has an interact() method (door, shipping box, shop...).

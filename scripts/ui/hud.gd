@@ -37,7 +37,9 @@ func _ready() -> void:
 	GameState.notice.connect(_show_notice)
 	Progress.fainted.connect(_faint)
 	farm.target_status_changed.connect(_show_crop_status)
+	farm.action_changed.connect($TouchControls.show_action)
 	_add_goal_guide()
+	_add_sleep_menu()
 	_refresh()
 
 
@@ -48,6 +50,13 @@ func _add_goal_guide() -> void:
 	guide.setup(tool_label)
 	add_child(guide)
 	move_child(guide, tool_label.get_index() + 1)
+
+
+## With the other menus: under the fade, and over everything else.
+func _add_sleep_menu() -> void:
+	var menu := SleepMenu.new()
+	add_child(menu)
+	move_child(menu, fade.get_index())
 
 
 func _refresh() -> void:

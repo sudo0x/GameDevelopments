@@ -86,7 +86,7 @@ func _run() -> void:
 	# Menus. They must never cover the button that closes them.
 	var act: Dictionary = {}
 	for entry in controls.ACTION_BUTTONS:
-		if entry[1] == "interact":
+		if entry[1] == "use_tool":
 			act = {"center": entry[2], "size": entry[3]}
 	var act_left: float = act["center"].x - act["size"] / 2.0
 	shop.open()
@@ -136,8 +136,8 @@ func _run() -> void:
 	craft.open()
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
-	# 7 tools, < and >, and pause.
-	check("tool bar, < > and pause hide under a menu", not bar.visible and bar.get_child_count() == 10)
+	# 7 tools, Use, < and >, and pause.
+	check("tool bar, < > and pause hide under a menu", not bar.visible and bar.get_child_count() == 11)
 	craft.close()
 	await wait(2)
 

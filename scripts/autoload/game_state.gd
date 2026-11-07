@@ -5,6 +5,8 @@ extends Node
 
 ## Something (the house door) asked to sleep. The HUD fades out and calls Progress.end_day().
 signal sleep_requested
+## The Action button reached the door. The sleep menu asks first.
+signal sleep_asked
 ## Something (the shop stall) asked to open the shop. The shop menu opens.
 signal shop_requested
 ## Something (the workbench) asked to open the crafting menu.
@@ -21,6 +23,10 @@ var touch_mode := false
 ## Picks help text for the controls in use, so a phone never says "press Space".
 func controls(keyboard: String, touch: String) -> String:
 	return touch if touch_mode else keyboard
+
+
+func ask_sleep() -> void:
+	sleep_asked.emit()
 
 
 func request_sleep() -> void:

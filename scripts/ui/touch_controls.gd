@@ -42,21 +42,34 @@ const MESSAGE_SIDE_GAP := 40.0
 const TOUCH_MESSAGE_SIDE_GAP := 181.0
 const MESSAGE_HEIGHT := 24.0
 const MESSAGES: Array[Array] = [["CropStatusLabel", -68.0, -44.0], ["NoticeLabel", -44.0, -92.0]]
-## Where the Act button starts on the base screen.
+## How far right a menu can reach on the base screen, so Bag and Action stay showing.
 const ACT_LEFT := 501.0
-## Text, action, center, size, and the edge it follows. Buttons with no text show an icon: Bag,
-## Act and pause have their own, and Use shows the selected tool, so you can see what it will do.
+## Text, action, center, size, and the edge it follows. Buttons with no text show an icon: Bag
+## and pause have their own, Action shows what it will do, and Use shows the selected tool.
+## Use stays until the Heal button and Build mode replace it (docs/23_...).
 const BAG_ICON := preload("res://assets/ui/bag.png")
 const PAUSE_ICON := preload("res://assets/ui/pause_icon.png")
 ## Smaller and lighter than other icons: full size, the dark bars hid the ring and sank into
 ## the curse.
 const PAUSE_ICON_SIZE := 0.55
 const PAUSE_ICON_COLOR := Color(1.8, 1.7, 1.5)
-## Act (interact): "you can do something here", unlike any tool icon.
+## On Action: "you can do something here", unlike any tool icon. It also closes menus.
 const ACT_ICON := preload("res://assets/ui/act_icon.png")
+## Which tool icon Action shows. Anything else shows ACT_ICON, and NONE keeps the last icon, dimmed.
+const ACTION_ICONS := {
+	Farm.Action.SWING: Player.Tool.SWORD,
+	Farm.Action.HARVEST: Player.Tool.HAND,
+	Farm.Action.WATER: Player.Tool.WATERING_CAN,
+	Farm.Action.PLANT: Player.Tool.SEEDS,
+	Farm.Action.GATHER: Player.Tool.HAND,
+	Farm.Action.TILL: Player.Tool.HOE,
+}
+const ACTION_DIM_COLOR := Color(1, 1, 1, 0.45)
+## Stands for an open menu in _shown_action, where Action shows ACT_ICON.
+const MENU_OPEN := -1
 const ACTION_BUTTONS: Array[Array] = [
-	["", "use_tool", Vector2(596, 296), 68.0, Vector2.ONE],
-	["", "interact", Vector2(526, 322), 50.0, Vector2.ONE],
+	["", "action", Vector2(596, 296), 68.0, Vector2.ONE],
+	["", "use_tool", Vector2(526, 322), 50.0, Vector2.ONE],
 	["", "inventory", Vector2(526, 262), 42.0, Vector2.ONE],
 	["<", "seed_prev", Vector2(476, 300), 34.0, Vector2.ONE],
 	[">", "seed_next", Vector2(476, 340), 34.0, Vector2.ONE],
@@ -64,7 +77,7 @@ const ACTION_BUTTONS: Array[Array] = [
 	["", "ui_cancel", Vector2(614, 24), 34.0, Vector2(1, 0)],
 ]
 ## The only buttons left showing under an open menu: they're what close it.
-const SHOWN_UNDER_MENUS: Array[String] = ["use_tool", "interact", "inventory"]
+const SHOWN_UNDER_MENUS: Array[String] = ["action", "inventory"]
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -74,6 +87,11 @@ var active := false
 
 var _tool_buttons: Array[TouchScreenButton] = []
 var _use_icon: Sprite2D
+var _action_button: TouchScreenButton
+var _action_icon: Sprite2D
+## What Farm says Action would do, and what the button shows now.
+var _action := Farm.Action.NONE
+var _shown_action: int = Farm.Action.NONE
 ## Each control with its position on the base screen and the edge it follows.
 var _placed: Array[Dictionary] = []
 
@@ -100,8 +118,10 @@ func _ready() -> void:
 			var pause_icon := _add_icon(button, PAUSE_ICON)
 			pause_icon.scale *= PAUSE_ICON_SIZE
 			pause_icon.modulate = PAUSE_ICON_COLOR
-		elif entry[1] == "interact":
-			_add_icon(button, ACT_ICON)
+		elif entry[1] == "action":
+			_action_button = button
+			_action_icon = _add_icon(button, tool_icon(Player.Tool.HOE))
+			_action_button.modulate = ACTION_DIM_COLOR
 		elif entry[1] == "use_tool":
 			_use_icon = _add_icon(button, tool_icon(0))
 	get_viewport().size_changed.connect(_fit_screen)
@@ -118,6 +138,25 @@ func _process(_delta: float) -> void:
 		stick.visible = not paused
 		if paused and active:
 			_release_movement()
+	var wanted: int = MENU_OPEN if paused else _action
+	if wanted != _shown_action:
+		_shown_action = wanted
+		_update_action_button()
+
+
+## Called when what the Action button would do changes.
+func show_action(action: Farm.Action) -> void:
+	_action = action
+
+
+func _update_action_button() -> void:
+	_action_button.modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE else Color.WHITE
+	if _shown_action == Farm.Action.NONE:
+		return
+	var icon: Texture2D = ACT_ICON
+	if ACTION_ICONS.has(_shown_action):
+		icon = tool_icon(ACTION_ICONS[_shown_action])
+	_fit_icon(_action_icon, icon)
 
 
 ## How much bigger this screen is than the base one.

@@ -55,7 +55,7 @@ func _run() -> void:
 	check("notices sit above crop text", hud.get_node("NoticeLabel").get_global_rect().end.y <= text_rect.position.y)
 	crop_text.text = ""
 	var use_button: Node2D = controls.get_children().filter(
-		func(n: Node) -> bool: return n is TouchScreenButton and n.action == "use_tool")[0]
+		func(n: Node) -> bool: return n is TouchScreenButton and n.action == "action")[0]
 	var use_at := use_button.position
 
 	root.size = PHONE
@@ -64,7 +64,7 @@ func _run() -> void:
 	print("phone screen ", screen)
 	check("the view grows instead of leaving bars", screen == Vector2(924, 426))
 	var extra: Vector2 = screen - base
-	check("Use follows the corner, moved in from the edge", use_button.position.is_equal_approx(use_at + extra - Vector2(20, 0)))
+	check("Action follows the corner, moved in from the edge", use_button.position.is_equal_approx(use_at + extra - Vector2(20, 0)))
 	var stick: Control = controls.get_node("Joystick")
 	check("joystick is on the bottom edge", is_equal_approx(stick.get_global_rect().end.y, screen.y))
 	check("joystick stays on the left", stick.position.x == 0.0)

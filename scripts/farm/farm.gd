@@ -5,6 +5,8 @@ extends Node2D
 
 ## What the targeted crop needs, or empty text when the player isn't facing one.
 signal target_status_changed(text: String)
+## What the Action button would do has changed, so its icon should too.
+signal action_changed(action: Action)
 
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
@@ -30,6 +32,8 @@ const BUILDING_BASE := Vector2(0, 12)
 
 ## Tools that make something where you aim (soil, a building) never guess another tile.
 const EXACT_TOOLS: Array[Player.Tool] = [Player.Tool.HOE, Player.Tool.BUILD]
+## Action can't do these, so on phones the cursor shows the tool's tile while one is selected.
+const USE_BUTTON_TOOLS: Array[Player.Tool] = [Player.Tool.HOLY_WATER, Player.Tool.BUILD]
 
 ## The tool behind each Action that uses one. Action only chooses: the tools do the work.
 const ACTION_TOOLS := {
@@ -46,9 +50,14 @@ const ACTION_TOOLS := {
 @export var crops_parent_path: NodePath
 
 var target_cell := Vector2i.ZERO
+## The tile the Action button would work on.
+var action_cell := Vector2i.ZERO
 ## Planted crops by cell.
 var crops: Dictionary[Vector2i, Crop] = {}
 var _target_status := ""
+var _shown_action := Action.NONE
+## The tile the cursor is on, and the one the status text describes.
+var _shown_cell := Vector2i.ZERO
 ## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
 var soil_idle: Dictionary[Vector2i, int] = {}
 ## Reused to check whether a solid object stands on a cell.
@@ -85,6 +94,7 @@ func _ready() -> void:
 	# get_node, because Farm starts before Player, so player.reach isn't set yet.
 	_build_query.exclude = [player.get_node("Reach").get_rid(), player.get_node("Sword/Hitbox").get_rid()]
 	player.tool_used.connect(_on_tool_used)
+	player.action_pressed.connect(run_action)
 	healing.land_healed.connect(gathering.reveal)
 	# Healed land beside a field is new grass, so the field's edge changes.
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: _refresh_soil_edges())
@@ -104,13 +114,25 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	target_cell = smart_target_for(player)
+	action_cell = action_target_for(player)
+	var action := smart_action(action_cell)
+	if action != _shown_action:
+		_shown_action = action
+		action_changed.emit(action)
+	var by_action: bool = GameState.touch_mode and player.tool not in USE_BUTTON_TOOLS
+	_shown_cell = action_cell if by_action else target_cell
 	var tile := Vector2(ground.tile_set.tile_size)
-	var rect := Rect2(ground.map_to_local(target_cell) - tile / 2.0, tile)
+	var rect := Rect2(ground.map_to_local(_shown_cell) - tile / 2.0, tile)
 	if player.tool == Player.Tool.HOLY_WATER:
 		rect = rect.grow(tile.x * healing.radius_for(player.strong_water))
-	highlight.show_cell(rect, can_use(player.tool, target_cell))
-	# The sword works on whatever is in front, not on a tile.
-	highlight.visible = player.tool != Player.Tool.SWORD
+	if by_action:
+		highlight.show_cell(rect, action != Action.NONE)
+		# Swinging and using an object don't happen on the tile, so don't point at it.
+		highlight.visible = action != Action.SWING and action != Action.INTERACT
+	else:
+		highlight.show_cell(rect, can_use(player.tool, target_cell))
+		# The sword works on whatever is in front, not on a tile.
+		highlight.visible = player.tool != Player.Tool.SWORD
 	_update_build_preview()
 	_update_target_status()
 
@@ -128,6 +150,21 @@ func smart_target_for(p: Player) -> Vector2i:
 	var ahead := target_cell_for(p)
 	if p.tool in EXACT_TOOLS or can_use(p.tool, ahead):
 		return ahead
+	return _beside(p, ahead, func(cell: Vector2i) -> bool: return can_use(p.tool, cell))
+
+
+## Aim assist for the Action button. The tile ahead wins if it has any action. Tiles beside it
+## can't be tilled, because new soil should only ever appear straight ahead.
+func action_target_for(p: Player) -> Vector2i:
+	var ahead := target_cell_for(p)
+	if _tile_action(ahead) != Action.NONE:
+		return ahead
+	return _beside(p, ahead, func(cell: Vector2i) -> bool:
+		return _tile_action(cell) != Action.NONE and _tile_action(cell) != Action.TILL)
+
+
+## The first tile beside the one ahead (nearer side first) that passes, or the one ahead.
+func _beside(p: Player, ahead: Vector2i, usable: Callable) -> Vector2i:
 	var facing: Vector2i = FACING_OFFSETS[p.facing]
 	var side := Vector2i(facing.y, facing.x)
 	var sides: Array[Vector2i] = [ahead + side, ahead - side]
@@ -135,7 +172,7 @@ func smart_target_for(p: Player) -> Vector2i:
 	sides.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		return feet.distance_squared_to(ground.map_to_local(a)) < feet.distance_squared_to(ground.map_to_local(b)))
 	for cell in sides:
-		if can_use(p.tool, cell):
+		if usable.call(cell):
 			return cell
 	return ahead
 
@@ -187,11 +224,34 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 ## Holy water, picking up buildings and hoeing soil back are left out on purpose, so they
 ## can't happen by accident (docs/23_...).
 func smart_action(cell: Vector2i) -> Action:
-	if Inventory.has_sword and spawner.any_within(player.global_position, GameState.BALANCE.action_swing_distance):
+	if _creature_to_swing_at():
 		return Action.SWING
 	if player.interact_target(true):
 		return Action.INTERACT
 	return _tile_action(cell)
+
+
+## Does what smart_action() says. The selected tool stays selected.
+func run_action() -> void:
+	if Progress.day_changing:
+		return
+	var cell := action_target_for(player)
+	var action := smart_action(cell)
+	match action:
+		Action.NONE:
+			return
+		Action.SWING:
+			player.swing_at(_creature_to_swing_at().global_position)
+		Action.INTERACT:
+			player.use_nearby()
+		_:
+			_use_tool(ACTION_TOOLS[action], cell)
+
+
+func _creature_to_swing_at() -> Creature:
+	if not Inventory.has_sword:
+		return null
+	return spawner.nearest_within(player.global_position, GameState.BALANCE.action_swing_distance)
 
 
 func _tile_action(cell: Vector2i) -> Action:
@@ -249,13 +309,13 @@ func _update_build_preview() -> void:
 
 
 func _update_target_status() -> void:
-	var status := curse_status(target_cell)
+	var status := curse_status(_shown_cell)
 	if status.is_empty():
-		status = crop_status(target_cell)
+		status = crop_status(_shown_cell)
 	if status.is_empty():
-		status = soil_status(target_cell)
+		status = soil_status(_shown_cell)
 	if status.is_empty():
-		status = gathering.status(target_cell) + builder.status(target_cell)
+		status = gathering.status(_shown_cell) + builder.status(_shown_cell)
 	if status != _target_status:
 		_target_status = status
 		target_status_changed.emit(status)
@@ -324,45 +384,49 @@ static func texture_coords(cell: Vector2i) -> Vector2i:
 
 
 func _on_tool_used(tool: Player.Tool) -> void:
-	if not can_use(tool, target_cell):
+	_use_tool(tool, target_cell)
+
+
+func _use_tool(tool: Player.Tool, cell: Vector2i) -> void:
+	if not can_use(tool, cell):
 		return
 	match tool:
 		Player.Tool.HOE:
-			if healing.is_cleansable(target_cell):
-				healing.purify(target_cell)
+			if healing.is_cleansable(cell):
+				healing.purify(cell)
 			else:
-				if is_tilled(target_cell):
-					untill(target_cell)
+				if is_tilled(cell):
+					untill(cell)
 				else:
-					till(target_cell)
+					till(cell)
 					Progress.record_action("till")
 				Audio.play(&"till")
 			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
-			water(target_cell)
+			water(cell)
 			Progress.record_action("water")
 			Audio.play(&"water")
 			_refresh_soil_edges()
 		Player.Tool.SEEDS:
-			plant(target_cell, player.selected_seed())
+			plant(cell, player.selected_seed())
 			Progress.record_action("plant_ward" if player.selected_seed().ward_radius > 0 else "plant")
 			Audio.play(&"plant")
 		Player.Tool.HAND:
-			if crops.has(target_cell):
-				harvest(target_cell)
+			if crops.has(cell):
+				harvest(cell)
 				Progress.record_action("harvest")
 				Audio.play(&"harvest")
-			elif builder.placed.has(target_cell):
-				builder.pick_up(target_cell)
+			elif builder.placed.has(cell):
+				builder.pick_up(cell)
 				Audio.play(&"pick_up")
 			else:
-				gathering.hit(target_cell)
+				gathering.hit(cell)
 				Audio.play(&"gather")
 		Player.Tool.HOLY_WATER:
-			healing.cleanse(target_cell, player.strong_water)
+			healing.cleanse(cell, player.strong_water)
 			Progress.record_action("heal")
 		Player.Tool.BUILD:
-			builder.place(target_cell, player.selected_building())
+			builder.place(cell, player.selected_building())
 			Audio.play(&"place")
 	_refresh_crop_needs()
 	healing.refresh_marks(_can_curse_take)
