@@ -65,6 +65,8 @@ var crops: Dictionary[Vector2i, Crop] = {}
 var _target_status := ""
 var _shown_action := Action.NONE
 var _shown_heal := Heal.NONE
+## Seconds left before the Action button can use objects again.
+var _object_pause := 0.0
 ## The tile the cursor is on, and the one the status text describes.
 var _shown_cell := Vector2i.ZERO
 ## Phones: press and hold a building to move it.
@@ -126,7 +128,8 @@ func _ready() -> void:
 	Audio.play_music(&"farm")
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_object_pause = maxf(_object_pause - delta, 0.0)
 	target_cell = smart_target_for(player)
 	var action := Action.NONE
 	# Only the phone's buttons show these, so computers skip the work.
@@ -255,7 +258,7 @@ func smart_action(cell: Vector2i) -> Action:
 	# While building, a stray tap mustn't till the tile you're about to build on.
 	if _is_building():
 		return _build_action(cell)
-	if player.action_target():
+	if _object_pause <= 0.0 and player.action_target():
 		return Action.INTERACT
 	return _tile_action(cell)
 
@@ -275,6 +278,7 @@ func run_action() -> void:
 			player.use_nearby()
 		_:
 			_use_tool(ACTION_TOOLS[action], cell)
+			_object_pause = GameState.BALANCE.action_object_pause
 	# Nothing left to place, so there's nothing left to do here.
 	if action == Action.PLACE and Inventory.building_count(player.selected_building()) == 0:
 		player.stop_building()

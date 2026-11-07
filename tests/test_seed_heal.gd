@@ -116,6 +116,24 @@ func _run() -> void:
 	inv.inventory_changed.emit()
 	player.select_seed(0)
 
+	# A long list scrolls instead of running off the screen.
+	var long_list: Array[Dictionary] = []
+	for i in 14:
+		long_list.append({"text": "Crop %d" % i, "icon": radish.seed_icon, "pick": func() -> void: pass})
+	pick.ask("Long", long_list)
+	await wait(3)
+	var long_rect: Rect2 = pick.get_global_rect()
+	check("a long list fits a phone", long_rect.size.y <= 360.0 and long_rect.position.y >= 0.0)
+	check("every row is there", pick._rows.get_child_count() == 14)
+	check("and it can scroll", pick._rows.size.y > pick._scroll.size.y)
+	pick.close()
+	await wait(2)
+	pick.ask("Short", [long_list[0]] as Array[Dictionary])
+	await wait(3)
+	check("a short list stays short", pick.get_global_rect().size.y < 160.0)
+	pick.close()
+	await wait(2)
+
 	# Beside the curse.
 	var edge := Vector2i(-1, -1)
 	for y in range(5, 22):

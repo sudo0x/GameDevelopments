@@ -209,7 +209,7 @@ func _run() -> void:
 	# Menus.
 	var stall: Node2D = main.get_node("World/ShopStall")
 	player.global_position = stall.global_position + Vector2(0, 16)
-	await wait(6)
+	await wait(40)
 	await tap(interact_at)
 	check("Action opens the shop", shop.visible and paused)
 	await wait(2)

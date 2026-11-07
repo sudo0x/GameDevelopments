@@ -5,9 +5,13 @@ extends GameMenu
 
 const ROW_SIZE := Vector2(220, 36)
 const DIM_COLOR := Color(1, 1, 1, 0.55)
+## Rows past this scroll, so a long list can't run off a phone's screen.
+const MOST_ROWS_SHOWING := 5
+const ROW_GAP := 4
 
 var _title := Label.new()
 var _rows := VBoxContainer.new()
+var _scroll := ScrollContainer.new()
 var _first_row: Button
 
 
@@ -18,8 +22,11 @@ func _init() -> void:
 	_build_frame()
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_add_above_help(_title)
-	_rows.add_theme_constant_override("separation", 4)
-	_add_above_help(_rows)
+	_rows.add_theme_constant_override("separation", ROW_GAP)
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.follow_focus = true
+	_scroll.add_child(_rows)
+	_add_above_help(_scroll)
 
 
 func ask(title: String, choices: Array[Dictionary]) -> void:
@@ -30,6 +37,9 @@ func ask(title: String, choices: Array[Dictionary]) -> void:
 	_first_row = null
 	for choice in choices:
 		_rows.add_child(_make_row(choice))
+	var showing := mini(choices.size(), MOST_ROWS_SHOWING)
+	_scroll.custom_minimum_size = Vector2(ROW_SIZE.x, showing * (ROW_SIZE.y + ROW_GAP) - ROW_GAP)
+	_scroll.scroll_vertical = 0
 	open()
 
 

@@ -143,6 +143,7 @@ func _run() -> void:
 
 	# Asking before sleep.
 	var day: int = progress.day
+	await wait(35)
 	await stand_on(door)
 	await press("action")
 	check("the door asks first", sleep.visible and paused and progress.day == day)
@@ -168,6 +169,21 @@ func _run() -> void:
 	check("F still sleeps at once", not sleep.visible)
 	await wait(100)
 	check("F slept", progress.day == day + 2)
+
+	# Fast tapping along a row can't open a menu.
+	var row_cell := Vector2i(21, 16)
+	await stand(row_cell + Vector2i.LEFT, RIGHT)
+	await press("action")
+	check("a farming tap", farm.is_tilled(row_cell))
+	await stand_on(stall)
+	await press("action")
+	check("the next quick tap doesn't open the shop", not shop.visible and not paused)
+	await wait(35)
+	await press("action")
+	check("a tap after the pause does", shop.visible)
+	await wait(2)
+	await press("action")
+	await wait(2)
 
 	# Other objects.
 	await stand_on(stall)
@@ -276,6 +292,7 @@ func _run() -> void:
 	await tap(Vector2(320, 120), 0)
 	check("a tap on the world uses no tool", tool_uses.is_empty())
 
+	await wait(35)
 	await stand_on(stall)
 	await wait(3)
 	check("objects show the ! icon", controls._action_icon.texture == controls.ACT_ICON)

@@ -46,7 +46,7 @@ func _run() -> void:
 	check("touch mode on", gs.touch_mode)
 
 	# The buttons use art.
-	for action: String in ["action", "heal", "seed_menu", "inventory", "tasks", "ui_cancel"]:
+	for action: String in ["action", "heal", "seed_menu", "inventory", "tasks", "build_mode", "ui_cancel"]:
 		var button: Node2D = controls._buttons[action]
 		var icons := button.get_children().filter(func(n: Node) -> bool: return n is Sprite2D)
 		check(action + " has an icon", icons.size() == 1 and icons[0].texture != null)

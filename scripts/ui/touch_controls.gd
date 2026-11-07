@@ -66,6 +66,7 @@ const ACTION_ICONS := {
 const ACTION_DIM_COLOR := Color(1, 1, 1, 0.45)
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const TASKS_ICON := preload("res://assets/ui/tasks_icon.png")
+const CANCEL_ICON := preload("res://assets/ui/cancel_icon.png")
 ## Stands for an open menu in _shown_action, where Action shows ACT_ICON.
 const MENU_OPEN := -1
 ## Makes _process() redraw Action's icon.
@@ -79,7 +80,7 @@ const ACTION_BUTTONS: Array[Array] = [
 	# Under the hearts, away from both thumbs, because it's for reading, not playing.
 	["", "tasks", Vector2(28, 78), 38.0, Vector2.ZERO],
 	# Leaves Build mode. In Seed's spot: they're never both showing.
-	["X", "build_mode", Vector2(526, 322), 50.0, Vector2.ONE],
+	["", "build_mode", Vector2(526, 322), 50.0, Vector2.ONE],
 	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
 	["", "ui_cancel", Vector2(614, 24), 34.0, Vector2(1, 0)],
 ]
@@ -117,6 +118,7 @@ func _ready() -> void:
 	_add_icon(_buttons["inventory"], BAG_ICON)
 	_add_icon(_buttons["heal"], HOLY_WATER_ICON)
 	_add_icon(_buttons["tasks"], TASKS_ICON)
+	_add_icon(_buttons["build_mode"], CANCEL_ICON)
 	var pause_icon := _add_icon(_buttons["ui_cancel"], PAUSE_ICON)
 	pause_icon.scale *= PAUSE_ICON_SIZE
 	pause_icon.modulate = PAUSE_ICON_COLOR

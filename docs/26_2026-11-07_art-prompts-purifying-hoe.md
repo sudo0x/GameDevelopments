@@ -51,3 +51,24 @@ square to its left, like a checklist. The first square has a small tick in it. T
 shape must be simple, bold and easy to read at a very small size. One object only,
 centered, filling most of the image, with a little empty space around it.
 ```
+
+## Build mode's X icon
+
+✅ In the game (2026-11-07), on the `build_mode` button. `art_source/ui/cancel_icon.png` was shrunk with `tools/pixelize.gd --height 39 --frame-w 39 --frame-h 39 --single true`, which shows at exactly 1:1 on a 50-pixel button.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+One bold cancel cross made of two thick crossed pieces of old dark red painted
+wood, held together at the center by a small iron nail. The ends are slightly
+worn and uneven. Pale edge highlights, so it stands out on a dark round button.
+The shape must be simple, bold and easy to read at a very small size. One object
+only, centered, filling most of the image, with a little empty space around it.
+```

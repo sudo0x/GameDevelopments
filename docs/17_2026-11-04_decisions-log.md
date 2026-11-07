@@ -10,6 +10,7 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| How do popups grow with more items? | **`PickMenu` scrolls now. The Bag gets tabs just before the areas work** (2026-11-07) | Scrolling is small and fixes Seed and Build together. Tabs are a bigger job, and aren't needed until there's more to list |
 | Does the goal stay on the screen? | **No: a Tasks menu holds goals, and a new one shows for 6 seconds** (2026-11-07, the user's choice). This adds a small sixth button | A clear screen, and the user can read as much as they want. Claude advised keeping one line, so new players always know what's next: the fading line covers that, and the outside test will check it |
 | Who runs the shop and buys from the box? | **A night trader nobody has seen** (2026-11-07, the user's choice) | One book page explains the box, the stall and its limit of 3 holy water, with no new systems, and keeps the island lonely |
 | How many free heals does the purifying hoe give? | **2 a day, down from 5** (2026-11-07, the user's catch) | 5 beat the curse's 3 to 5 tiles a night, so one cheap tool made holy water, lanterns and wardthorn optional early on. At 2 it helps, but can't win alone |

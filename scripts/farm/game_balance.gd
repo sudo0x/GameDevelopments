@@ -26,6 +26,9 @@ extends Resource
 ## The Action button swings the sword when a creature is this close, in pixels.
 ## A little more than the sword's own reach of about 44.
 @export var action_swing_distance: float = 48.0
+## After a farming tap, the Action button won't use objects for this many seconds, so tapping
+## along a row can't open a menu by accident.
+@export var action_object_pause: float = 0.5
 ## Tilled soil with no crop turns back into grass after this many nights.
 @export var soil_idle_nights: int = 3
 ## Hearts the player starts each day with.
