@@ -31,7 +31,6 @@ const FACING_OFFSETS := {
 
 const CROP_SCENE := preload("res://scenes/farm/crop.tscn")
 const WATER_ICON := preload("res://assets/ui/need_water.png")
-const RIPE_ICON := preload("res://assets/ui/need_ripe.png")
 
 ## Where a building's base sits, measured from the center of its tile.
 const BUILDING_BASE := Vector2(0, 12)
@@ -224,7 +223,7 @@ static func tiles_apart(a: Vector2i, b: Vector2i) -> int:
 ## How far the guard on this cell reaches, or the one about to be placed there. 0 if none.
 func guard_radius_at(cell: Vector2i) -> int:
 	if crops.has(cell):
-		return crops[cell].data.ward_radius
+		return ward_reach(cell)
 	if builder.placed.has(cell):
 		return builder.placed[cell]["data"].guard_radius
 	if player.tool == Player.Tool.BUILD:
@@ -232,11 +231,21 @@ func guard_radius_at(cell: Vector2i) -> int:
 	return 0
 
 
-## A dry ward plant shows red, to say it needs water. A new building shows if it can go there.
+## How far a ward plant on this cell reaches right now. A seed guards only its own tile, so
+## planting can't save tonight's marks: guarding takes planning ahead. A ripe one needs no water,
+## because the big button only bursts it from then on, so it could never be watered on a phone.
+func ward_reach(cell: Vector2i) -> int:
+	var crop := crops[cell]
+	if crop.data.ward_radius <= 0 or crop.stage == 0:
+		return 0
+	if crop.is_ripe():
+		return crop.data.ward_ripe_radius
+	return crop.data.ward_radius if is_watered(cell) else crop.data.ward_dry_radius
+
+
+## Guards in place always show as working. A new building shows if it can go there.
 func _guard_is_active(cell: Vector2i) -> bool:
-	if crops.has(cell):
-		return is_watered(cell)
-	return builder.placed.has(cell) or _can_place(cell)
+	return crops.has(cell) or builder.placed.has(cell) or _can_place(cell)
 
 
 func is_tilled(cell: Vector2i) -> bool:
@@ -280,7 +289,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 
 ## What the Action button would do with this cell in front of the player. It changes nothing.
 ## Holy water, picking up buildings and hoeing soil back are left out on purpose, so they
-## can't happen by accident (docs/23_...).
+## can't happen by accident (docs/24_...).
 func smart_action(cell: Vector2i) -> Action:
 	if _creature_to_swing_at():
 		return Action.SWING
@@ -473,7 +482,7 @@ func crop_status(cell: Vector2i) -> String:
 	if crop.blighted:
 		return "Blighted %s. %s" % [crop.data.display_name.to_lower(), GameState.controls("Press R to clear it for a curse shard.", "Tap the big button for a curse shard.")]
 	if crop.is_ripe() and crop.data.burst_radius > 0:
-		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press R to burst it and heal the land.", "Tap the big button to burst it.")]
+		return "%s is ready! %s" % [crop.data.display_name, GameState.controls("Press R to burst it, or leave it to guard.", "Tap the big button to burst it, or leave it to guard.")]
 	if crop.is_ripe():
 		return "%s is ripe! %s" % [crop.data.display_name, GameState.controls("Press R to harvest.", "Tap the big button.")]
 	return _growing_status(cell, crop)
@@ -509,6 +518,8 @@ func curse_status(cell: Vector2i) -> String:
 
 func _growing_status(cell: Vector2i, crop: Crop) -> String:
 	var progress := "%s: %d of %d days" % [crop.data.display_name, crop.days_grown, crop.data.days_to_grow]
+	if crop.data.ward_radius > 0 and crop.stage == 0:
+		progress += ". It guards once it sprouts"
 	if is_watered(cell):
 		return progress + ", watered. Sleep to grow."
 	if Inventory.can_water <= 0:
@@ -653,8 +664,8 @@ func _can_curse_take(cell: Vector2i) -> bool:
 
 func _ward_protects(cell: Vector2i) -> bool:
 	for center in crops:
-		var radius := crops[center].data.ward_radius
-		if radius > 0 and is_watered(center) and tiles_apart(cell, center) <= radius:
+		var radius := ward_reach(center)
+		if radius > 0 and tiles_apart(cell, center) <= radius:
 			return true
 	return false
 
@@ -678,14 +689,11 @@ func _age_empty_soil() -> void:
 			untill(cell)
 
 
-## Icons only for what needs the player: ripe, or not watered yet. Calm otherwise.
+## An icon only when a crop needs water. A ripe crop shows it by its own look.
 func _refresh_crop_needs() -> void:
 	for cell in crops:
 		var crop := crops[cell]
-		if crop.can_harvest():
-			crop.show_need(RIPE_ICON)
-		else:
-			crop.show_need(null if is_watered(cell) else WATER_ICON)
+		crop.show_need(null if crop.can_harvest() or is_watered(cell) else WATER_ICON)
 
 
 ## Grass over the field's edge, and wet soil over dry. Call after any soil change:

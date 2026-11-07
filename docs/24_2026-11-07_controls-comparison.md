@@ -10,6 +10,36 @@ After playing the Action button, you asked why we don't tap tiles like Hay Day. 
 
 **The right controls depend on the game, not on which game is the most popular.** Hay Day's controls are excellent for Hay Day. Ours has a walking character, creatures and a sword, so it needs something else.
 
+## How the big button decides
+
+The first row that fits wins, and the icon always shows what will happen.
+
+```mermaid
+flowchart TD
+	A[Action pressed] --> B{Creature close, and you own a sword?}
+	B -->|Yes| C[Turn and swing]
+	B -->|No| D{Building?}
+	D -->|Yes| E[Place, or take back]
+	D -->|No| F{Facing an object with something to do, and not farming a moment ago?}
+	F -->|Yes| G[Use it. The door asks first]
+	F -->|No| H{What's on the tile you face?}
+	H -->|Ripe or blighted crop| I[Harvest]
+	H -->|Dry crop, and water in the can| J[Water]
+	H -->|Empty soil| K[Plant the selected seed]
+	H -->|Tree or rock| L[Gather]
+	H -->|Clean grass| M[Till]
+	H -->|Nothing to do| N[Button dims]
+```
+
+**Things that never happen by accident:**
+
+| Action | How to do it |
+|---|---|
+| Spending holy water, or the hoe's uses | The Heal button, kept away from Action. It uses the hoe first, and asks which water if you own both |
+| Picking up a building | Build mode, from the Bag |
+| Hoeing soil back to grass | Empty soil turns back by itself |
+| Sleeping | The door asks "Sleep?" first. F on a computer sleeps at once |
+
 ## How the main styles compare
 
 These are from general knowledge of the games, so check the current versions before copying any detail.

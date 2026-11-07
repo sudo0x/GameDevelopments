@@ -1,5 +1,5 @@
 extends SceneTree
-## Farm.smart_action(): one section per row of the chart in docs/23_..., then the order
+## Farm.smart_action(): one section per row of the chart in docs/24_..., then the order
 ## between the rows, then what must never happen by accident.
 const NONE := 0
 const SWING := 1

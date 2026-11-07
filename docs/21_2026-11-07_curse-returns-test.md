@@ -35,13 +35,14 @@ flowchart TD
 | Bare soil is lost with its tile | A hoe tap alone shouldn't stop the curse |
 | A food crop on a marked tile is blighted, and its land stays clean that night | A normal plant can't protect itself, but losing it outright could make players quit |
 | Buildings, gatherable spots and ward plants are never taken | Nothing the player built is destroyed |
-| Tiles within 4 of a healing lantern are safe (about 50 tiles) | Gives lanterns a clear job |
-| Tiles within 2 of a watered wardthorn are safe | Plants that are poison to the curse make the field a defense |
+| A lantern guards a 5×5 square, must stand 6 tiles from another, and costs curse shards | Rare, permanent safe spots |
+| A wardthorn seed guards only its own tile. Once sprouted it guards 3×3 while dry and 7×7 while watered, and 5×5 once ripe, with no water | Guarding takes planning ahead, care makes it strong, and ripe means choosing: keep guarding, or burst |
+| Guards remove marks in their area, but don't heal the curse. Only a burst does | Guarding and healing stay two different jobs |
 | Tiles within 9 of a restored shrine are safe | Makes the shrine feel like a real victory |
 | Tonight's tiles are marked in the morning, and land healed that day is safe tonight | A loss you can see coming feels fair; a surprise doesn't |
 | Starts on day 4 | The first days stay calm while the player learns |
 
-**The wardthorn:** seed 60 money, 4 watered days to ripen. It can't be blighted. Ripe, it keeps guarding until the player bursts it with the Hand tool, which heals cursed land within 2 tiles and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
+**The wardthorn:** seed 30 money, 4 watered days to ripen. It can't be blighted. Ripe, it guards without water until the player bursts it, which heals cursed land in a 7×7 square and uses the plant up. That's up to 12 tiles, and about 5 or 6 at the curse's edge. It's planted on clean tilled soil, like any crop.
 
 **Starting numbers, first guesses:** all of them are in `data/balance.tres` and `data/crops/wardthorn.tres`. Setting `curse_return_per_night` to 0 turns the returning curse off.
 
@@ -49,7 +50,6 @@ flowchart TD
 
 - **Boring days:** this is the main thing we're testing.
 - **Sleeping for free:** sleeping now risks healed land and crops near the curse. A player who has healed nothing, or protected everything, still loses nothing. That's fine in a single-player game, because they aren't moving towards the goal.
-- **Too many buttons:** not part of this test (finding 25).
 
 ## Traps found in the code
 
@@ -100,7 +100,7 @@ The first play, on a day 53 save with 4,695 money, had no pressure: one hoe tap 
 | The curse grows | 3 tiles a night, plus 1 for every 5% of the island healed (`curse_growth_percent`) |
 | What saves a tile | A building, a lantern's reach, a watered wardthorn's reach, or healing beside it. Bare soil doesn't, and it's lost with its tile |
 | Food crops | They can't protect themselves (the user's idea). The curse blights a marked crop: it stops growing, and clearing it gives 5 money and a curse shard. The land under it stays clean that night |
-| Wardthorn | A plant that is poison to the curse. Seed 60 money, 4 watered days to ripen. While watered that day, it guards land within 2 tiles. Ripe, it can be burst with the Hand tool to heal cursed land within 2 tiles, which uses it up |
+| Wardthorn | A plant that is poison to the curse. Seed 30 money, 4 watered days to ripen. While watered that day, it guards a 7×7 square (changed from the first numbers on 2026-11-07, see finding 57). Ripe, it can be burst with the Hand tool to heal cursed land within 2 tiles, which uses it up |
 | How to test | Start a **New Game**, because a rich old save can't show the pace |
 
 Pace check with these rules, shrine restored at 3 tiles a night:
@@ -125,10 +125,13 @@ After playing a New Game, answer these:
 3. Did losing land feel fair, or just annoying? Did the daily limit feel like a real choice, or just a wall?
 4. Did you still feel you were making progress?
 5. Was the wardthorn worth buying, or did it make the game too easy?
+6. Are lanterns and wardthorn each worth using, for different reasons?
+7. Did the watering can's limit feel fair, or like a chore?
+8. Is the hoe's 2 uses a day fair, and do a few lanterns beat the curse by themselves?
 
 | Result | What we do |
 |---|---|
-| Mostly yes | Keep it, add art and sound, then start the button redesign (finding 25) |
+| Mostly yes | Keep it, add art and sound, then start the outside test |
 | Good idea, wrong pace | Change the numbers and play again, but only once: two tries in total |
 | Annoying or no better | Set the nightly number to 0, log why, and try another idea |
 
@@ -137,5 +140,4 @@ After playing a New Game, answer these:
 - **Too punishing:** this game is meant to be calm and short per session. Losing land must feel like a push, never like losing your work.
 - **Busywork:** if protecting land becomes a daily chore, it swaps boredom for chores.
 - **Too many wardthorns:** seeds have no daily limit, so a rich player could buy many and get around the holy water limit. If so, limit the seeds too, or raise their price.
-- **Unclear controls:** the first play showed that needing the Hoe first, and switching seeds, isn't obvious (finding 33).
 - **Pace:** the release gets later by the length of this test.

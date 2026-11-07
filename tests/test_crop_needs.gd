@@ -1,5 +1,5 @@
 extends SceneTree
-## Crops show a small icon only when they need the player: a water drop, or a ripe sparkle.
+## Crops show a small icon only when they need water. A ripe crop shows it by its own look.
 var fails := 0
 
 
@@ -47,7 +47,7 @@ func _run() -> void:
 	check("next morning it asks again", crop.need_icon == farm.WATER_ICON)
 	crop.set_days_grown(crop.data.days_to_grow)
 	farm._refresh_crop_needs()
-	check("ripe shows the sparkle, not water", crop.need_icon == farm.RIPE_ICON)
+	check("ripe shows no icon", crop.need_icon == null and not crop._need_sprite.visible)
 	check("the icon sits above the plant", crop._need_sprite.position.y == crop.NEED_HEIGHTS[3])
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

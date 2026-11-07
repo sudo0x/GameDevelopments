@@ -4,12 +4,16 @@
 
 Choices we made about how the game works, and why, so we don't undo one by accident. If you later ask for something that goes against a decision here (for example, "move the house"), Claude should point to it, explain the reason again, and then do what you decide. A decision can change: when it does, update its row and say why.
 
-Newest first. Bigger plan decisions are also in each plan's "Design decisions" table.
+Newest first. The first choices from the finished layer plans are at the end.
 
 ## Playtest session 1 (2026-11-04)
 
 | Question | Decision | Why |
 |---|---|---|
+| What shows a crop is ripe? | **The crop itself, with no star** (2026-11-07, the user's choice). Only the water drop remains as an icon | Fewer icons keep the field calm, and they'd get in the way of animation later |
+| Does a wardthorn seed guard? | **Only its own tile, until it sprouts** (2026-11-07, the user's catch) | A seed protecting land the moment it's planted isn't logical, and it let planting save tonight's marks. Now guarding takes planning ahead |
+| What does a wardthorn guard? | **Once sprouted: 3×3 dry, 7×7 watered, and 5×5 ripe with no water, until burst** (2026-11-07, from the user's idea, sizes by Claude) | A growing one should always do something. Ripe gives a real choice: keep a free guard, or burst to heal. It stays below watered size, so daily care still pays |
+| How many docs do we keep? | **Only what's used to build and plan the game** (2026-11-07, the user's choice). Finished plans and old art prompts were removed, and their design reasons moved here | Fewer, current docs are easier to trust. Git history keeps the rest |
 | What do lanterns and wardthorn each do? | **Lanterns are rare and permanent, wardthorn is cheap and needs care** (2026-11-07, Claude's design at the user's request) | Lanterns beat wardthorn at everything, so spamming them was the best plan and made the land messy. Now a lantern guards 5×5, must stand 6 tiles from another and costs curse shards. A wardthorn guards 7×7 while watered |
 | What limits farm size? | **Water, not soil** (2026-11-07, Claude's design at the user's request). The can holds 10, is full each morning and refills at wells | Energy bars just stop people playing. Water makes field size and well placement a choice, and gives wells a job |
 | Is the starting well movable? | **No, it's fixed like the house** (2026-11-07) | Saves list which map objects are still in place, so a new movable one would be removed from older saves. Loading clears any soil or crop under it |
@@ -54,7 +58,7 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 | Messages: stack or queue? | **Queue** on one line: 3 s alone, 1.5 s while others wait, at most 4 waiting | The bottom of the screen has no room for 3 lines (crop status above, tool label below) |
 | Use button on phones? | Shows the selected tool's icon | Tells you what Use will do, with no new art |
 | The first Act icon (a pointing glove)? | Rejected | A fist with one raised finger can read as a rude gesture when shrunk to 24 pixels |
-| The open-glove Act icon? | **Not used. Act shows a "!" in a wooden speech bubble** (chosen 2026-11-04, in the game; prompt in `docs/14_...`). Menus say "Tap ! to close" | It looks almost the same as the Hand tool's glove, so with the Hand tool selected, Use and Act would show two gloves side by side. A different symbol is clearer |
+| The open-glove Act icon? | **Not used. Act shows a "!" in a wooden speech bubble** (chosen 2026-11-04, in the game). Menus say "Tap ! to close" | It looks almost the same as the Hand tool's glove, so with the Hand tool selected, Use and Act would show two gloves side by side. A different symbol is clearer |
 | A vertical line of fences? | The new vertical art at the same pixel scale as the side-on fence: it reads as a line of posts | Squeezing it smaller to show rails would mix two pixel sizes |
 
 ## Sound (2026-11-04)
@@ -101,3 +105,96 @@ The Hand tool picks them up and the Build tool places them again, the same as th
 | Test on a phone now? | Not yet: play on the computer and report problems, phone in release step 1 (was Layer 6 step 4) | Problems found on the computer can be fixed now |
 | Areas or Layer 6 first? | **Layer 6 first**, then the woods and marsh as a free update after release. Order: keep playing, step 5 sound, step 6 polish, step 4 phone, step 7 balance, step 8 ads, step 9 release | Core loop and phone tested before adding content, and release (and income) comes sooner. This replaces the earlier choice of areas before release |
 | Where do the rest of Layer 6 and the playing go? | **Layer 6 closes at step 6.** A new **playtest** plan (`docs/19_...`) comes next: play on the computer in sessions, log findings, fix them, and do the balance pass. Then a **release** plan (`docs/20_...`): phone, final balance on the phone, ads, Google Play | The user's idea, and the usual studio order (alpha before release). Claude's two changes, agreed: balance moved into the playtest because it needs playing, and the phone is the release plan's first step, not its last |
+
+## From the finished layer plans
+
+Moved here when those plans were removed. These are the first choices, so a newer row above wins where they differ, and `data/` holds the real numbers.
+
+### The curse (Layer 2)
+
+| Question | Decision | Why |
+|---|---|---|
+| How does the player cleanse before crafting exists? | Buy **holy water** at the stall | Links farming to cleansing now. Layer 3 can add crafting without changing how cleansing works |
+| How much does one use clean? | A **3×3 patch** around the target tile, for about 30 money | One tile at a time would feel slow, and a big patch turning green looks better |
+| Where can the player farm? | **Any clean grass**, instead of a fixed farm area | Cleansing should pay off straight away |
+| Does the curse fight back? | **No, not in this layer** | Keeps the layer small. Creeping curse stays an update idea, and lantern protection comes with it |
+| What's the goal of the layer? | Reach and restore the **old shrine** in the old farmlands | Gives the player somewhere to head, and a big moment at the end |
+
+Prices are starting values, to be tuned once the loop can be played.
+
+### Gathering and crafting (Layer 3)
+
+| Question | Decision | Why |
+|---|---|---|
+| How does the player gather? | With the **hand tool** (key 4), a few hits per tree or rock | No new tools to switch between, which also keeps touch controls simple later |
+| Where do trees and rocks grow? | Placed around the map, including on cursed land | Reachable only after healing, so "cleansed land reveals resources" needs no extra code |
+| Do they run out? | **Regrow** after a few days | The player can't get stuck with no materials |
+| Where does crafting happen? | A **workbench** near the house, with a menu like the shop | Reuses a pattern that already works |
+| Does the shop keep selling holy water? | **Yes**, but crafting it is cheaper | Crafting is a reward, not a wall |
+| What does the purifying hoe do? | Heals **one tile for free, 5 times a day** | Steady free healing without making holy water pointless |
+| Where's the inventory shown? | A new panel on a key, with only key numbers left on the HUD | The HUD's top-right list is already 6 lines long |
+
+Recipes and amounts are starting values, to be tuned once the loop can be played.
+
+| Recipe | Needs | Makes |
+|---|---|---|
+| Holy water | 1 radish, 1 stone | 1 holy water |
+| Purifying hoe | 10 wood, 5 stone | The hoe, once only |
+
+### Building (Layer 4)
+
+| Question | Decision | Why |
+|---|---|---|
+| Where can the player build? | **Clean grass only**, with nothing solid on it | Matches the concept's rule, and pushes the player to heal more |
+| How do you get buildings? | **Craft them at the workbench**, then place them from the bag | Reuses recipes, so a building is only new data |
+| How do you place one? | A **Build tool on key 6**: Q and E pick the building, Space places it | Works like the Seeds tool, which the player already knows |
+| How do you see where it goes? | A see-through **preview**, tinted red if it can't go there | The player should never have to guess |
+| Can you take one back? | **Yes**, with the hand tool, and you get it back | Mistakes shouldn't cost anything |
+| What makes a lantern useful? | It **heals one nearby cursed tile each night** | Turns the warm-light look into a real mechanic, as the concept asks |
+| Does the curse fight back? | **Still no** | Keeps this layer small. Enemies arrive in Layer 5 |
+
+Recipes and numbers are starting values, kept in data files so they're easy to tune.
+
+| Building | Needs | Does |
+|---|---|---|
+| Lantern post | 3 wood, 2 stone | Gives warm light and heals 1 nearby cursed tile each night |
+| Fence | 1 wood | Decoration, and blocks walking |
+| Well | 5 wood, 8 stone | Waters every crop in a 5×5 area each morning |
+
+### Combat (Layer 5)
+
+| Question | Decision | Why |
+|---|---|---|
+| Where do creatures come from? | They **rise from the curse's edge** each morning, on land near it | Players can't walk on cursed land, so creatures have to come to them |
+| What keeps the farm safe? | Creatures **can't enter lantern light** | Turns the concept's rule into the main way to defend your land, and makes placing lanterns a real choice |
+| How does the player fight? | Craft a **sword**, used on key 7 with Space, hitting in front of the player | Works like every other tool, and maps to one button on a phone |
+| What's the health system? | **5 hearts**, refilled by sleeping | Simple to read and fits the existing day loop |
+| What happens at 0 hearts? | You **faint and wake at home** the next morning, losing a little money | Short sessions shouldn't end in a harsh punishment, and nothing else is lost |
+| Are creatures saved? | **No.** They vanish at night and new ones rise each morning | Keeps saves simple, and every morning is a fresh start |
+| Do they get stronger? | A **tougher creature** appears further east | Matches "stronger toward the center" from the concept |
+| What do they drop? | **Curse shards**, a new material | Gives fighting a purpose tied to healing |
+
+Numbers are starting values, kept in data files so they're easy to tune.
+
+| Creature | Hearts of damage | Hits to defeat | Where |
+|---|---|---|---|
+| Shade | 1 | 2 | Along the curse's edge |
+| Hollow | 2 | 4 | The far east of the old farmlands |
+
+| Recipe | Needs | Makes |
+|---|---|---|
+| Sword | 5 wood, 3 stone | The sword, once only |
+| Strong holy water | 1 holy water, 2 curse shards | Heals a 5×5 patch |
+
+### Phones and release (Layer 6)
+
+| Question | Decision | Why |
+|---|---|---|
+| How do you move on a phone? | A **virtual joystick**, on the left | It's familiar, and it feeds the existing movement actions |
+| How do you pick tools? | A **tool bar** of icons along the bottom | Seven keyboard keys need a touch version, and it also replaces the tool text |
+| How do you act? | **Use** and **Interact** buttons, on the right | Matches Space and F, so game code barely changes |
+| Do keyboards keep working? | **Yes** | Needed for Steam, and it keeps the tests valid |
+| How do players start over? | A **title menu** with Continue and New Game | Deleting a file isn't acceptable for real players |
+| When does the game save on a phone? | **Still each morning**, plus a warning that progress saves when you sleep | Phones close apps without asking, so players must know the rule |
+| How do ads work? | **Rewarded only**: the player chooses to watch one, as the concept planned | Forced ads would break the mood |
+| Which store comes first? | **Google Play**, then Steam | Matches the project's plan |

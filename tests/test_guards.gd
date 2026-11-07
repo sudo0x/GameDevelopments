@@ -66,15 +66,45 @@ func _run() -> void:
 	inv.seeds[ward.id] = 1
 	farm.till(thorn)
 	farm.plant(thorn, ward)
-	check("a dry ward guards nothing", not farm._ward_protects(thorn + Vector2i.RIGHT))
+	check("a seed guards nothing around it", guards_square(farm._ward_protects, thorn, -1))
+	farm.crops[thorn].set_days_grown(1)
+	check("a dry ward guards one tile around", guards_square(farm._ward_protects, thorn, ward.ward_dry_radius))
 	await stand(thorn + Vector2i.LEFT)
-	check("facing a dry ward shows its area in red", highlight.visible and not highlight._valid)
+	check("facing a dry ward shows its small area", highlight.visible and is_equal_approx(highlight._cell_rect.size.x, (ward.ward_dry_radius * 2 + 1) * tile))
 	farm.water(thorn)
 	check("a watered ward guards a square", guards_square(farm._ward_protects, thorn, ward.ward_radius))
 	check("the corner is safe", farm._ward_protects(thorn + Vector2i(ward.ward_radius, ward.ward_radius)))
 	await wait(3)
 	var shown: Rect2 = highlight._cell_rect
 	check("the cursor covers the guarded square", is_equal_approx(shown.size.x, (ward.ward_radius * 2 + 1) * tile) and highlight._valid and highlight._filled)
+
+	# Ripe, it needs no water, because the big button can only burst it now.
+	var crop: Node = farm.crops[thorn]
+	crop.set_days_grown(ward.days_to_grow)
+	farm.till(thorn)
+	await wait(2)
+	check("a ripe ward is dry here", not farm.is_watered(thorn))
+	check("a ripe ward glows", crop._glow != null and crop._glow.visible and crop._motes.emitting)
+	var first_energy: float = crop._glow.energy
+	await wait(30)
+	check("the glow breathes", crop._glow.energy != first_energy)
+	check("the ripe art is in place", ward.ripe_animation != null and crop.sprite.texture == ward.ripe_animation and crop.sprite.hframes == ward.ripe_frames)
+	var seen: Dictionary = {}
+	for i in 90:
+		await physics_frame
+		seen[crop.sprite.frame] = true
+	check("and it plays every frame", seen.size() == ward.ripe_frames)
+	crop.blighted = true
+	check("blight puts the glow out", not crop._glow.visible)
+	check("and stops the animation", crop.sprite.texture == ward.stages_texture and crop.sprite.frame == 3)
+	crop.blighted = false
+	check("it comes back", crop.sprite.texture == ward.ripe_animation)
+	check("other crops stay calm", inv.CROPS[0].ripe_glow.a == 0.0)
+	check("Action can only burst it", farm.smart_action(thorn) == farm.Action.HARVEST)
+	check("it still guards without water", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
+	farm.water(thorn)
+	check("water doesn't change a ripe ward", guards_square(farm._ward_protects, thorn, ward.ward_ripe_radius))
+	farm.till(thorn)
 
 	# A lantern: a smaller square, for good.
 	var post := Vector2i(26, 14)

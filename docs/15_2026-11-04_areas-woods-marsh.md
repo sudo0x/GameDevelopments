@@ -29,7 +29,7 @@ flowchart LR
 | What's new in the woods? | **Darkwood** from dark trees, and a sturdier sword made from it | The concept gives this area wood and its first real enemies |
 | What's new in the marsh? | **Moonreed**, a rare crop that only grows there, and **healing potions** | The concept gives this area rare crops and potion ingredients |
 | Should new creatures do new things? | **Slightly**: thornlings are fast, and the drowned slow the player | Simple changes that feel different, without ranged attacks |
-| Does the curse fight back? | **Still no spreading** | Stays an update idea |
+| Does the curse fight back? | **Same as the main game**, whatever [the curse test](21_2026-11-07_curse-returns-test.md) decides | The areas shouldn't have their own rules |
 
 Numbers are starting values, kept in data files, and none of them have been played.
 
@@ -61,7 +61,13 @@ Numbers are starting values, kept in data files, and none of them have been play
 
 ## Not in this plan
 
-The ruined village and the cursed heart (areas 5 and 6), bosses, story characters, ranged attacks, the curse spreading back.
+The ruined village and the cursed heart (areas 5 and 6), bosses, story characters, ranged attacks.
+
+## Before starting
+
+- **Bag tabs:** a full Bag already fills a phone's screen, and this plan adds items (finding 55)
+- **Water:** wells are the only refill, so each area needs a way to get water, or a well the player can reach early
+- **Book pages:** the shrines and the heart are already in the story, so new areas should add pages, and the percents in `BookPages.PAGES` may need changing on a bigger map
 
 ## Build steps
 
@@ -78,7 +84,7 @@ Each step ends with something you can run in Godot and see working.
 9. **Drowned:** the slowing creature (needs art)
 10. **Area names and ending:** arrival messages, and the ending screen
 
-This plan starts after Layer 6 is finished and the game is released: the woods and marsh come as a free update (changed on 2026-11-04, see [the decisions log](17_2026-11-04_decisions-log.md)). Recheck the numbers here against the balance pass before starting.
+This plan starts after the game is released, as a free update, and only if real players stay and want more. Recheck the numbers here against the balance pass before starting.
 
 ## Art needed
 
@@ -94,7 +100,7 @@ This plan starts after Layer 6 is finished and the game is released: the woods a
 | 3, 4, 7, 8 | Bag and menu icons for darkwood, the sword, moonreed and the potion, matching the UI art |
 | 9 | Drowned |
 
-The prompts come with the step that needs them, in a new art doc.
+The prompts come with the step that needs them, and go in [the art guide](27_2026-11-07_art-guide.md).
 
 ## Risks
 

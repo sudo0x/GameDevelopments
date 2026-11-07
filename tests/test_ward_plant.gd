@@ -88,7 +88,13 @@ func _run() -> void:
 	var far := thorn + Vector2i(4, 0)
 	farm.till(thorn)
 	farm.plant(thorn, ward)
-	check("a dry wardthorn guards nothing", farm._can_curse_take(near))
+	check("a seed guards nothing around it", farm._can_curse_take(thorn + Vector2i(1, 0)))
+	farm.water(thorn)
+	check("even watered", farm._can_curse_take(thorn + Vector2i(1, 0)))
+	check("its own tile is still safe", not farm._can_curse_take(thorn))
+	farm.till(thorn)
+	farm.crops[thorn].set_days_grown(1)
+	check("a dry wardthorn only guards close by", farm._can_curse_take(near) and not farm._can_curse_take(thorn + Vector2i(1, 0)))
 	farm.water(thorn)
 	check("watered, it guards 3 tiles away", not farm._can_curse_take(near))
 	check("4 tiles away isn't guarded", farm._can_curse_take(far))
@@ -108,7 +114,7 @@ func _run() -> void:
 	var plant: Node = farm.crops[thorn]
 	check("it ripens", plant.is_ripe())
 	farm.water(thorn)
-	check("ripe, it still guards", not farm._can_curse_take(near))
+	check("ripe, it still guards", not farm._can_curse_take(thorn + Vector2i(2, 0)))
 	check("it says it can burst", farm.crop_status(thorn).contains("burst"))
 	var healed: int = healing.cleansed.size()
 	var holy: int = inv.holy_water

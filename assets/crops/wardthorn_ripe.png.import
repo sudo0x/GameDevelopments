@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dac106p13cfj6"
-path="res://.godot/imported/need_ripe.png-85f1d58964663d691fec6c9968ce5735.ctex"
+uid="uid://dxkvjsl70p8ay"
+path="res://.godot/imported/wardthorn_ripe.png-4eaf980b6dfce7d130d5e481ac504623.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/need_ripe.png"
-dest_files=["res://.godot/imported/need_ripe.png-85f1d58964663d691fec6c9968ce5735.ctex"]
+source_file="res://assets/crops/wardthorn_ripe.png"
+dest_files=["res://.godot/imported/wardthorn_ripe.png-4eaf980b6dfce7d130d5e481ac504623.ctex"]
 
 [params]
 

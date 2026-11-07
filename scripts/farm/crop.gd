@@ -9,6 +9,12 @@ const STEM_COLOR := Color(0.36, 0.55, 0.3)
 const NEED_HEIGHTS: Array[float] = [-14.0, -22.0, -30.0, -40.0]
 const NEED_BOB_SPEED := 3.0
 const BLIGHT_COLOR := Color(0.55, 0.35, 0.7)
+## The ripe glow breathes between these, this fast.
+const GLOW_LOW := 0.35
+const GLOW_HIGH := 0.85
+const GLOW_SPEED := 2.4
+const GLOW_HEIGHT := -28.0
+const GLOW_SIZE := 96
 
 var data: CropData
 ## 0 = seed, 1 = sprout, 2 = growing, 3 = ripe.
@@ -29,6 +35,9 @@ var blighted := false:
 var need_icon: Texture2D
 var _need_sprite := Sprite2D.new()
 var _bob_time := 0.0
+var _glow: PointLight2D
+var _motes: CPUParticles2D
+var _ripe_time := 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -42,6 +51,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_bob_time += delta
 	_need_sprite.offset.y = roundf(sin(_bob_time * NEED_BOB_SPEED))
+	if _shows_ripe_life():
+		_ripe_time += delta
+		if _glow:
+			_glow.energy = lerpf(GLOW_LOW, GLOW_HIGH, 0.5 + 0.5 * sin(_ripe_time * GLOW_SPEED))
+		if data.ripe_animation:
+			sprite.frame = int(_ripe_time * data.ripe_fps) % data.ripe_frames
 
 
 ## Shows what the crop needs (Farm decides). Crops loading from a save aren't ready yet.
@@ -55,7 +70,12 @@ func _update_need() -> void:
 	_need_sprite.texture = need_icon
 	_need_sprite.visible = need_icon != null
 	_need_sprite.position.y = NEED_HEIGHTS[stage]
-	set_process(need_icon != null)
+	set_process(need_icon != null or _shows_ripe_life())
+
+
+## Ripe crops with art or a glow keep moving. Blight takes that away.
+func _shows_ripe_life() -> bool:
+	return is_ripe() and not blighted and data != null and (data.ripe_glow.a > 0.0 or data.ripe_animation != null)
 
 
 func is_ripe() -> bool:
@@ -92,15 +112,59 @@ func _update_look() -> void:
 		return
 	sprite.modulate = BLIGHT_COLOR if blighted else Color.WHITE
 	if data and data.stages_texture:
-		sprite.texture = data.stages_texture
-		sprite.hframes = STAGES
-		sprite.frame = stage
+		var animated := _shows_ripe_life() and data.ripe_animation != null
+		sprite.texture = data.ripe_animation if animated else data.stages_texture
+		sprite.hframes = data.ripe_frames if animated else STAGES
+		sprite.frame = 0 if animated else stage
 		# Frames may be taller than a tile (carrot leaves); keep the bottom at the crop's base.
-		sprite.offset = Vector2(0, -data.stages_texture.get_height() / 2.0)
+		sprite.offset = Vector2(0, -sprite.texture.get_height() / 2.0)
 		sprite.show()
 	else:
 		sprite.hide()
+	_update_ripe_glow()
+	_update_need()
 	queue_redraw()
+
+
+func _update_ripe_glow() -> void:
+	var glowing := _shows_ripe_life() and data.ripe_glow.a > 0.0
+	if glowing and not _glow:
+		_add_ripe_glow()
+	if _glow:
+		_glow.visible = glowing
+		_motes.emitting = glowing
+
+
+func _add_ripe_glow() -> void:
+	var fade := Gradient.new()
+	fade.set_color(0, Color.WHITE)
+	fade.set_color(1, Color(1, 1, 1, 0))
+	var soft := GradientTexture2D.new()
+	soft.gradient = fade
+	soft.fill = GradientTexture2D.FILL_RADIAL
+	soft.fill_from = Vector2(0.5, 0.5)
+	soft.fill_to = Vector2(1.0, 0.5)
+	soft.width = GLOW_SIZE
+	soft.height = GLOW_SIZE
+	_glow = PointLight2D.new()
+	_glow.texture = soft
+	_glow.color = data.ripe_glow
+	_glow.energy = GLOW_LOW
+	_glow.position.y = GLOW_HEIGHT
+	add_child(_glow)
+	_motes = CPUParticles2D.new()
+	_motes.amount = 6
+	_motes.lifetime = 1.6
+	_motes.position.y = GLOW_HEIGHT
+	_motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	_motes.emission_rect_extents = Vector2(9, 8)
+	_motes.direction = Vector2.UP
+	_motes.spread = 15.0
+	_motes.gravity = Vector2.ZERO
+	_motes.initial_velocity_min = 5.0
+	_motes.initial_velocity_max = 11.0
+	_motes.color = data.ripe_glow
+	add_child(_motes)
 
 
 func _draw() -> void:
