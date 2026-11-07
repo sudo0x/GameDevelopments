@@ -17,9 +17,9 @@ Plans have their own step numbers, so **always say which plan you mean**: "relea
 | 1 | Layers 1 to 5 (farming, curse, crafting, building, combat) | `docs/01`, `04`, `07`, `09`, `11` | ✅ Built. Their balance passes moved to the playtest |
 | 2 | Layer 6 steps 1 to 6 (title, touch, phone UI, UI art, sound and settings, polish) | `docs/13_...`, `14_...`, `18_...` | ✅ Finished at step 6; the rest moved to the playtest and release plans |
 | 3 | **Phone checks** (release step 1): the build runs on the user's phone, and findings 14 to 20 and 22 are fixed | `docs/20_...` | ✅ Main checks okay on the user's phone (2026-11-07). The rest are in the plan's checks table, each with when to do it |
-| 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | **👉 Next.** Second try built, the user's play test is next. At most two tries, then keep it or move on |
+| 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | Second try built. Its play test waits until simpler controls are done (the user's choice, 2026-11-07). At most two tries, then keep it or move on |
 | 5 | **First 15 minutes:** a story on New Game, then one goal at a time (findings 4, 33 and 36) | `scripts/ui/goal_guide.gd` | ✅ Built early, on 2026-11-07, because the curse test needs a New Game that makes sense. Recheck with outside players |
-| 6 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26). Update the goal text in `GoalGuide.STEPS` too | `docs/23_...` | Planned, not started. Do it after the curse play test, and recheck the plan against the result |
+| 6 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26). Update the goal text in `GoalGuide.STEPS` too | `docs/23_...` | **👉 Next.** Planned, not started. The user chose to build this before the curse play test |
 | 7 | **Outside test:** 5 to 10 players who aren't the user, while the user plays sessions 2 to 7 | `docs/19_...`, `docs/20_...` | Waiting. Needs the real title and testers. Start the Google Play account before this |
 | 8 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
 | 9 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
@@ -80,9 +80,10 @@ The user works on both, sometimes in separate Claude chats. Neither one is "old"
 ## Current status (keep this updated at the end of each work session)
 - Last updated: 2026-11-07 (main phone checks okay; the curse test's second try is built, with blight and the wardthorn; findings up to 34 are logged in `docs/19_...`)
 - **Next (start here):** first check `git status -sb`: on Windows the user pushes, so make sure the latest commits reached GitHub. Then, in this order:
-  1. Curse step 5, second and last try (`docs/21_...`): the user starts a **New Game** (on the computer, or with `builds/cursed-island-test.apk`, not in git), plays 5 to 7 game days, then answers the plan's 4 questions, and we decide
-  2. Ask when it fits, both unanswered: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
-  3. Then go on down the roadmap. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes.
+  1. Controls step 1 (`docs/23_...`), then the rest of that plan, one step at a time. The user chose this order, so don't ask them to play test first
+  2. Then curse step 5, second and last try (`docs/21_...`): the user starts a **New Game** (on the computer, or with `builds/cursed-island-test.apk`, not in git), plays 5 to 7 game days, then answers the plan's questions, and we decide
+  3. Ask when it fits, both unanswered: what came after "hardly move character to the left and even" in the user's message, and whether the rough edges on the joystick ring and buttons bother them (finding 21)
+  4. Then go on down the roadmap. Before areas step 1, do the plan's math check on how long healing a path across 80 more columns takes.
 - **Android build:** the user has a working setup on Windows, and Claude can export it (see `docs/20_...`, "Making a test build"). No phone was connected by USB so far, so the user copies the APK over. If `project.godot` has `emulate_touch_from_mouse` on, 11 tests fail, so turn it off for tests, builds and commits and tell the user
 - The user has made a game before by following along, and wants to understand the work this time; explain Godot concepts by comparing them to Angular
 

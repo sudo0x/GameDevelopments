@@ -6,7 +6,7 @@
 
 Make the phone game easy to play with one thumb on each side. It has 13 buttons plus the joystick today (finding 25). This plan brings that down to **5 buttons plus the joystick**, by letting the game work out what you mean from what you're facing.
 
-**When:** after the curse play test (`docs/21_...`), because its result decides which tools stay. Before building, recheck this plan against that result.
+**When:** next, before the curse play test (`docs/21_...`). That's the user's choice on 2026-11-07. If the play test later removes a tool, update the Action button's order to match.
 
 ## The new phone layout
 
