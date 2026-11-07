@@ -20,6 +20,11 @@ func _ready() -> void:
 	_update_look()
 
 
+## Once restored there's nothing left to do here, so the Action button can look past it.
+func can_interact() -> bool:
+	return not restored
+
+
 func interact(_player: Player) -> void:
 	activated.emit()
 

@@ -10,6 +10,8 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| Should the Action button sleep at once at the door? | **No, it asks "Sleep?" first** (2026-11-07, the user's choice, on Claude's advice) | Action does many jobs, so a tap beside the house could be meant for something else, and sleeping can't be undone. It would lose the rest of the day |
+| Do objects with nothing to do block the Action button? | **No** (2026-11-07, controls step 2). An empty box or a restored shrine is skipped, so the tile in front decides. F still reaches them | The chart says the box comes first, but a box you can't use would stop you tilling beside it for nothing, and the button would promise an action that does nothing |
 | Does `GameState` disappear in the split? | **No, a small one stays** (2026-11-07, controls step 1), with `BALANCE`, `notice`, `controls()` and the menu requests | The plan named three parts, but these fit none of them: they aren't owned items, progress or saving. Forcing them in would make each part a bit of a junk drawer |
 | Wide phones: bars, stretch, or show more? | **Show more of the world**, at a whole-number scale | Sharp pixels and a full screen. Phones with different shapes see slightly different amounts of the map, which is fine in a game with no hidden-view challenge |
 | Simpler controls or the curse play test first? | **Simpler controls first** (2026-11-07, the user's choice), then play both together | Claude advised playing first, because the result could change which tools stay. The user prefers to play the game with its final controls, and any tool change is small to fix later |

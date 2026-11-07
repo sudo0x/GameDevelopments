@@ -67,6 +67,14 @@ func creature_for(cell: Vector2i) -> CreatureData:
 	return CREATURES[CREATURES.size() - 1]
 
 
+## Whether any creature is this close to a point, in pixels.
+func any_within(point: Vector2, distance: float) -> bool:
+	for creature in creatures:
+		if is_instance_valid(creature) and creature.global_position.distance_to(point) <= distance:
+			return true
+	return false
+
+
 func clear() -> void:
 	for creature in creatures:
 		if is_instance_valid(creature):

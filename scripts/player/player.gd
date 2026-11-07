@@ -159,12 +159,23 @@ func _change_selection(step: int) -> void:
 	tool_changed.emit()
 
 
-## Interacts with the first nearby area that has an interact() method (door, later shipping box and shop).
+## Interacts with the first nearby area that has an interact() method (door, shipping box, shop...).
 func _interact() -> void:
+	var target := interact_target()
+	if target:
+		target.interact(self)
+
+
+## The first nearby area with an interact() method, or null. With useful_only, areas whose
+## can_interact() says it would do nothing right now are skipped.
+func interact_target(useful_only := false) -> Area2D:
 	for area in reach.get_overlapping_areas():
-		if area.has_method("interact"):
-			area.interact(self)
-			return
+		if not area.has_method("interact"):
+			continue
+		if useful_only and area.has_method("can_interact") and not area.can_interact():
+			continue
+		return area
+	return null
 
 
 ## Sticky facing: keeps the current pose while it still points the way you're walking, so a

@@ -8,6 +8,8 @@ signal target_status_changed(text: String)
 
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
+## What the Action button would do, in the order smart_action() checks them.
+enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL }
 
 ## Each ground texture is 128×128, a 4×4 block of 32×32 tiles.
 const TEXTURE_TILES := 4
@@ -28,6 +30,16 @@ const BUILDING_BASE := Vector2(0, 12)
 
 ## Tools that make something where you aim (soil, a building) never guess another tile.
 const EXACT_TOOLS: Array[Player.Tool] = [Player.Tool.HOE, Player.Tool.BUILD]
+
+## The tool behind each Action that uses one. Action only chooses: the tools do the work.
+const ACTION_TOOLS := {
+	Action.SWING: Player.Tool.SWORD,
+	Action.HARVEST: Player.Tool.HAND,
+	Action.WATER: Player.Tool.WATERING_CAN,
+	Action.PLANT: Player.Tool.SEEDS,
+	Action.GATHER: Player.Tool.HAND,
+	Action.TILL: Player.Tool.HOE,
+}
 
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
@@ -169,6 +181,29 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.BUILD:
 			return Inventory.building_count(player.selected_building()) > 0 and can_build(cell)
 	return false
+
+
+## What the Action button would do with this cell in front of the player. It changes nothing.
+## Holy water, picking up buildings and hoeing soil back are left out on purpose, so they
+## can't happen by accident (docs/23_...).
+func smart_action(cell: Vector2i) -> Action:
+	if Inventory.has_sword and spawner.any_within(player.global_position, GameState.BALANCE.action_swing_distance):
+		return Action.SWING
+	if player.interact_target(true):
+		return Action.INTERACT
+	return _tile_action(cell)
+
+
+func _tile_action(cell: Vector2i) -> Action:
+	if crops.has(cell):
+		if crops[cell].can_harvest():
+			return Action.HARVEST
+		return Action.NONE if is_watered(cell) else Action.WATER
+	if is_tilled(cell):
+		return Action.PLANT if can_use(Player.Tool.SEEDS, cell) else Action.NONE
+	if gathering.can_hit(cell):
+		return Action.GATHER
+	return Action.TILL if is_farmable(cell) else Action.NONE
 
 
 func till(cell: Vector2i) -> void:

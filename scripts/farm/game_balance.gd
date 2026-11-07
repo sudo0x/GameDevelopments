@@ -23,6 +23,9 @@ extends Resource
 @export var lantern_safe_radius: float = 96.0
 ## Hearts of damage one sword hit does.
 @export var sword_damage: int = 1
+## The Action button swings the sword when a creature is this close, in pixels.
+## A little more than the sword's own reach of about 44.
+@export var action_swing_distance: float = 48.0
 ## Tilled soil with no crop turns back into grass after this many nights.
 @export var soil_idle_nights: int = 3
 ## Hearts the player starts each day with.

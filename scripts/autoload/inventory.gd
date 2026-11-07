@@ -89,6 +89,11 @@ func harvest_count(crop: CropData) -> int:
 	return harvest.get(crop.id, 0)
 
 
+## Crafting can leave a crop at a count of 0, so an entry alone doesn't mean there's a harvest.
+func has_harvest() -> bool:
+	return harvest.values().any(func(count: int) -> bool: return count > 0)
+
+
 func material_count(material: MaterialData) -> int:
 	return materials.get(material.id, 0)
 
