@@ -7,9 +7,9 @@ const EMPTY := preload("res://assets/ui/heart_empty.png")
 
 
 func _ready() -> void:
-	GameState.hearts_changed.connect(queue_redraw)
+	Progress.hearts_changed.connect(queue_redraw)
 
 
 func _draw() -> void:
 	for i in GameState.BALANCE.max_hearts:
-		draw_texture(FULL if i < GameState.hearts else EMPTY, Vector2(i * SPACING, 0))
+		draw_texture(FULL if i < Progress.hearts else EMPTY, Vector2(i * SPACING, 0))

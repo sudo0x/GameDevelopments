@@ -28,6 +28,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -56,7 +57,7 @@ func _run() -> void:
 	check("the watering can isn't cut off", can.texture.region.size.x == 36.0)
 
 	# Tool help.
-	gs.strong_holy_water = 1
+	inv.strong_holy_water = 1
 	player.tool = 2
 	player.tool_changed.emit()
 	no_keys("seeds", hud.tool_label.text)
@@ -75,11 +76,11 @@ func _run() -> void:
 	no_keys("gathering", farm.gathering.status(Vector2i(22, 6)))
 	var cell := Vector2i(16, 12)
 	farm.till(cell)
-	farm.plant(cell, gs.CROPS[0])
+	farm.plant(cell, inv.CROPS[0])
 	farm.crops[cell].set_days_grown(3)
 	no_keys("ripe crop", farm.crop_status(cell))
-	gs.buildings[&"fence"] = 1
-	farm.builder.place(Vector2i(16, 14), gs.building_by_id(&"fence"))
+	inv.buildings[&"fence"] = 1
+	farm.builder.place(Vector2i(16, 14), inv.building_by_id(&"fence"))
 	no_keys("placed building", farm.builder.status(Vector2i(16, 14)))
 
 	# Menus. They must never cover the button that closes them.
@@ -102,16 +103,16 @@ func _run() -> void:
 	no_keys("bag help", bag.get_node("Margin/Box/Help").text)
 	bag.close()
 	# The fullest bag a player can have.
-	gs.has_sword = true
-	gs.has_purifying_hoe = true
-	gs.strong_holy_water = 99
-	gs.holy_water = 99
-	gs.harvest[&"pumpkin"] = 999
-	gs.seeds[&"wardthorn"] = 99
-	for material in gs.MATERIALS:
-		gs.materials[material.id] = 999
-	for building in gs.BUILDINGS:
-		gs.buildings[building.id] = 99
+	inv.has_sword = true
+	inv.has_purifying_hoe = true
+	inv.strong_holy_water = 99
+	inv.holy_water = 99
+	inv.harvest[&"pumpkin"] = 999
+	inv.seeds[&"wardthorn"] = 99
+	for material in inv.MATERIALS:
+		inv.materials[material.id] = 999
+	for building in inv.BUILDINGS:
+		inv.buildings[building.id] = 99
 	bag.open()
 	await process_frame
 	await process_frame
@@ -119,7 +120,7 @@ func _run() -> void:
 	check("a full bag fits the screen", bag.get_global_rect().size.y <= 360.0 and bag.get_global_rect().position.y >= 0.0)
 	check("a full bag leaves Act showing", bag.get_global_rect().end.x <= act_left)
 	bag.close()
-	gs.has_sword = true
+	inv.has_sword = true
 	craft.open()
 	await process_frame
 	no_keys("crafting help", craft.get_node("Margin/Box/Help").text)

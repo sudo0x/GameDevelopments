@@ -14,7 +14,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -25,7 +26,7 @@ func _run() -> void:
 	var tree: Node2D = spots[Vector2i(22, 6)]
 	var rock: Node2D = spots[Vector2i(18, 7)]
 	var hidden: Node2D = spots[Vector2i(44, 12)]
-	check("materials kept", gs.material_count(gs.MATERIALS[0]) == 6 and gs.material_count(gs.MATERIALS[1]) == 2)
+	check("materials kept", inv.material_count(inv.MATERIALS[0]) == 6 and inv.material_count(inv.MATERIALS[1]) == 2)
 	check("tree stays a stump", tree.gathered and tree.sprite.texture == tree.data.remains_texture)
 	check("countdown kept", tree.days_until_regrow == 4 and rock.days_until_regrow == 6)
 	check("rubble stays walkable", rock.shape.disabled)
@@ -34,7 +35,7 @@ func _run() -> void:
 	check("half-hit tree starts whole", not spots[Vector2i(14, 7)].gathered and spots[Vector2i(14, 7)].hits_left == 3)
 	check("others untouched and hidden", not spots[Vector2i(60, 10)].revealed)
 	for night in 4:
-		gs.end_day()
+		progress.end_day()
 	check("regrows after reloading", not tree.gathered)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

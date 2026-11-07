@@ -80,7 +80,7 @@ func cleanse(center: Vector2i, strong: bool = false) -> void:
 	var cells := cleansable_cells(center, strong)
 	if cells.is_empty():
 		return
-	var paid := GameState.use_strong_holy_water() if strong else GameState.use_holy_water()
+	var paid := Inventory.use_strong_holy_water() if strong else Inventory.use_holy_water()
 	if paid:
 		_cleanse_cells(cells, center)
 
@@ -108,12 +108,12 @@ func burst(center: Vector2i, radius: int) -> int:
 
 ## Whether the purifying hoe would heal this cell.
 func can_purify(cell: Vector2i) -> bool:
-	return GameState.hoe_uses_left > 0 and is_cleansable(cell)
+	return Inventory.hoe_uses_left > 0 and is_cleansable(cell)
 
 
 ## Heals one cell with the purifying hoe.
 func purify(cell: Vector2i) -> void:
-	if is_cleansable(cell) and GameState.use_purifying_hoe():
+	if is_cleansable(cell) and Inventory.use_purifying_hoe():
 		_cleanse_cells([cell], cell)
 
 
@@ -121,13 +121,13 @@ func purify(cell: Vector2i) -> void:
 ## `can_take` says whether a tile is free to lose. Seeded by the day, so a restart picks the same.
 func mark_tonight(can_take: Callable) -> void:
 	marked.clear()
-	if GameState.day >= GameState.BALANCE.curse_return_first_day:
+	if Progress.day >= GameState.BALANCE.curse_return_first_day:
 		var at_risk: Array[Vector2i] = []
 		for cell in cleansed:
 			if _touches_curse(cell) and can_take.call(cell):
 				at_risk.append(cell)
 		var rng := RandomNumberGenerator.new()
-		rng.seed = GameState.day
+		rng.seed = Progress.day
 		for i in mini(tiles_tonight(), at_risk.size()):
 			marked.append(at_risk.pop_at(rng.randi_range(0, at_risk.size() - 1)))
 	refresh_marks(can_take)
@@ -138,7 +138,7 @@ func tiles_tonight() -> int:
 	var base := GameState.BALANCE.curse_return_per_night
 	if base == 0:
 		return 0
-	return base + floori(GameState.healed_percent / GameState.BALANCE.curse_growth_percent)
+	return base + floori(Progress.healed_percent / GameState.BALANCE.curse_growth_percent)
 
 
 ## Shows only what's still at risk: using a marked tile saves it, and the mark goes.
@@ -192,7 +192,7 @@ func _on_shrine_activated() -> void:
 	var cost := GameState.BALANCE.shrine_cost
 	if shrine.restored:
 		GameState.notice.emit("The shrine is at peace.")
-	elif not GameState.use_holy_water(cost):
+	elif not Inventory.use_holy_water(cost):
 		GameState.notice.emit("The shrine needs %d holy water." % cost)
 	else:
 		shrine.restored = true
@@ -239,7 +239,7 @@ func _touches_curse(cell: Vector2i) -> bool:
 
 
 func _dig_up(cell: Vector2i) -> void:
-	GameState.give_find(finds[cell])
+	Inventory.give_find(finds[cell])
 	Audio.play(&"find")
 	_glimmers[cell].queue_free()
 	_glimmers.erase(cell)
@@ -260,4 +260,4 @@ func _add_glimmers() -> void:
 
 
 func _report_progress() -> void:
-	GameState.set_healed_percent(100.0 * cleansed.size() / _cursed_total)
+	Progress.set_healed_percent(100.0 * cleansed.size() / _cursed_total)

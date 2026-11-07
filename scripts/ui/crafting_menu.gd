@@ -1,5 +1,5 @@
 extends GameMenu
-## The workbench menu. One row per recipe, built from GameState.RECIPES.
+## The workbench menu. One row per recipe, built from Inventory.RECIPES.
 
 ## Narrower than other menus, so the panel leaves the touch buttons showing.
 const MAKE_BUTTON_SIZE := Vector2(60, 36)
@@ -11,7 +11,7 @@ var _buttons: Array[Button] = []
 
 
 func _ready() -> void:
-	for recipe in GameState.RECIPES:
+	for recipe in Inventory.RECIPES:
 		_add_row(recipe)
 	GameState.crafting_requested.connect(open)
 	super()
@@ -33,7 +33,7 @@ func _add_row(recipe: RecipeData) -> void:
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var button := Button.new()
 	button.custom_minimum_size = MAKE_BUTTON_SIZE
-	button.pressed.connect(GameState.craft.bind(recipe))
+	button.pressed.connect(Inventory.craft.bind(recipe))
 	button.pressed.connect(Audio.play.bind(&"craft"))
 	row.add_child(label)
 	row.add_child(button)
@@ -43,18 +43,18 @@ func _add_row(recipe: RecipeData) -> void:
 
 
 func _refresh() -> void:
-	for i in GameState.RECIPES.size():
-		var recipe := GameState.RECIPES[i]
-		var made := GameState.already_made(recipe)
+	for i in Inventory.RECIPES.size():
+		var recipe := Inventory.RECIPES[i]
+		var made := Inventory.already_made(recipe)
 		var details := GameState.controls(recipe.made_text, recipe.made_text_touch) if made else _needs_text(recipe)
 		_labels[i].text = "%s\n%s" % [recipe.display_name, details]
 		_buttons[i].text = "Made" if made else "Make"
-		_buttons[i].disabled = not GameState.can_craft(recipe)
+		_buttons[i].disabled = not Inventory.can_craft(recipe)
 
 
 ## Shows what's needed and what the player has, like "1 Radish (0), 1 Stone (3)".
 func _needs_text(recipe: RecipeData) -> String:
 	var parts: PackedStringArray = []
 	for need in recipe.needs:
-		parts.append("%d %s (%d)" % [need.amount, need.display_name(), GameState.owned(need)])
+		parts.append("%d %s (%d)" % [need.amount, need.display_name(), Inventory.owned(need)])
 	return ", ".join(parts)

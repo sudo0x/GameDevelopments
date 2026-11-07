@@ -28,7 +28,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible and not get_tree().paused and not GameState.day_changing and event.is_action_pressed("ui_cancel"):
+	if not visible and not get_tree().paused and not Progress.day_changing and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		open()
 	elif visible and confirm.visible and event.is_action_pressed("ui_cancel"):
@@ -73,6 +73,6 @@ func _cancel_leave() -> void:
 
 
 func _leave() -> void:
-	GameState.discard_unsaved()
+	SaveGame.discard_unsaved()
 	get_tree().paused = false
 	get_tree().change_scene_to_file(TITLE_SCENE)

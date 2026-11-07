@@ -36,7 +36,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -47,8 +47,8 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
 	var gather: Node = farm.gathering
-	var wood = gs.MATERIALS[0]
-	var stone = gs.MATERIALS[1]
+	var wood = inv.MATERIALS[0]
+	var stone = inv.MATERIALS[1]
 
 	# Every spot is placed sensibly.
 	check("15 spots", gather.spots.size() == 15)
@@ -79,14 +79,14 @@ func _run() -> void:
 	await press("tool_4")
 	await press("use_tool")
 	await press("use_tool")
-	check("no wood yet", gs.material_count(wood) == 0 and gather.spots[tree_cell].hits_left == 1)
+	check("no wood yet", inv.material_count(wood) == 0 and gather.spots[tree_cell].hits_left == 1)
 	await press("use_tool")
-	check("3 wood", gs.material_count(wood) == 3)
+	check("3 wood", inv.material_count(wood) == 3)
 	check("notice", hud.notice_label.text == "+3 Wood")
 	var tree: Node2D = gather.spots[tree_cell]
 	check("stump now", tree.gathered and tree.sprite.texture == tree.data.remains_texture)
 	await press("use_tool")
-	check("stump gives nothing", gs.material_count(wood) == 3)
+	check("stump gives nothing", inv.material_count(wood) == 3)
 	await physics_frame
 	await physics_frame
 	check("stump says when it returns", hud.crop_status_label.text == "Tree: grows back in 5 days.")
@@ -103,7 +103,7 @@ func _run() -> void:
 	await press("use_tool")
 	await press("use_tool")
 	await press("use_tool")
-	check("2 stone", gs.material_count(stone) == 2)
+	check("2 stone", inv.material_count(stone) == 2)
 	var rock: Node2D = gather.spots[rock_cell]
 	for i in 3:
 		await physics_frame
@@ -130,7 +130,7 @@ func _run() -> void:
 	var buried: Node2D = gather.spots[hidden]
 	check("hidden in the curse", not buried.visible and not gather.can_hit(hidden))
 	check("no status when hidden", gather.status(hidden) == "")
-	gs.holy_water = 3
+	inv.holy_water = 3
 	farm.healing.cleanse(hidden)
 	await physics_frame
 	await physics_frame

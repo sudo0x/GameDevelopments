@@ -70,7 +70,7 @@ func hit(cell: Vector2i) -> void:
 	var gatherable := spots[cell]
 	if gatherable.hit():
 		var data := gatherable.data
-		GameState.add_material(data.material, data.amount)
+		Inventory.add_material(data.material, data.amount)
 		GameState.notice.emit("+%d %s" % [data.amount, data.material.display_name])
 
 

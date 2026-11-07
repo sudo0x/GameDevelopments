@@ -22,10 +22,13 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
-	gs.holy_water = 20
-	gs.strong_holy_water = 5
-	gs.buildings[&"lantern_post"] = 1
-	gs.buildings[&"fence"] = 1
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
+	inv.holy_water = 20
+	inv.strong_holy_water = 5
+	inv.buildings[&"lantern_post"] = 1
+	inv.buildings[&"fence"] = 1
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -48,10 +51,10 @@ func _run() -> void:
 	check("the patch healed", healed == 25)
 	var shore_and_healed: int = g.get_used_cells_by_id(GRASS).size()
 
-	gs.end_day()
-	gs.end_day()
-	gs.end_day()
-	check("the first days stay calm", gs.day == 4 and healing.cleansed.size() == healed)
+	progress.end_day()
+	progress.end_day()
+	progress.end_day()
+	check("the first days stay calm", progress.day == 4 and healing.cleansed.size() == healed)
 
 	check("the morning marks tonight's tiles", healing.marked.size() == 3 and healing._marks._rects.size() == 3)
 	check("marked tiles touch the curse", healing.marked.all(func(c: Vector2i) -> bool: return healing._touches_curse(c)))
@@ -64,8 +67,8 @@ func _run() -> void:
 	check("the warning fits a computer screen", width <= 560.0)
 	var tonight: Array = healing.marked.duplicate()
 	var before: Array = healing.cleansed.duplicate()
-	var percent: float = gs.healed_percent
-	gs.end_day()
+	var percent: float = progress.healed_percent
+	progress.end_day()
 	var lost: Array = before.filter(func(c: Vector2i) -> bool: return not healing.cleansed.has(c))
 	check("three tiles returned", lost.size() == 3 and healing.cleansed.size() == healed - 3)
 	check("exactly the marked tiles returned", tonight.all(func(c: Vector2i) -> bool: return lost.has(c)))
@@ -73,8 +76,8 @@ func _run() -> void:
 	check("they are cursed again", lost.all(func(c: Vector2i) -> bool: return g.get_cell_source_id(c) == CURSED))
 	check("texture piece lines up", g.get_cell_atlas_coords(lost[0]) == farm.texture_coords(lost[0]))
 	check("only healed land was lost", g.get_used_cells_by_id(GRASS).size() == shore_and_healed - 3)
-	check("the score went down", gs.healed_percent < percent)
-	check("the morning save knows", gs.farm_state["cleansed"].size() == healed - 3)
+	check("the score went down", progress.healed_percent < percent)
+	check("the morning save knows", saves.farm_state["cleansed"].size() == healed - 3)
 	check("the middle is safe for now", healing.cleansed.has(middle))
 	await wait(2)
 	check("returned land blocks farming", not farm.is_farmable(lost[0]))
@@ -90,14 +93,14 @@ func _run() -> void:
 	check("tilling a marked tile works", farm.is_tilled(save_me))
 	check("bare soil keeps its mark", healing._marks._rects.size() == 3)
 	farm.untill(save_me)
-	var fence = gs.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
+	var fence = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
 	farm.builder.place(save_me, fence)
 	healing.refresh_marks(farm._can_curse_take)
 	check("its mark goes", healing._marks._rects.size() == 2)
 	var bare_soil: Vector2i = lose_me[0]
 	farm.till(bare_soil)
 	check("it stops warning", farm.curse_status(save_me).is_empty())
-	gs.end_day()
+	progress.end_day()
 	check("the saved tile stays", healing.cleansed.has(save_me) and g.get_cell_source_id(save_me) == GRASS)
 	check("the others go", lose_me.all(func(c: Vector2i) -> bool: return g.get_cell_source_id(c) == CURSED))
 	check("bare soil goes with its tile", not farm.is_tilled(bare_soil))
@@ -114,7 +117,7 @@ func _run() -> void:
 	var all_free := func(_c: Vector2i) -> bool: return true
 	var picked: Array = []
 	for run in 2:
-		gs.day = 9
+		progress.day = 9
 		var taken: Array = []
 		var keep: Array = healing.cleansed.duplicate()
 		healing.mark_tonight(all_free)
@@ -133,44 +136,44 @@ func _run() -> void:
 	farm.till(empty)
 	check("bare soil can be taken", farm._can_curse_take(empty))
 	farm.untill(empty)
-	farm.builder.place(empty, gs.BUILDINGS[0])
+	farm.builder.place(empty, inv.BUILDINGS[0])
 	check("a building is safe", not farm._can_curse_take(empty))
 	var spot: Vector2i = farm.gathering.spots.keys()[0]
 	check("a tree or rock is safe", not farm._can_curse_take(spot))
 
 	# A tile that can't be taken stays, even at the curse's edge.
 	var kept: int = healing.cleansed.size()
-	gs.day = 10
+	progress.day = 10
 	healing.mark_tonight(all_free)
 	check("nothing free, nothing lost", healing.curse_returns(func(_c: Vector2i) -> bool: return false).is_empty())
 	check("nothing free, nothing taken", healing.cleansed.size() == kept)
 
 	# The more land is healed, the harder the curse pushes back.
-	var percent_now: float = gs.healed_percent
-	gs.set_healed_percent(0.0)
+	var percent_now: float = progress.healed_percent
+	progress.set_healed_percent(0.0)
 	check("3 tiles at the start", healing.tiles_tonight() == 3)
-	gs.set_healed_percent(4.9)
+	progress.set_healed_percent(4.9)
 	check("still 3 under 5%", healing.tiles_tonight() == 3)
-	gs.set_healed_percent(5.0)
+	progress.set_healed_percent(5.0)
 	check("4 tiles at 5%", healing.tiles_tonight() == 4)
-	gs.set_healed_percent(50.0)
+	progress.set_healed_percent(50.0)
 	check("13 tiles at 50%", healing.tiles_tonight() == 13)
-	gs.set_healed_percent(percent_now)
+	progress.set_healed_percent(percent_now)
 
 	# A find pays once, however many times its land is healed.
 	var find := Vector2i(53, 11)
-	var money: int = gs.money
+	var money: int = inv.money
 	healing.cleanse(Vector2i(54, 12))
-	check("the find paid", gs.money == money + 80)
+	check("the find paid", inv.money == money + 80)
 	check("the find is remembered", healing.dug_finds.has(find) and not healing.finds.has(find))
-	gs.day = 11
+	progress.day = 11
 	var only_find := func(c: Vector2i) -> bool: return c == find
 	healing.mark_tonight(only_find)
 	healing.curse_returns(only_find)
 	check("the find's land returned", g.get_cell_source_id(find) == CURSED)
 	check("no new glimmer", not healing._glimmers.has(find))
 	healing.cleanse(find)
-	check("healed again, no second payment", g.get_cell_source_id(find) == GRASS and gs.money == money + 80)
+	check("healed again, no second payment", g.get_cell_source_id(find) == GRASS and inv.money == money + 80)
 
 	# Fainting at the curse's edge still ends at home, never stuck on returned land.
 	player.global_position = g.to_global(g.map_to_local(healing.cleansed[0]))

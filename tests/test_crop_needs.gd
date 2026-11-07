@@ -24,7 +24,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -43,7 +43,7 @@ func _run() -> void:
 	await press("tool_2")
 	await press("use_tool")
 	check("watered: the icon goes", crop.need_icon == null and not crop._need_sprite.visible)
-	gs.end_day()
+	progress.end_day()
 	check("next morning it asks again", crop.need_icon == farm.WATER_ICON)
 	crop.set_days_grown(crop.data.days_to_grow)
 	farm._refresh_crop_needs()

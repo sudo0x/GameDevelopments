@@ -50,6 +50,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -83,17 +85,17 @@ func _run() -> void:
 	check("no swing without it", dummy.hits == 0)
 
 	# Crafting it, once only.
-	var recipe = gs.RECIPES[5]
-	gs.add_material(gs.MATERIALS[0], 5)
-	gs.add_material(gs.MATERIALS[1], 3)
+	var recipe = inv.RECIPES[5]
+	inv.add_material(inv.MATERIALS[0], 5)
+	inv.add_material(inv.MATERIALS[1], 3)
 	gs.request_crafting()
 	await process_frame
 	check("in the menu", menu._labels[5].text == "Sword\n5 Wood (5), 3 Stone (3)")
 	menu._buttons[5].pressed.emit()
-	check("made", gs.has_sword and gs.material_count(gs.MATERIALS[0]) == 0)
+	check("made", inv.has_sword and inv.material_count(inv.MATERIALS[0]) == 0)
 	check("done text", menu._labels[5].text == "Sword\nPress 7, then Space to swing." and menu._buttons[5].text == "Made")
-	check("hoe text comes from data", gs.RECIPES[1].made_text == "Use the hoe on cursed land.")
-	check("only once", not gs.can_craft(recipe))
+	check("hoe text comes from data", inv.RECIPES[1].made_text == "Use the hoe on cursed land.")
+	check("only once", not inv.can_craft(recipe))
 	menu.close()
 	check("label clears", hud.tool_label.text == "Tool: Sword")
 	await wait(2)
@@ -152,10 +154,10 @@ func _run() -> void:
 	check("sword does nothing to a tile", not farm.can_use(6, Vector2i(16, 12)))
 
 	# Saved.
-	gs.save_game()
-	gs.has_sword = false
-	gs.load_game()
-	check("saved", gs.has_sword)
+	saves.save_game()
+	inv.has_sword = false
+	saves.load_game()
+	check("saved", inv.has_sword)
 	var bag: Node = main.get_node("HUD/BagMenu")
 	bag.open()
 	check("bag shows it", bag.items_text.contains("Sword"))

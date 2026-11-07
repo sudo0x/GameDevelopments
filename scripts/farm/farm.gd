@@ -79,12 +79,12 @@ func _ready() -> void:
 	healing.land_healed.connect(func(_cells: Array[Vector2i]) -> void: healing.refresh_marks(_can_curse_take))
 	builder.setup(ground, crops_parent)
 	spawner.setup(self, crops_parent, player)
-	GameState.day_ended.connect(spawner.clear)
-	GameState.day_started.connect(spawner.spawn_for_today)
-	GameState.day_ended.connect(_on_day_ended)
-	GameState.day_started.connect(_on_day_started)
+	Progress.day_ended.connect(spawner.clear)
+	Progress.day_started.connect(spawner.spawn_for_today)
+	Progress.day_ended.connect(_on_day_ended)
+	Progress.day_started.connect(_on_day_started)
 	_limit_camera()
-	_restore(GameState.farm_state)
+	_restore(SaveGame.farm_state)
 	healing.mark_tonight(_can_curse_take)
 	spawner.spawn_for_today()
 	Audio.play_music(&"farm")
@@ -160,14 +160,14 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 		Player.Tool.WATERING_CAN:
 			return is_tilled(cell) and not is_watered(cell)
 		Player.Tool.SEEDS:
-			return is_tilled(cell) and not crops.has(cell) and GameState.seed_count(player.selected_seed()) > 0
+			return is_tilled(cell) and not crops.has(cell) and Inventory.seed_count(player.selected_seed()) > 0
 		Player.Tool.HAND:
 			return (crops.has(cell) and crops[cell].can_harvest()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
-			var owned := GameState.strong_holy_water if player.strong_water else GameState.holy_water
+			var owned := Inventory.strong_holy_water if player.strong_water else Inventory.holy_water
 			return owned > 0 and not healing.cleansable_cells(cell, player.strong_water).is_empty()
 		Player.Tool.BUILD:
-			return GameState.building_count(player.selected_building()) > 0 and can_build(cell)
+			return Inventory.building_count(player.selected_building()) > 0 and can_build(cell)
 	return false
 
 
@@ -186,7 +186,7 @@ func water(cell: Vector2i) -> void:
 
 
 func plant(cell: Vector2i, data: CropData) -> void:
-	if not GameState.use_seed(data):
+	if not Inventory.use_seed(data):
 		return
 	_add_crop(cell, data)
 
@@ -197,12 +197,12 @@ func harvest(cell: Vector2i) -> void:
 	crops.erase(cell)
 	crop.queue_free()
 	if crop.blighted:
-		GameState.take_blighted_crop()
+		Inventory.take_blighted_crop()
 	elif crop.data.burst_radius > 0:
 		var healed := healing.burst(cell, crop.data.burst_radius)
 		GameState.notice.emit("The %s burst and healed %s!" % [crop.data.display_name.to_lower(), _tiles_text(healed)])
 	else:
-		GameState.add_harvest(crop.data)
+		Inventory.add_harvest(crop.data)
 
 
 func _update_build_preview() -> void:
@@ -300,22 +300,22 @@ func _on_tool_used(tool: Player.Tool) -> void:
 					untill(target_cell)
 				else:
 					till(target_cell)
-					GameState.record_action("till")
+					Progress.record_action("till")
 				Audio.play(&"till")
 			_refresh_soil_edges()
 		Player.Tool.WATERING_CAN:
 			water(target_cell)
-			GameState.record_action("water")
+			Progress.record_action("water")
 			Audio.play(&"water")
 			_refresh_soil_edges()
 		Player.Tool.SEEDS:
 			plant(target_cell, player.selected_seed())
-			GameState.record_action("plant_ward" if player.selected_seed().ward_radius > 0 else "plant")
+			Progress.record_action("plant_ward" if player.selected_seed().ward_radius > 0 else "plant")
 			Audio.play(&"plant")
 		Player.Tool.HAND:
 			if crops.has(target_cell):
 				harvest(target_cell)
-				GameState.record_action("harvest")
+				Progress.record_action("harvest")
 				Audio.play(&"harvest")
 			elif builder.placed.has(target_cell):
 				builder.pick_up(target_cell)
@@ -325,7 +325,7 @@ func _on_tool_used(tool: Player.Tool) -> void:
 				Audio.play(&"gather")
 		Player.Tool.HOLY_WATER:
 			healing.cleanse(target_cell, player.strong_water)
-			GameState.record_action("heal")
+			Progress.record_action("heal")
 		Player.Tool.BUILD:
 			builder.place(target_cell, player.selected_building())
 			Audio.play(&"place")
@@ -350,7 +350,7 @@ func _on_day_ended() -> void:
 	_water_from_buildings()
 	_refresh_soil_edges()
 	_refresh_crop_needs()
-	GameState.farm_state = _to_state()
+	SaveGame.farm_state = _to_state()
 
 
 ## Food crops can't protect themselves: the curse blights them, and the land under them stays.
@@ -485,7 +485,7 @@ func _restore(state: Dictionary) -> void:
 	# Saves from before this existed count all their soil as freshly used.
 	soil_idle.assign(state.get("soil_idle", {}))
 	for saved: Dictionary in state.get("crops", []):
-		var data := GameState.crop_by_id(saved["id"])
+		var data := Inventory.crop_by_id(saved["id"])
 		if data:
 			var crop := _add_crop(saved["cell"], data)
 			crop.set_days_grown(saved["days"])

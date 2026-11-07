@@ -25,7 +25,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -52,7 +52,7 @@ func _run() -> void:
 	check("drawn in the red tint", cursor._style.modulate_color == cursor.INVALID_COLOR)
 
 	# Holy water covers a 3x3 patch, and the same art stretches to fit it.
-	gs.holy_water = 1
+	inv.holy_water = 1
 	await press("tool_5")
 	await physics_frame
 	check("holy water: a 3x3 patch", cursor._cell_rect.size == tile * 3)

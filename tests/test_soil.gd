@@ -31,6 +31,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -95,19 +97,19 @@ func _run() -> void:
 
 	# Empty soil goes back to grass after 3 nights; soil with a crop stays.
 	check("balance number", gs.BALANCE.soil_idle_nights == 3)
-	gs.end_day()
+	progress.end_day()
 	check("soil dries overnight, and its wet edges go", not farm.is_watered(a) and wet_edges._pieces.is_empty())
-	gs.end_day()
+	progress.end_day()
 	check("still soil after 2 nights", farm.is_tilled(a) and farm.soil_idle.get(a, 0) == 2)
 	check("planted cell isn't counted", not farm.soil_idle.has(cell))
 	# Watering doesn't keep it: only a crop does.
 	farm.water(b)
-	gs.end_day()
+	progress.end_day()
 	check("grass after 3 nights", not farm.is_tilled(a) and not farm.is_tilled(b))
 	check("cell forgotten", not farm.soil_idle.has(a))
 	check("planted soil stays", farm.is_tilled(cell) and farm.crops.has(cell))
 	check("edges follow", at.call(a) == 0 and at.call(cell) == 4)
-	check("saved", not gs.farm_state["tilled"].has(a) and gs.farm_state.has("soil_idle"))
+	check("saved", not saves.farm_state["tilled"].has(a) and saves.farm_state.has("soil_idle"))
 	# Old saves have no soil_idle: test_old_save checks they still load.
 
 	print("FAILS: %d" % fails)

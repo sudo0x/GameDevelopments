@@ -29,7 +29,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -45,7 +46,7 @@ func _run() -> void:
 	}
 	var cell := Vector2i(16, 12)
 	for x in 3:
-		var data = gs.CROPS[x]
+		var data = inv.CROPS[x]
 		var c := cell + Vector2i(x, 0)
 		farm.till(c)
 		farm.plant(c, data)
@@ -66,7 +67,7 @@ func _run() -> void:
 	await press("tool_1")
 	await press("use_tool")
 	await press("tool_3")
-	gs.seeds[&"pumpkin"] = 1
+	inv.seeds[&"pumpkin"] = 1
 	player.seed_index = 2
 	await press("use_tool")
 	await physics_frame
@@ -75,7 +76,7 @@ func _run() -> void:
 	await press("use_tool")
 	await physics_frame
 	check("watered", hud.crop_status_label.text == "Pumpkin: 0 of 8 days, watered. Sleep to grow.")
-	gs.end_day()
+	progress.end_day()
 	await physics_frame
 	await physics_frame
 	check("next morning needs water again", hud.crop_status_label.text == "Pumpkin: 1 of 8 days, needs water.")

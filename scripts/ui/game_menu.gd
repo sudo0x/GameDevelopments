@@ -18,7 +18,7 @@ const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 
 
 func _ready() -> void:
-	GameState.inventory_changed.connect(_refresh)
+	Inventory.inventory_changed.connect(_refresh)
 	resized.connect(_place)
 
 

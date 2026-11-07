@@ -14,7 +14,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -29,6 +29,6 @@ func _run() -> void:
 	check("box at its new spot", not moved.is_empty() and moved["data"].id == &"shipping_box")
 	var fences: Array = [builder.placed.get(Vector2i(24, 15), {}), builder.placed.get(Vector2i(24, 16), {})]
 	check("a vertical fence line loads vertical", fences.all(func(e: Dictionary) -> bool: return not e.is_empty() and e["node"].vertical and e["node"].get_node("Sprite2D").texture == e["node"].VERTICAL_TEXTURE))
-	check("lantern still in the bag", gs.building_count(gs.building_by_id(&"old_lantern_post")) == 1)
+	check("lantern still in the bag", inv.building_count(inv.building_by_id(&"old_lantern_post")) == 1)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

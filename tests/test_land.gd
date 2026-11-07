@@ -20,8 +20,9 @@ func press(action: String) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
-	gs.holy_water = 2
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	inv.holy_water = 2
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -73,10 +74,10 @@ func _run() -> void:
 	var crop: Node = farm.crops[c]
 	for d in 3:
 		farm.water(c)
-		gs.end_day()
+		progress.end_day()
 	check("grows on healed land", crop.is_ripe())
 	await press("tool_4")
 	await press("use_tool")
-	check("harvested on healed land", gs.harvest_count(gs.CROPS[0]) == 1)
+	check("harvested on healed land", inv.harvest_count(inv.CROPS[0]) == 1)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -37,6 +37,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -56,7 +58,7 @@ func _run() -> void:
 	print("nearest to the light %.1f of %.1f" % [nearest, radius])
 	check("stops at the light's edge", nearest >= radius - 2.0)
 	check("it does come right up to the edge", nearest < radius + 10.0)
-	check("no damage in the light", gs.hearts == 5)
+	check("no damage in the light", progress.hearts == 5)
 	check("still hunting", shade.state == 1)
 
 	# The player on the far side: it goes around, and never through.
@@ -73,8 +75,8 @@ func _run() -> void:
 
 	# A lantern the player placed works the same, and picking it up ends the safety.
 	var cell := Vector2i(16, 12)
-	gs.buildings[&"lantern_post"] = 1
-	farm.builder.place(cell, gs.BUILDINGS[0])
+	inv.buildings[&"lantern_post"] = 1
+	farm.builder.place(cell, inv.BUILDINGS[0])
 	await wait(2)
 	var placed: Node2D = farm.builder.placed[cell]["node"].get_node("Light")
 	player.global_position = placed.global_position
@@ -89,8 +91,8 @@ func _run() -> void:
 	# A lantern placed right beside a creature drives it out.
 	var at: Vector2 = shade.global_position
 	var near_cell: Vector2i = farm.ground.local_to_map(farm.ground.to_local(at))
-	gs.buildings[&"lantern_post"] = 1
-	farm.builder.place(near_cell, gs.BUILDINGS[0])
+	inv.buildings[&"lantern_post"] = 1
+	farm.builder.place(near_cell, inv.BUILDINGS[0])
 	await wait(2)
 	var new_light: Node2D = farm.builder.placed[near_cell]["node"].get_node("Light")
 	player.global_position = Vector2(600, 400)

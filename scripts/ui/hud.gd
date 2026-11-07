@@ -31,11 +31,11 @@ var _notice_left := 0.0
 
 func _ready() -> void:
 	player.tool_changed.connect(_refresh)
-	GameState.inventory_changed.connect(_refresh)
-	GameState.day_started.connect(_refresh)
+	Inventory.inventory_changed.connect(_refresh)
+	Progress.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
 	GameState.notice.connect(_show_notice)
-	GameState.fainted.connect(_faint)
+	Progress.fainted.connect(_faint)
 	farm.target_status_changed.connect(_show_crop_status)
 	_add_goal_guide()
 	_refresh()
@@ -51,22 +51,22 @@ func _add_goal_guide() -> void:
 
 
 func _refresh() -> void:
-	day_label.text = "Day %d" % GameState.day
-	money_label.text = str(GameState.money)
+	day_label.text = "Day %d" % Progress.day
+	money_label.text = str(Inventory.money)
 	status_label.text = _status_text()
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
 	if player.tool == Player.Tool.SEEDS:
 		var crop := player.selected_seed()
-		text += "  |  %s seeds: %d  %s" % [crop.display_name, GameState.seed_count(crop), _change_hint()]
+		text += "  |  %s seeds: %d  %s" % [crop.display_name, Inventory.seed_count(crop), _change_hint()]
 	if player.tool == Player.Tool.HOLY_WATER:
 		text = _water_text()
 	if player.tool == Player.Tool.BUILD:
 		var building := player.selected_building()
-		text += "  |  %s: %d  %s" % [building.display_name, GameState.building_count(building), _change_hint()]
-	if player.tool == Player.Tool.SWORD and not GameState.has_sword:
+		text += "  |  %s: %d  %s" % [building.display_name, Inventory.building_count(building), _change_hint()]
+	if player.tool == Player.Tool.SWORD and not Inventory.has_sword:
 		text += "  |  Craft one at the workbench"
-	if player.tool == Player.Tool.HOE and GameState.has_purifying_hoe:
-		text += "  |  Purify left today: %d" % GameState.hoe_uses_left
+	if player.tool == Player.Tool.HOE and Inventory.has_purifying_hoe:
+		text += "  |  Purify left today: %d" % Inventory.hoe_uses_left
 	tool_label.text = text
 
 
@@ -76,21 +76,21 @@ func _change_hint() -> String:
 
 func _water_text() -> String:
 	if player.strong_water:
-		return "Tool: Strong holy water: %d  %s" % [GameState.strong_holy_water, _change_hint()]
-	var hint := "  " + _change_hint() if GameState.strong_holy_water > 0 else ""
-	return "Tool: Holy water: %d%s" % [GameState.holy_water, hint]
+		return "Tool: Strong holy water: %d  %s" % [Inventory.strong_holy_water, _change_hint()]
+	var hint := "  " + _change_hint() if Inventory.strong_holy_water > 0 else ""
+	return "Tool: Holy water: %d%s" % [Inventory.holy_water, hint]
 
 
 ## Only what changes often is shown here. The full list is in the bag (key I).
 func _status_text() -> String:
 	var lines: PackedStringArray = []
-	if GameState.holy_water > 0:
-		lines.append("Holy water: %d" % GameState.holy_water)
-	if GameState.strong_holy_water > 0:
-		lines.append("Strong holy water: %d" % GameState.strong_holy_water)
-	if not GameState.shipped.is_empty():
-		lines.append("Shipping: %d overnight" % GameState.shipped_value())
-	lines.append("Island healed: %.1f%%" % GameState.healed_percent)
+	if Inventory.holy_water > 0:
+		lines.append("Holy water: %d" % Inventory.holy_water)
+	if Inventory.strong_holy_water > 0:
+		lines.append("Strong holy water: %d" % Inventory.strong_holy_water)
+	if not Inventory.shipped.is_empty():
+		lines.append("Shipping: %d overnight" % Inventory.shipped_value())
+	lines.append("Island healed: %.1f%%" % Progress.healed_percent)
 	return "\n".join(lines)
 
 
@@ -138,7 +138,7 @@ func _process(delta: float) -> void:
 
 ## Fade out, end the day while the screen is black, fade back in.
 func _sleep() -> void:
-	_fade_to_next_day(GameState.end_day)
+	_fade_to_next_day(Progress.end_day)
 
 
 ## Like sleeping, but the player wakes up at home.
@@ -146,7 +146,7 @@ func _faint(money_lost: int) -> void:
 	_fade_to_next_day(func() -> void:
 		# Home first, so the morning's creatures keep their distance from where the player wakes.
 		player.return_home()
-		GameState.end_day()
+		Progress.end_day()
 		GameState.notice.emit("You fainted and woke up at home. You lost %d money." % money_lost))
 
 
@@ -154,7 +154,7 @@ func _fade_to_next_day(while_black: Callable) -> void:
 	if _sleeping:
 		return
 	_sleeping = true
-	GameState.day_changing = true
+	Progress.day_changing = true
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_SECONDS)
 	tween.tween_callback(while_black)
@@ -162,4 +162,4 @@ func _fade_to_next_day(while_black: Callable) -> void:
 	tween.tween_property(fade, "color:a", 0.0, FADE_SECONDS)
 	tween.tween_callback(func() -> void:
 		_sleeping = false
-		GameState.day_changing = false)
+		Progress.day_changing = false)

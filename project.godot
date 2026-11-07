@@ -17,6 +17,9 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 GameState="*res://scripts/autoload/game_state.gd"
+Inventory="*res://scripts/autoload/inventory.gd"
+Progress="*res://scripts/autoload/progress.gd"
+SaveGame="*res://scripts/autoload/save_game.gd"
 Audio="*res://scripts/autoload/audio.gd"
 ScreenFit="*res://scripts/autoload/screen_fit.gd"
 

@@ -33,7 +33,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -41,8 +42,8 @@ func _run() -> void:
 	var shop: Control = main.get_node("HUD/ShopMenu")
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var wood = gs.MATERIALS[0]
-	var stone = gs.MATERIALS[1]
+	var wood = inv.MATERIALS[0]
+	var stone = inv.MATERIALS[1]
 	var key := InputEventKey.new()
 	key.physical_keycode = KEY_I
 	key.pressed = true
@@ -50,12 +51,12 @@ func _run() -> void:
 	check("starts closed", not bag.visible)
 	check("HUD no longer lists crops", not hud.status_label.text.contains("Radish"))
 
-	gs.add_material(wood, 3)
-	gs.add_material(stone, 2)
-	gs.add_material(wood, 1)
-	check("materials add up", gs.material_count(wood) == 4 and gs.material_count(stone) == 2)
-	gs.harvest[&"carrot"] = 7
-	gs.holy_water = 2
+	inv.add_material(wood, 3)
+	inv.add_material(stone, 2)
+	inv.add_material(wood, 1)
+	check("materials add up", inv.material_count(wood) == 4 and inv.material_count(stone) == 2)
+	inv.harvest[&"carrot"] = 7
+	inv.holy_water = 2
 	await press("inventory")
 	check("opens and pauses", bag.visible and paused)
 	var list := cells(bag)
@@ -68,7 +69,7 @@ func _run() -> void:
 		await physics_frame
 	Input.action_release("move_left")
 	check("player can't move while open", player.global_position == pos)
-	gs.add_material(stone, 1)
+	inv.add_material(stone, 1)
 	check("updates while open", bag.items_text.contains("Stone: 3"))
 	await press("inventory")
 	check("I closes", not bag.visible and not paused)
@@ -77,8 +78,8 @@ func _run() -> void:
 	check("Esc closes", not bag.visible and not paused)
 	await physics_frame
 	check("stays closed", not bag.visible)
-	gs.holy_water = 0
-	gs.add_material(wood, 1)
+	inv.holy_water = 0
+	inv.add_material(wood, 1)
 	await press("inventory")
 	check("fresh numbers when reopened", bag.items_text.contains("Wood: 5"))
 	await press("inventory")
@@ -91,10 +92,10 @@ func _run() -> void:
 	check("game unpaused after shop", not paused)
 
 	# Materials are saved.
-	gs.save_game()
-	gs.materials.clear()
-	gs.load_game()
-	check("materials saved", gs.material_count(wood) == 5 and gs.material_count(stone) == 3)
-	check("keys still StringName", typeof(gs.materials.keys()[0]) == TYPE_STRING_NAME)
+	saves.save_game()
+	inv.materials.clear()
+	saves.load_game()
+	check("materials saved", inv.material_count(wood) == 5 and inv.material_count(stone) == 3)
+	check("keys still StringName", typeof(inv.materials.keys()[0]) == TYPE_STRING_NAME)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -29,8 +29,10 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
-	gs.buildings[&"lantern_post"] = 1
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
+	inv.buildings[&"lantern_post"] = 1
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -40,7 +42,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var lantern = gs.BUILDINGS[0]
+	var lantern = inv.BUILDINGS[0]
 	var cell := Vector2i(16, 12)
 	player.global_position = g.to_global(g.map_to_local(cell + Vector2i(-1, 0))) + Vector2(0, 8)
 	player.facing = 3
@@ -49,7 +51,7 @@ func _run() -> void:
 
 	await press("tool_6")
 	await press("use_tool")
-	check("placed", farm.builder.placed.has(cell) and gs.building_count(lantern) == 0)
+	check("placed", farm.builder.placed.has(cell) and inv.building_count(lantern) == 0)
 	var node: Node2D = farm.builder.placed[cell]["node"]
 	await physics_frame
 	await physics_frame
@@ -59,7 +61,7 @@ func _run() -> void:
 	await press("use_tool")
 	await process_frame
 	check("gone from the map", not farm.builder.placed.has(cell) and not is_instance_valid(node))
-	check("back in the bag", gs.building_count(lantern) == 1)
+	check("back in the bag", inv.building_count(lantern) == 1)
 	check("notice", hud.notice_label.text == "Picked up: Lantern post")
 	await physics_frame
 	await physics_frame
@@ -68,11 +70,11 @@ func _run() -> void:
 	check("tile is free again", farm.can_build(cell))
 	check("farmable again", farm.can_use(0, cell))
 	await press("use_tool")
-	check("hand on empty ground does nothing", gs.building_count(lantern) == 1)
+	check("hand on empty ground does nothing", inv.building_count(lantern) == 1)
 
 	await press("tool_6")
 	await press("use_tool")
-	check("can place it again", farm.builder.placed.has(cell) and gs.building_count(lantern) == 0)
+	check("can place it again", farm.builder.placed.has(cell) and inv.building_count(lantern) == 0)
 
 	# The map's lanterns can move now (test_moving.gd); the house and shop stall can't.
 	for path in ["House", "ShopStall"]:
@@ -83,10 +85,10 @@ func _run() -> void:
 	# Picking up is saved.
 	farm.builder.pick_up(cell)
 	await process_frame
-	gs.end_day()
-	check("save has no building", gs.farm_state["buildings"].is_empty())
-	gs.buildings.clear()
-	gs.load_game()
-	check("the bag count is saved", gs.building_count(lantern) == 1)
+	progress.end_day()
+	check("save has no building", saves.farm_state["buildings"].is_empty())
+	inv.buildings.clear()
+	saves.load_game()
+	check("the bag count is saved", inv.building_count(lantern) == 1)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

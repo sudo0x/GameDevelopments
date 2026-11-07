@@ -19,9 +19,10 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
-	gs.start_new_game()
-	check("a new game asks for the story", gs.show_story)
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
+	saves.start_new_game()
+	check("a new game asks for the story", progress.show_story)
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -33,7 +34,7 @@ func _run() -> void:
 	var controls: Node = main.get_node("HUD/TouchControls")
 	check("the story pauses the game", paused and guide._story != null)
 	check("it tells the purpose", guide.STORY.contains("heal the island"))
-	check("the story is only shown once", not gs.show_story)
+	check("the story is only shown once", not progress.show_story)
 	guide._close_story()
 	await process_frame
 	check("starting farming unpauses", not paused)
@@ -65,37 +66,37 @@ func _run() -> void:
 	check("the goal sits under the tool text", guide.position.y == hud.tool_label.position.y + 24.0)
 	controls.set_active(false)
 	check("back to keyboard words", guide.text.contains("press F"))
-	gs.end_day()
+	progress.end_day()
 	check("sleeping moves on to healing", guide.text.contains("heal"))
 
 	# A goal done early is already ticked when its turn comes.
-	gs.record_action("ship")
-	gs.record_action("heal")
+	progress.record_action("ship")
+	progress.record_action("heal")
 	check("the next open goal shows", guide.text.contains("ripe"))
-	gs.record_action("harvest")
+	progress.record_action("harvest")
 	check("a goal done early is skipped", guide.text.contains("wardthorn"))
 
 	# The goals survive a restart.
-	gs.end_day()
-	var done: Array = Array(gs.guide_done).duplicate()
+	progress.end_day()
+	var done: Array = Array(progress.guide_done).duplicate()
 	main.free()
-	gs._reset()
-	gs.load_game()
-	check("finished goals are saved", Array(gs.guide_done) == done)
+	saves._reset()
+	saves.load_game()
+	check("finished goals are saved", Array(progress.guide_done) == done)
 
 	# The end of the list, and a save from before goals existed.
-	gs.record_action("plant_ward")
+	progress.record_action("plant_ward")
 	main = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
 	guide = main.get_node("HUD/GoalGuide")
 	check("then the long goal", guide.text == guide.SHRINE_GOAL)
-	gs.farm_state["shrine"] = true
-	gs.guide_changed.emit()
+	saves.farm_state["shrine"] = true
+	progress.guide_changed.emit()
 	check("then keep healing", guide.text == guide.LAST_GOAL)
-	gs.farm_state["shrine"] = false
-	gs.guide_done.assign([gs.GUIDE_FINISHED])
-	gs.guide_changed.emit()
+	saves.farm_state["shrine"] = false
+	progress.guide_done.assign([progress.GUIDE_FINISHED])
+	progress.guide_changed.emit()
 	check("old saves skip the lessons", guide.text == guide.SHRINE_GOAL)
 
 	print("FAILS: %d" % fails)

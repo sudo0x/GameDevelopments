@@ -7,8 +7,8 @@ func check(name: String, ok: bool) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
-	gs.holy_water = 10
+	var inv: Node = root.get_node("Inventory")
+	inv.holy_water = 10
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame

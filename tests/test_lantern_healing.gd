@@ -15,7 +15,10 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
-	gs.buildings[&"lantern_post"] = 5
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
+	inv.buildings[&"lantern_post"] = 5
 	# This test is about lanterns alone: the curse taking land back would change its counts.
 	load("res://data/balance.tres").curse_return_per_night = 0
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
@@ -26,7 +29,7 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
-	var lantern = gs.BUILDINGS[0]
+	var lantern = inv.BUILDINGS[0]
 	var healing: Node = farm.healing
 	# All messages, because only the newest one stays on screen.
 	var notices: Array = []
@@ -35,7 +38,7 @@ func _run() -> void:
 
 	# Far from any curse: nothing happens, and nothing is said.
 	farm.builder.place(Vector2i(20, 13), lantern)
-	gs.end_day()
+	progress.end_day()
 	check("no curse in range, nothing healed", healing.cleansed.is_empty())
 	check("no message", notices.is_empty())
 
@@ -43,22 +46,22 @@ func _run() -> void:
 	var edge := Vector2i(34, 13)
 	check("lantern tile is clean", g.get_cell_source_id(edge) == 0)
 	farm.builder.place(edge, lantern)
-	gs.end_day()
+	progress.end_day()
 	check("one tile healed", healing.cleansed.size() == 1)
 	var first: Vector2i = healing.cleansed[0]
 	print("first healed ", first)
 	check("it was close", Vector2(first - edge).length() <= 2.0)
 	check("the land really healed", g.get_cell_source_id(first) == 0)
 	check("message", notices.has("Your lanterns healed 1 tile overnight."))
-	check("progress counts it", gs.healed_percent > 0.0)
-	gs.end_day()
+	check("progress counts it", progress.healed_percent > 0.0)
+	progress.end_day()
 	check("another the next night", healing.cleansed.size() == 2)
 	check("distance never gets shorter", Vector2(healing.cleansed[1] - edge).length() >= Vector2(first - edge).length())
 
 	# Two lanterns, two tiles, never the same one.
 	farm.builder.place(Vector2i(34, 15), lantern)
 	var before: int = healing.cleansed.size()
-	gs.end_day()
+	progress.end_day()
 	check("two lanterns heal two tiles", healing.cleansed.size() == before + 2)
 	check("plural message", notices.has("Your lanterns healed 2 tiles overnight."))
 	var unique := {}
@@ -71,7 +74,7 @@ func _run() -> void:
 	farm.builder.pick_up(Vector2i(34, 15))
 	await process_frame
 	before = healing.cleansed.size()
-	gs.end_day()
+	progress.end_day()
 	check("no placed lanterns near curse, no healing", healing.cleansed.size() == before)
 
 	# It stops at its range.
@@ -80,7 +83,7 @@ func _run() -> void:
 	var nights := 0
 	while nights < 80:
 		before = healing.cleansed.size()
-		gs.end_day()
+		progress.end_day()
 		nights += 1
 		if healing.cleansed.size() == before:
 			break
@@ -93,6 +96,6 @@ func _run() -> void:
 	check("the outer ring is safe", g.get_cell_source_id(Vector2i(75, 13)) == 1)
 
 	# Saved with the morning.
-	check("in the save", gs.farm_state["cleansed"].size() == healing.cleansed.size())
+	check("in the save", saves.farm_state["cleansed"].size() == healing.cleansed.size())
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

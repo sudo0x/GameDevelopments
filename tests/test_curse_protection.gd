@@ -14,11 +14,12 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
-	gs.holy_water = 10
-	gs.buildings[&"lantern_post"] = 2
-	gs.buildings[&"fence"] = 1
-	gs.day = 5
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	inv.holy_water = 10
+	inv.buildings[&"lantern_post"] = 2
+	inv.buildings[&"fence"] = 1
+	progress.day = 5
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -27,8 +28,8 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var healing: Node = farm.healing
 	main.get_node("World/Player")._safe_left = 9999.0
-	var lantern = gs.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"lantern_post")[0]
-	var fence = gs.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
+	var lantern = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"lantern_post")[0]
+	var fence = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
 
 	# A lantern's reach, measured the same way as its healing.
 	var at := Vector2i(34, 13)
@@ -44,9 +45,9 @@ func _run() -> void:
 	# A whole night beside a lantern loses nothing.
 	healing.cleanse(Vector2i(36, 13))
 	var patch: Array = healing.cleansed.duplicate()
-	gs.end_day()
+	progress.end_day()
 	check("nothing lit is marked", healing.marked.is_empty())
-	gs.end_day()
+	progress.end_day()
 	check("a lit patch survives the night", patch.all(func(c: Vector2i) -> bool: return healing.cleansed.has(c)))
 	check("the lantern still heals", healing.cleansed.size() > patch.size())
 

@@ -58,7 +58,7 @@ Say "controls step N" so these aren't mixed up with other plans.
 
 | Step | Work | Done when |
 |---|---|---|
-| 1 | Split `GameState` (finding 26) into `Inventory`, `Progress` and `SaveGame`, with no change to how the game plays | All tests pass with only their paths updated |
+| 1 ✅ | Split `GameState` (finding 26) into `Inventory`, `Progress` and `SaveGame`, with no change to how the game plays. Built 2026-11-07. A small `GameState` stays for what fits none of the three (see the decisions log) | All tests pass with only their paths updated |
 | 2 | `Farm.smart_action(cell)`: returns what Action would do, with one test per row of the chart. Nothing on screen changes yet | Tests cover every row and the order between them |
 | 3 | Action button: replaces Use and Act, and its icon follows the player's target | Playing a full day on the phone needs no tool button |
 | 4 | Seed popup and Heal button; remove the arrows and tool bar on phones | 5 buttons plus the joystick. Menus still clear the buttons |

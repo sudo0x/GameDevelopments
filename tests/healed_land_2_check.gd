@@ -7,7 +7,9 @@ func check(name: String, ok: bool) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -17,7 +19,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var player: Node = main.get_node("World/Player")
 	var c := Vector2i(38, 13)
-	check("holy water count from the morning", gs.holy_water == 3)
+	check("holy water count from the morning", inv.holy_water == 3)
 	check("healed land came back", g.get_cell_source_id(c) == 0 and g.get_cell_source_id(c + Vector2i.ONE) == 0)
 	check("texture piece lines up", g.get_cell_atlas_coords(c) == Vector2i(posmod(c.x, 4), posmod(c.y, 4)))
 	check("9 cells remembered", farm.healing.cleansed.size() == 9)
@@ -38,7 +40,7 @@ func _run() -> void:
 	Input.action_release("move_right")
 	check("walkable after reload", player.global_position.x > x0 + 25)
 	farm.healing.cleanse(c + Vector2i(3, 0))
-	gs.end_day()
-	check("18 cells, no duplicates", farm.healing.cleansed.size() == 18 and gs.farm_state["cleansed"].size() == 18)
+	progress.end_day()
+	check("18 cells, no duplicates", farm.healing.cleansed.size() == 18 and saves.farm_state["cleansed"].size() == 18)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -43,8 +43,11 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
-	gs.money = 50
-	gs.save_game()
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
+	inv.money = 50
+	saves.save_game()
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -80,10 +83,10 @@ func _run() -> void:
 	check("Esc closes the bag only", not bag.visible and not pause.visible and not paused)
 
 	# Not while the screen fades to the next day.
-	gs.day_changing = true
+	progress.day_changing = true
 	await press("ui_cancel")
 	check("no pause while the day changes", not pause.visible)
-	gs.day_changing = false
+	progress.day_changing = false
 
 	# Settings take the menu's place, and Esc comes back to it.
 	await press("ui_cancel")
@@ -105,15 +108,15 @@ func _run() -> void:
 	check("No stays", pause.visible and not pause.confirm.visible)
 
 	# Leaving throws away today: money earned since the save is gone.
-	gs.money = 999
-	gs.shipped[&"radish"] = 3
-	gs.hearts = 1
+	inv.money = 999
+	inv.shipped[&"radish"] = 3
+	progress.hearts = 1
 	pause.title_button.pressed.emit()
 	pause.confirm_yes.pressed.emit()
 	await process_frame
 	await process_frame
 	check("unpaused", not paused)
-	check("back to the saved morning", gs.money == 50 and gs.shipped.is_empty() and gs.hearts == gs.BALANCE.max_hearts)
+	check("back to the saved morning", inv.money == 50 and inv.shipped.is_empty() and progress.hearts == gs.BALANCE.max_hearts)
 	check("title screen shown", root.get_node_or_null("TitleScreen") != null)
 
 	# Phones: the pause button hides under menus like the tool bar.

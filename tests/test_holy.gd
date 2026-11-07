@@ -20,9 +20,10 @@ func press(action: String) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var saves: Node = root.get_node("SaveGame")
 	# These checks count holy water from zero; new games start with some (test_title).
-	gs.holy_water = 0
+	inv.holy_water = 0
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -44,7 +45,7 @@ func _run() -> void:
 	check("tool label", hud.tool_label.text == "Tool: Holy water: 0")
 
 	# Buying at the stall.
-	gs.money = 70
+	inv.money = 70
 	player.global_position = stall.global_position + Vector2(0, 16)
 	for i in 6:
 		await physics_frame
@@ -54,10 +55,10 @@ func _run() -> void:
 	check("holy row text", menu._labels[4].text == "Holy water: 0 (3 left)" and menu._buttons[4].text == "Buy for 30")
 	menu._buttons[4].pressed.emit()
 	menu._buttons[4].pressed.emit()
-	check("bought 2", gs.holy_water == 2 and gs.money == 10)
+	check("bought 2", inv.holy_water == 2 and inv.money == 10)
 	check("button disabled when too poor", menu._buttons[4].disabled)
 	menu._buttons[4].pressed.emit()
-	check("third refused", gs.holy_water == 2 and gs.money == 10)
+	check("third refused", inv.holy_water == 2 and inv.money == 10)
 	check("seed row 0 still buys seeds", menu._labels[0].text.begins_with("Radish seeds"))
 	await press("interact")
 	check("shop closed", not menu.visible)
@@ -78,7 +79,7 @@ func _run() -> void:
 	var patch: Array = farm.healing.cleansable_cells(target)
 	var x0: float = player.global_position.x
 	await press("use_tool")
-	check("one use spent", gs.holy_water == 1)
+	check("one use spent", inv.holy_water == 1)
 	var all_clean := true
 	for c: Vector2i in patch:
 		all_clean = all_clean and g.get_cell_source_id(c) == 0
@@ -95,32 +96,32 @@ func _run() -> void:
 	for i in 4:
 		await physics_frame
 	await press("use_tool")
-	check("no cost on clean land", gs.holy_water == 1)
+	check("no cost on clean land", inv.holy_water == 1)
 	check("highlight invalid on clean land", not farm.can_use(4, farm.target_cell))
 
 	# Outer ring stays cursed.
-	gs.holy_water = 5
+	inv.holy_water = 5
 	farm.healing.cleanse(Vector2i(1, 1))
 	check("ring kept", g.get_cell_source_id(Vector2i(0, 0)) == CURSED and g.get_cell_source_id(Vector2i(0, 1)) == CURSED and g.get_cell_source_id(Vector2i(1, 0)) == CURSED)
 	check("inner part healed", g.get_cell_source_id(Vector2i(1, 1)) == 0 and g.get_cell_source_id(Vector2i(2, 2)) == 0)
 	farm.healing.cleanse(Vector2i(74, 24))
 	check("east ring kept", g.get_cell_source_id(Vector2i(75, 24)) == CURSED and g.get_cell_source_id(Vector2i(74, 25)) == CURSED)
-	var before: int = gs.holy_water
+	var before: int = inv.holy_water
 	check("ring-only patch not usable", farm.healing.cleansable_cells(Vector2i(-1, 13)).is_empty())
 	farm.healing.cleanse(Vector2i(-1, 13))
-	check("ring-only patch costs nothing", gs.holy_water == before)
+	check("ring-only patch costs nothing", inv.holy_water == before)
 
 	# None left.
-	gs.holy_water = 0
+	inv.holy_water = 0
 	check("not usable with none", not farm.can_use(4, Vector2i(38, 13)))
 	farm.healing.cleanse(Vector2i(38, 3))
 	check("no heal with none", g.get_cell_source_id(Vector2i(38, 3)) == CURSED)
 
 	# Saved count.
-	gs.holy_water = 3
-	gs.save_game()
-	gs.holy_water = 0
-	gs.load_game()
-	check("holy water saved", gs.holy_water == 3)
+	inv.holy_water = 3
+	saves.save_game()
+	inv.holy_water = 0
+	saves.load_game()
+	check("holy water saved", inv.holy_water == 3)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

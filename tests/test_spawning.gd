@@ -18,7 +18,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -31,9 +33,9 @@ func _run() -> void:
 	var spawner: Node = farm.spawner
 	player._safe_left = 9999.0
 	check("none on day 1", alive(spawner).is_empty())
-	gs.end_day()
+	progress.end_day()
 	check("none on day 2", alive(spawner).is_empty())
-	gs.end_day()
+	progress.end_day()
 	check("they start on day 3", alive(spawner).size() == 2)
 	check("a warning the first time", hud.notice_label.text == "Something stirs at the edge of the curse...")
 	await process_frame
@@ -62,7 +64,7 @@ func _run() -> void:
 			for b: Node2D in list:
 				if a != b:
 					ok_spacing = ok_spacing and a.global_position.distance_to(b.global_position) >= 96.0
-		gs.end_day()
+		progress.end_day()
 		await process_frame
 	check("on clean land beside the curse", ok_edge)
 	check("never in a cut-off clearing", ok_reachable)
@@ -73,7 +75,7 @@ func _run() -> void:
 
 	# The old ones are gone by morning, with no build-up.
 	var old: Array = alive(spawner)
-	gs.end_day()
+	progress.end_day()
 	await process_frame
 	check("old ones vanish", old.all(func(c: Variant) -> bool: return not is_instance_valid(c)))
 	var total := 0
@@ -86,30 +88,30 @@ func _run() -> void:
 	var victim: Node = alive(spawner)[0]
 	victim.take_hit(9, Vector2.RIGHT)
 	await process_frame
-	gs.end_day()
+	progress.end_day()
 	await process_frame
 	check("two again next morning", alive(spawner).size() == 2)
 
 	# More healing, more creatures, up to the limit.
-	gs.healed_percent = 12.0
+	progress.healed_percent = 12.0
 	check("2 extra at 12%", spawner.count_for_today() == 4)
-	gs.healed_percent = 90.0
+	progress.healed_percent = 90.0
 	check("capped at the limit", spawner.count_for_today() == 6)
-	gs.end_day()
+	progress.end_day()
 	await process_frame
 	check("the cap really spawns", alive(spawner).size() == 6)
-	gs.healed_percent = 0.0
+	progress.healed_percent = 0.0
 
 	# Lanterns push them away: light up a good part of the edge.
 	var spots: Array = spawner.spawn_cells()
 	var before: int = spots.size()
-	gs.buildings[&"lantern_post"] = 1
-	farm.builder.place(spots[0], gs.BUILDINGS[0])
+	inv.buildings[&"lantern_post"] = 1
+	farm.builder.place(spots[0], inv.BUILDINGS[0])
 	await physics_frame
 	check("a new lantern removes nearby spots", spawner.spawn_cells().size() < before)
 
 	# Healed land opens new places.
-	gs.holy_water = 1
+	inv.holy_water = 1
 	farm.healing.cleanse(Vector2i(36, 13))
 	# Tile collision only updates on the next physics frame.
 	await physics_frame
@@ -119,8 +121,8 @@ func _run() -> void:
 	check("healed land becomes the new edge", not on_healed.is_empty())
 
 	# A saved game starts its morning with creatures too.
-	gs.day = 9
-	gs.save_game()
+	progress.day = 9
+	saves.save_game()
 	main.free()
 	var again: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(again)

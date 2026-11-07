@@ -36,7 +36,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -46,7 +46,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var lantern = gs.BUILDINGS[0]
+	var lantern = inv.BUILDINGS[0]
 	var cell := Vector2i(16, 12)
 
 	await press("tool_6")
@@ -54,10 +54,10 @@ func _run() -> void:
 	await press("use_tool")
 	check("nothing placed with none crafted", farm.builder.to_state().is_empty())
 
-	gs.buildings[&"lantern_post"] = 2
+	inv.buildings[&"lantern_post"] = 2
 	await press("use_tool")
 	check("placed", farm.builder.placed.has(cell))
-	check("one used", gs.building_count(lantern) == 1)
+	check("one used", inv.building_count(lantern) == 1)
 	check("label updates", hud.tool_label.text.contains("Lantern post: 1"))
 	var node: Node2D = farm.builder.placed[cell]["node"]
 	check("in the y-sorted World", node.get_parent().name == "World")
@@ -68,7 +68,7 @@ func _run() -> void:
 	check("the tile is taken", not farm.can_build(cell))
 	check("preview goes red", farm.build_preview.modulate == farm.build_preview.INVALID_COLOR)
 	await press("use_tool")
-	check("can't stack a second", gs.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
+	check("can't stack a second", inv.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
 	check("can't till under it", not farm.can_use(0, cell))
 
 	# It's solid.
@@ -85,16 +85,16 @@ func _run() -> void:
 	await aim_at(player, g, Vector2i(35, 12))
 	check("aiming at the curse", farm.target_cell == Vector2i(35, 12))
 	await press("use_tool")
-	check("no building on the curse", gs.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
+	check("no building on the curse", inv.building_count(lantern) == 1 and farm.builder.to_state().size() == 1)
 
 	# Healed land is clean land.
-	gs.holy_water = 1
+	inv.holy_water = 1
 	farm.healing.cleanse(Vector2i(35, 12))
 	await physics_frame
 	await physics_frame
 	await press("use_tool")
 	check("builds on healed land", farm.builder.placed.has(Vector2i(35, 12)))
-	check("last one used", gs.building_count(lantern) == 0)
+	check("last one used", inv.building_count(lantern) == 0)
 	await aim_at(player, g, Vector2i(20, 15))
 	await press("use_tool")
 	check("none left", farm.builder.to_state().size() == 2)

@@ -8,20 +8,21 @@ func check(name: String, ok: bool) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
 	var farm: Node = main.get_node("Farm")
 	var hud: Node = main.get_node("HUD")
-	var c := gs.CROPS as Array
-	check("day", gs.day == 5)
-	check("money paid and kept", gs.money == 200)
-	check("seeds", gs.seed_count(c[0]) == 8 and gs.seed_count(c[1]) == 4 and gs.seed_count(c[2]) == 2)
-	check("harvest", gs.harvest_count(c[0]) == 2)
-	check("after-save pumpkin lost", gs.harvest_count(c[2]) == 0)
-	check("shipping empty", gs.shipped.is_empty())
-	check("dictionary keys still StringName", typeof(gs.seeds.keys()[0]) == TYPE_STRING_NAME)
+	var c := inv.CROPS as Array
+	check("day", progress.day == 5)
+	check("money paid and kept", inv.money == 200)
+	check("seeds", inv.seed_count(c[0]) == 8 and inv.seed_count(c[1]) == 4 and inv.seed_count(c[2]) == 2)
+	check("harvest", inv.harvest_count(c[0]) == 2)
+	check("after-save pumpkin lost", inv.harvest_count(c[2]) == 0)
+	check("shipping empty", inv.shipped.is_empty())
+	check("dictionary keys still StringName", typeof(inv.seeds.keys()[0]) == TYPE_STRING_NAME)
 	check("tilled empty cell", farm.is_tilled(Vector2i(20, 12)) and not farm.crops.has(Vector2i(20, 12)))
 	# save_1_play's water() re-tilled this cell after night 3 turned it to grass, so 1 night.
 	check("empty soil's nights kept", farm.soil_idle.get(Vector2i(20, 12), 0) == 1)
@@ -41,9 +42,9 @@ func _run() -> void:
 	check("HUD day", hud.day_label.text == "Day 5")
 	check("HUD money", hud.money_label.text == "200")
 	farm.harvest(Vector2i(14, 10))
-	check("restored crop harvests", gs.harvest_count(c[0]) == 3)
+	check("restored crop harvests", inv.harvest_count(c[0]) == 3)
 	farm.water(Vector2i(15, 10))
-	gs.end_day()
+	progress.end_day()
 	check("restored crop keeps growing", carrot.days_grown == 4)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

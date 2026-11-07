@@ -31,9 +31,9 @@ func setup(farm: Farm, parent: Node2D, player: Node2D) -> void:
 
 func count_for_today() -> int:
 	var balance := GameState.BALANCE
-	if GameState.day < balance.creature_first_day:
+	if Progress.day < balance.creature_first_day:
 		return 0
-	var extra := int(GameState.healed_percent / balance.creature_heal_percent_each)
+	var extra := int(Progress.healed_percent / balance.creature_heal_percent_each)
 	return mini(balance.creature_base_count + extra, balance.creature_max_count)
 
 
@@ -42,11 +42,11 @@ func spawn_for_today() -> void:
 	var wanted := count_for_today()
 	if wanted == 0:
 		return
-	if GameState.day == GameState.BALANCE.creature_first_day:
+	if Progress.day == GameState.BALANCE.creature_first_day:
 		GameState.notice.emit("Something stirs at the edge of the curse...")
 	var rng := RandomNumberGenerator.new()
 	# Seeded by the day, so a morning always plays out the same way.
-	rng.seed = GameState.day
+	rng.seed = Progress.day
 	var cells := spawn_cells()
 	_shuffle(cells, rng)
 	var taken: Array[Vector2] = []

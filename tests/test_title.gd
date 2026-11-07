@@ -47,10 +47,13 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	check("the game opens on this screen", ProjectSettings.get_setting("application/run/main_scene") == "res://scenes/ui/title_screen.tscn")
 
 	# First time: no save.
-	check("no save at first", not gs.has_save())
+	check("no save at first", not saves.has_save())
 	var title: Node = await open_title()
 	check("no Continue", not title.continue_button.visible)
 	check("New Game has focus", title.new_game_button.has_focus())
@@ -58,31 +61,31 @@ func _run() -> void:
 	await press("ui_accept")
 	await wait_for_game()
 	check("no question with nothing to lose", current_scene.name == "Main")
-	check("day 1", gs.day == 1)
+	check("day 1", progress.day == 1)
 
 	# A farm in progress.
-	gs.day = 9
-	gs.money = 500
-	gs.harvest[&"radish"] = 3
-	gs.materials[&"wood"] = 7
-	gs.buildings[&"fence"] = 2
-	gs.holy_water = 4
-	gs.strong_holy_water = 1
-	gs.has_sword = true
-	gs.has_purifying_hoe = true
-	gs.hoe_uses_left = 2
-	gs.hearts = 1
-	gs.seeds[&"radish"] = 0
-	gs.farm_state = {"cleansed": [Vector2i(38, 13)], "tilled": [], "crops": [], "gathered": [], "buildings": []}
-	gs.save_game()
+	progress.day = 9
+	inv.money = 500
+	inv.harvest[&"radish"] = 3
+	inv.materials[&"wood"] = 7
+	inv.buildings[&"fence"] = 2
+	inv.holy_water = 4
+	inv.strong_holy_water = 1
+	inv.has_sword = true
+	inv.has_purifying_hoe = true
+	inv.hoe_uses_left = 2
+	progress.hearts = 1
+	inv.seeds[&"radish"] = 0
+	saves.farm_state = {"cleansed": [Vector2i(38, 13)], "tilled": [], "crops": [], "gathered": [], "buildings": []}
+	saves.save_game()
 	title = await open_title()
-	check("save found", gs.has_save())
+	check("save found", saves.has_save())
 	check("Continue shows the day", title.continue_button.visible and title.continue_button.text == "Continue (Day 9)")
 	check("Continue has focus", title.continue_button.has_focus())
 	await press("ui_accept")
 	await wait_for_game()
 	check("Continue starts the game", current_scene.name == "Main")
-	check("the farm is there", gs.day == 9 and current_scene.get_node("Farm").healing.cleansed.size() == 1)
+	check("the farm is there", progress.day == 9 and current_scene.get_node("Farm").healing.cleansed.size() == 1)
 
 	# New Game asks, and the safe answer comes first.
 	title = await open_title()
@@ -92,12 +95,12 @@ func _run() -> void:
 	check("the warning names the farm", title.confirm_label.text.contains("Day 9"))
 	check("No has focus", title.confirm_no.has_focus())
 	await press("ui_accept")
-	check("Enter by accident keeps the farm", not title.confirm.visible and gs.has_save() and current_scene == title)
+	check("Enter by accident keeps the farm", not title.confirm.visible and saves.has_save() and current_scene == title)
 	check("back on New Game", title.new_game_button.has_focus())
 	title.new_game_button.pressed.emit()
 	await process_frame
 	await press("ui_cancel")
-	check("Esc keeps the farm", not title.confirm.visible and gs.has_save() and gs.day == 9)
+	check("Esc keeps the farm", not title.confirm.visible and saves.has_save() and progress.day == 9)
 
 	# Really starting over.
 	title.new_game_button.pressed.emit()
@@ -105,31 +108,31 @@ func _run() -> void:
 	title.confirm_yes.pressed.emit()
 	await wait_for_game()
 	check("in the game", current_scene.name == "Main")
-	check("save erased", not gs.has_save() and not FileAccess.file_exists(gs.SAVE_PATH))
-	check("day and money", gs.day == 1 and gs.money == 0)
-	check("seeds back", gs.seeds == gs.START_SEEDS)
-	check("crops, materials, buildings", gs.harvest.is_empty() and gs.materials.is_empty() and gs.buildings.is_empty())
-	check("water: the free start amount, 2", gs.holy_water == 2 and gs.holy_water == gs.BALANCE.start_holy_water and gs.strong_holy_water == 0)
-	check("upgrades", not gs.has_sword and not gs.has_purifying_hoe and gs.hoe_uses_left == 0)
-	check("hearts", gs.hearts == 5)
-	check("empty land", current_scene.get_node("Farm").healing.cleansed.is_empty() and gs.healed_percent == 0.0)
-	gs.seeds[&"radish"] = 1
-	check("the starting list is untouched", gs.START_SEEDS[&"radish"] == 10)
+	check("save erased", not saves.has_save() and not FileAccess.file_exists(saves.SAVE_PATH))
+	check("day and money", progress.day == 1 and inv.money == 0)
+	check("seeds back", inv.seeds == inv.START_SEEDS)
+	check("crops, materials, buildings", inv.harvest.is_empty() and inv.materials.is_empty() and inv.buildings.is_empty())
+	check("water: the free start amount, 2", inv.holy_water == 2 and inv.holy_water == gs.BALANCE.start_holy_water and inv.strong_holy_water == 0)
+	check("upgrades", not inv.has_sword and not inv.has_purifying_hoe and inv.hoe_uses_left == 0)
+	check("hearts", progress.hearts == 5)
+	check("empty land", current_scene.get_node("Farm").healing.cleansed.is_empty() and progress.healed_percent == 0.0)
+	inv.seeds[&"radish"] = 1
+	check("the starting list is untouched", inv.START_SEEDS[&"radish"] == 10)
 
 	# Starting over from a real old save leaves nothing behind.
 	var out := FileAccess.open("user://save.cfg", FileAccess.WRITE)
 	out.store_string(FileAccess.get_file_as_string("res://tests/fixtures/save_v1.cfg"))
 	out.close()
-	gs.load_game()
-	check("old save counts", gs.has_save() and gs.day == 2)
-	gs.start_new_game()
-	check("old save erased", not gs.has_save() and gs.day == 1 and gs.farm_state.is_empty())
+	saves.load_game()
+	check("old save counts", saves.has_save() and progress.day == 2)
+	saves.start_new_game()
+	check("old save erased", not saves.has_save() and progress.day == 1 and saves.farm_state.is_empty())
 
 	# A broken save isn't offered.
 	out = FileAccess.open("user://save.cfg", FileAccess.WRITE)
 	out.store_string("not a save")
 	out.close()
-	check("broken save ignored", not gs.has_save())
+	check("broken save ignored", not saves.has_save())
 	title = await open_title()
 	check("no Continue for it", not title.continue_button.visible)
 	print("FAILS: %d" % fails)

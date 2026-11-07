@@ -1,5 +1,5 @@
 extends GameMenu
-## The shop. One seed row per crop, built from GameState.CROPS, then holy water.
+## The shop. One seed row per crop, built from Inventory.CROPS, then holy water.
 
 var _labels: Array[Label] = []
 var _buttons: Array[Button] = []
@@ -9,9 +9,9 @@ var _buttons: Array[Button] = []
 
 
 func _ready() -> void:
-	for crop in GameState.CROPS:
-		_add_row(GameState.buy_seed.bind(crop), crop.seed_icon)
-	_add_row(GameState.buy_holy_water, HOLY_WATER_ICON)
+	for crop in Inventory.CROPS:
+		_add_row(Inventory.buy_seed.bind(crop), crop.seed_icon)
+	_add_row(Inventory.buy_holy_water, HOLY_WATER_ICON)
 	GameState.shop_requested.connect(open)
 	super()
 	_refresh()
@@ -41,14 +41,14 @@ func _add_row(buy: Callable, icon: Texture2D) -> void:
 
 
 func _refresh() -> void:
-	money_label.text = "Money: %d" % GameState.money
-	for i in GameState.CROPS.size():
-		var crop := GameState.CROPS[i]
-		_labels[i].text = "%s seeds: %d" % [crop.display_name, GameState.seed_count(crop)]
+	money_label.text = "Money: %d" % Inventory.money
+	for i in Inventory.CROPS.size():
+		var crop := Inventory.CROPS[i]
+		_labels[i].text = "%s seeds: %d" % [crop.display_name, Inventory.seed_count(crop)]
 		_set_price(i, crop.seed_price)
 	var last := _labels.size() - 1
-	var left := GameState.holy_water_left_today()
-	_labels[last].text = "Holy water: %d (%d left)" % [GameState.holy_water, left]
+	var left := Inventory.holy_water_left_today()
+	_labels[last].text = "Holy water: %d (%d left)" % [Inventory.holy_water, left]
 	_set_price(last, GameState.BALANCE.holy_water_price)
 	if left <= 0:
 		_buttons[last].text = "Sold out"
@@ -57,4 +57,4 @@ func _refresh() -> void:
 
 func _set_price(row: int, price: int) -> void:
 	_buttons[row].text = "Buy for %d" % price
-	_buttons[row].disabled = GameState.money < price
+	_buttons[row].disabled = Inventory.money < price

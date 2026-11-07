@@ -27,7 +27,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -94,7 +96,7 @@ func _run() -> void:
 	check("doesn't block building", farm.can_build(g.local_to_map(g.to_local(shade.global_position))))
 	player.global_position = shade.global_position + Vector2(30, -10)
 	await wait(2)
-	gs.has_sword = true
+	inv.has_sword = true
 	player.sword.swing(Vector2.LEFT)
 	await wait(20)
 	check("a single hit doesn't defeat it", is_instance_valid(shade) and shade.health >= 1)
@@ -124,7 +126,7 @@ func _run() -> void:
 	paused = false
 
 	# Not saved.
-	gs.end_day()
-	check("not in the save", not str(gs.farm_state).contains("shade"))
+	progress.end_day()
+	check("not in the save", not str(saves.farm_state).contains("shade"))
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -36,7 +36,7 @@ func _ready() -> void:
 	_fit_screen()
 	player.tool_changed.connect(_show_selected)
 	# Touch controls emit this when they turn on or off.
-	GameState.inventory_changed.connect(_update_visible)
+	Inventory.inventory_changed.connect(_update_visible)
 	_show_selected()
 	_update_visible()
 

@@ -3,5 +3,5 @@ extends Area2D
 
 
 func interact(_player: Player) -> void:
-	GameState.ship_all()
+	Inventory.ship_all()
 	Audio.play(&"ship")

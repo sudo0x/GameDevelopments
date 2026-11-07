@@ -37,7 +37,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -48,7 +49,7 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
 	var preview: Sprite2D = farm.build_preview
-	var lantern = gs.BUILDINGS[0]
+	var lantern = inv.BUILDINGS[0]
 	var BUILD := 5
 
 	var key := InputEventKey.new()
@@ -70,13 +71,13 @@ func _run() -> void:
 	check("preview red", preview.modulate == preview.INVALID_COLOR)
 
 	# Crafting one.
-	var recipe = gs.RECIPES[2]
-	gs.add_material(gs.MATERIALS[0], 3)
-	gs.add_material(gs.MATERIALS[1], 2)
+	var recipe = inv.RECIPES[2]
+	inv.add_material(inv.MATERIALS[0], 3)
+	inv.add_material(inv.MATERIALS[1], 2)
 	check("recipe is the lantern", recipe.building == lantern)
-	check("crafted", gs.craft(recipe) and gs.building_count(lantern) == 1)
-	check("materials spent", gs.material_count(gs.MATERIALS[0]) == 0 and gs.material_count(gs.MATERIALS[1]) == 0)
-	check("can make more than one", not gs.already_made(recipe))
+	check("crafted", inv.craft(recipe) and inv.building_count(lantern) == 1)
+	check("materials spent", inv.material_count(inv.MATERIALS[0]) == 0 and inv.material_count(inv.MATERIALS[1]) == 0)
+	check("can make more than one", not inv.already_made(recipe))
 	await physics_frame
 	await physics_frame
 	check("usable now", farm.can_use(BUILD, open_cell))
@@ -128,9 +129,9 @@ func _run() -> void:
 	bag.open()
 	check("bag shows it", bag.items_text.contains("Lantern post: 1"))
 	bag.close()
-	gs.save_game()
-	gs.buildings.clear()
-	gs.load_game()
-	check("saved", gs.building_count(lantern) == 1)
+	saves.save_game()
+	inv.buildings.clear()
+	saves.load_game()
+	check("saved", inv.building_count(lantern) == 1)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -29,7 +29,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -39,16 +41,16 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var fence = gs.building_by_id(&"fence")
+	var fence = inv.building_by_id(&"fence")
 	check("fence exists", fence != null and fence.heal_radius == 0)
 
 	# Crafting by wood alone.
-	gs.add_material(gs.MATERIALS[0], 6)
-	var recipe = gs.RECIPES[3]
+	inv.add_material(inv.MATERIALS[0], 6)
+	var recipe = inv.RECIPES[3]
 	check("recipe is the fence", recipe.building == fence)
 	for i in 6:
-		gs.craft(recipe)
-	check("6 made", gs.building_count(fence) == 6 and gs.material_count(gs.MATERIALS[0]) == 0)
+		inv.craft(recipe)
+	check("6 made", inv.building_count(fence) == 6 and inv.material_count(inv.MATERIALS[0]) == 0)
 
 	# Q and E go through the buildings, and wrap around.
 	await press("tool_6")
@@ -71,7 +73,7 @@ func _run() -> void:
 	var y := 12
 	for x in range(14, 18):
 		farm.builder.place(Vector2i(x, y), fence)
-	check("4 placed", farm.builder.to_state().size() == 4 and gs.building_count(fence) == 2)
+	check("4 placed", farm.builder.to_state().size() == 4 and inv.building_count(fence) == 2)
 	var first: Node2D = farm.builder.placed[Vector2i(14, y)]["node"]
 	var second: Node2D = farm.builder.placed[Vector2i(15, y)]["node"]
 	check("exactly one tile apart", second.global_position.x - first.global_position.x == 32.0)
@@ -94,17 +96,17 @@ func _run() -> void:
 
 	# Picking up gives a fence back, not a lantern.
 	farm.builder.pick_up(Vector2i(14, y))
-	check("fence back in the bag", gs.building_count(fence) == 3)
+	check("fence back in the bag", inv.building_count(fence) == 3)
 
 	# Fences don't heal.
 	var healed: int = farm.healing.cleansed.size()
 	farm.builder.place(Vector2i(34, 13), fence)
-	gs.end_day()
+	progress.end_day()
 	check("no healing from fences", farm.healing.cleansed.size() == healed)
-	check("saved with its id", gs.farm_state["buildings"].filter(func(b: Dictionary) -> bool: return b["id"] == &"fence").size() == 4)
+	check("saved with its id", saves.farm_state["buildings"].filter(func(b: Dictionary) -> bool: return b["id"] == &"fence").size() == 4)
 
 	# A line going up and down uses the vertical art, and has no gaps either.
-	gs.add_building(fence, 3)
+	inv.add_building(fence, 3)
 	for row in range(8, 11):
 		farm.builder.place(Vector2i(10, row), fence)
 	var top: Node = farm.builder.placed[Vector2i(10, 8)]["node"]

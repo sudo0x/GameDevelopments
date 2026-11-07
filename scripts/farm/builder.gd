@@ -21,7 +21,7 @@ func setup(ground: TileMapLayer, parent: Node2D) -> void:
 
 ## Uses one crafted building. Check Farm.can_build() first.
 func place(cell: Vector2i, building: BuildingData) -> void:
-	if GameState.use_building(building):
+	if Inventory.use_building(building):
 		_spawn(cell, building)
 		fit_neighbors()
 
@@ -32,7 +32,7 @@ func pick_up(cell: Vector2i) -> void:
 	placed.erase(cell)
 	entry["node"].queue_free()
 	fit_neighbors()
-	GameState.add_building(entry["data"])
+	Inventory.add_building(entry["data"])
 	GameState.notice.emit("Picked up: %s" % entry["data"].display_name)
 
 
@@ -80,7 +80,7 @@ func adopt_starting(left: Variant) -> void:
 
 func restore(saved: Array) -> void:
 	for entry: Dictionary in saved:
-		var building := GameState.building_by_id(entry["id"])
+		var building := Inventory.building_by_id(entry["id"])
 		if building:
 			_spawn(entry["cell"], building)
 	fit_neighbors()
@@ -102,7 +102,7 @@ func fit_neighbors() -> void:
 
 ## Only starting-only kinds, so the map's lanterns are old ones that don't heal.
 func _building_for(node: Node) -> BuildingData:
-	for building in GameState.BUILDINGS:
+	for building in Inventory.BUILDINGS:
 		if building.starting_only and node.scene_file_path == building.scene.resource_path:
 			return building
 	return null

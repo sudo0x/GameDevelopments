@@ -14,7 +14,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var theme: Theme = load("res://data/ui/game_theme.tres")
 	check("the project uses it", ProjectSettings.get_setting("gui/theme/custom") == "res://data/ui/game_theme.tres")
 	for style in ["normal", "hover", "pressed", "disabled", "focus"]:
@@ -27,11 +27,11 @@ func _run() -> void:
 	check("the size is a clean size", theme.default_font_size == 24)
 	check("panels are art", theme.get_stylebox("panel", "PanelContainer") is StyleBoxTexture)
 	check("buttons are art", theme.get_stylebox("normal", "Button") is StyleBoxTexture)
-	for crop in gs.CROPS:
+	for crop in inv.CROPS:
 		check(crop.id + " has icons", crop.icon != null and crop.seed_icon != null)
-	for material in gs.MATERIALS:
+	for material in inv.MATERIALS:
 		check(material.id + " has an icon", material.icon != null)
-	for recipe in gs.RECIPES:
+	for recipe in inv.RECIPES:
 		check(recipe.display_name + " has an icon", recipe.icon != null)
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)

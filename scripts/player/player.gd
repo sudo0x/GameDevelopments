@@ -37,11 +37,11 @@ var facing: Facing = Facing.DOWN
 ## Last movement direction (8-way).
 var look_direction: Vector2 = Vector2.DOWN
 var tool: Tool = Tool.HOE
-## Index into GameState.CROPS of the seed planted with the Seeds tool.
+## Index into Inventory.CROPS of the seed planted with the Seeds tool.
 var seed_index := 0
 ## Whether the Holy water tool uses the strong kind.
 var strong_water := false
-## Index into GameState.BUILDINGS of the building placed with the Build tool.
+## Index into Inventory.BUILDINGS of the building placed with the Build tool.
 var building_index := 0
 
 var _walk_time: float = 0.0
@@ -112,7 +112,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("seed_prev"):
 		_change_selection(-1)
 	if event.is_action_pressed("use_tool"):
-		if tool == Tool.SWORD and GameState.has_sword:
+		if tool == Tool.SWORD and Inventory.has_sword:
 			sword.swing(FACING_DIRECTIONS[facing])
 		tool_used.emit(tool)
 	if event.is_action_pressed("interact"):
@@ -122,12 +122,12 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Called by creatures on contact. Does nothing during the short safe time after a hit,
 ## or while the day is changing.
 func hurt(amount: int, direction: Vector2) -> void:
-	if _safe_left > 0.0 or GameState.day_changing:
+	if _safe_left > 0.0 or Progress.day_changing:
 		return
 	_safe_left = SAFE_SECONDS
 	_knockback = direction * KNOCKBACK_SPEED
 	Audio.play(&"hurt")
-	GameState.take_damage(amount)
+	Progress.take_damage(amount)
 
 
 ## Sends the player home. Physics interpolation is reset so they jump there instead of sliding.
@@ -137,25 +137,25 @@ func return_home() -> void:
 
 
 func selected_seed() -> CropData:
-	return GameState.CROPS[seed_index]
+	return Inventory.CROPS[seed_index]
 
 
 func selected_building() -> BuildingData:
-	return GameState.BUILDINGS[building_index]
+	return Inventory.BUILDINGS[building_index]
 
 
 ## Q and E pick a building, or a kind of holy water, and a seed the rest of the time.
 func _change_selection(step: int) -> void:
 	if tool == Tool.BUILD:
-		for i in GameState.BUILDINGS.size():
-			building_index = posmod(building_index + step, GameState.BUILDINGS.size())
-			var building := GameState.BUILDINGS[building_index]
-			if not building.starting_only or GameState.building_count(building) > 0:
+		for i in Inventory.BUILDINGS.size():
+			building_index = posmod(building_index + step, Inventory.BUILDINGS.size())
+			var building := Inventory.BUILDINGS[building_index]
+			if not building.starting_only or Inventory.building_count(building) > 0:
 				break
 	elif tool == Tool.HOLY_WATER:
 		strong_water = not strong_water
 	else:
-		seed_index = posmod(seed_index + step, GameState.CROPS.size())
+		seed_index = posmod(seed_index + step, Inventory.CROPS.size())
 	tool_changed.emit()
 
 

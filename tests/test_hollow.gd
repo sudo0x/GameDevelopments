@@ -27,7 +27,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -36,7 +37,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var player: Node2D = main.get_node("World/Player")
 	var spawner: Node = farm.spawner
-	var shard = gs.MATERIALS[2]
+	var shard = inv.MATERIALS[2]
 	var HOLLOW := "res://data/creatures/hollow.tres"
 	var SHADE := "res://data/creatures/shade.tres"
 	var open := Vector2(600, 500)
@@ -58,10 +59,10 @@ func _run() -> void:
 	shade.queue_free()
 	for i in 3:
 		hollow.take_hit(1, Vector2.RIGHT)
-	check("3 hits isn't enough", hollow.health == 1 and gs.material_count(shard) == 0)
+	check("3 hits isn't enough", hollow.health == 1 and inv.material_count(shard) == 0)
 	hollow.take_hit(1, Vector2.RIGHT)
 	check("4 defeats it", hollow.health == 0)
-	check("3 shards", gs.material_count(shard) == 3)
+	check("3 shards", inv.material_count(shard) == 3)
 	check("notice", main.get_node("HUD").notice_label.text == "+3 Curse shard")
 
 	# Heavy: it doesn't float, and a hit moves it less than a shade.
@@ -94,7 +95,7 @@ func _run() -> void:
 	print("hollow moved %.1f in a second" % speed)
 	check("slower than a shade", speed > 25.0 and speed < 45.0)
 	await wait(50)
-	check("takes 2 hearts", gs.hearts == 3)
+	check("takes 2 hearts", progress.hearts == 3)
 	chaser.queue_free()
 	await wait(2)
 
@@ -119,14 +120,14 @@ func _run() -> void:
 	await wait(3)
 	player.global_position = Vector2(784, 348)
 	await wait(3)
-	gs.day = 20
-	gs.healed_percent = 90.0
+	progress.day = 20
+	progress.healed_percent = 90.0
 	var saw_hollow := false
 	var saw_shade := false
 	var rule_ok := true
 	for morning in 12:
-		gs.end_day()
-		gs.healed_percent = 90.0
+		progress.end_day()
+		progress.healed_percent = 90.0
 		await process_frame
 		for c: Node2D in spawner.creatures:
 			if not is_instance_valid(c):

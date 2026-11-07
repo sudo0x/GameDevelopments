@@ -23,9 +23,9 @@ func _ready() -> void:
 	Audio.play_music(&"title")
 	confirm_yes.pressed.connect(_erase_and_start)
 	confirm_no.pressed.connect(_cancel_new_game)
-	var has_save := GameState.has_save()
+	var has_save := SaveGame.has_save()
 	continue_button.visible = has_save
-	continue_button.text = "Continue (Day %d)" % GameState.day
+	continue_button.text = "Continue (Day %d)" % Progress.day
 	# Phones have their own way to leave an app.
 	quit_button.visible = not OS.has_feature("mobile")
 	(continue_button if has_save else new_game_button).grab_focus()
@@ -38,10 +38,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_new_game() -> void:
-	if not GameState.has_save():
+	if not SaveGame.has_save():
 		_erase_and_start()
 		return
-	confirm_label.text = "Start over? Your farm on Day %d will be gone for good." % GameState.day
+	confirm_label.text = "Start over? Your farm on Day %d will be gone for good." % Progress.day
 	confirm.show()
 	# "No" first, so pressing Enter by accident can't erase a farm.
 	confirm_no.grab_focus()
@@ -64,7 +64,7 @@ func _cancel_new_game() -> void:
 
 
 func _erase_and_start() -> void:
-	GameState.start_new_game()
+	SaveGame.start_new_game()
 	_start_game()
 
 

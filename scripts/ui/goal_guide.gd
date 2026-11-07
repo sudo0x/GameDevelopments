@@ -2,7 +2,7 @@ class_name GoalGuide
 extends Label
 ## Teaches the game by doing: one goal at a time under the tool text, ticked off by playing, then
 ## the long goal. A New Game opens with a short story panel. Each row is the action that finishes
-## the goal (see GameState.record_action), then its text for keyboards and for touch screens.
+## the goal (see Progress.record_action), then its text for keyboards and for touch screens.
 
 const STEPS: Array[Array] = [
 	["till", "Goal: press 1, then Space to till the soil.", "Goal: tap the hoe, then Use to till the soil."],
@@ -43,22 +43,22 @@ func _ready() -> void:
 	# Goals sit over trees and grass, so they need more help to read than other text.
 	add_theme_color_override("font_outline_color", OUTLINE_COLOR)
 	add_theme_constant_override("outline_size", OUTLINE_SIZE)
-	GameState.guide_changed.connect(_refresh)
-	GameState.inventory_changed.connect(_refresh)
-	GameState.day_started.connect(_refresh)
+	Progress.guide_changed.connect(_refresh)
+	Inventory.inventory_changed.connect(_refresh)
+	Progress.day_started.connect(_refresh)
 	_refresh()
-	if GameState.show_story:
-		GameState.show_story = false
+	if Progress.show_story:
+		Progress.show_story = false
 		_open_story.call_deferred()
 
 
 ## The goal to show now.
 func current_text() -> String:
-	if not GameState.guide_done.has(GameState.GUIDE_FINISHED):
+	if not Progress.guide_done.has(Progress.GUIDE_FINISHED):
 		for step in STEPS:
-			if not GameState.guide_done.has(step[0]):
+			if not Progress.guide_done.has(step[0]):
 				return GameState.controls(step[1], step[2])
-	return LAST_GOAL if GameState.farm_state.get("shrine", false) else SHRINE_GOAL
+	return LAST_GOAL if SaveGame.farm_state.get("shrine", false) else SHRINE_GOAL
 
 
 func _refresh() -> void:

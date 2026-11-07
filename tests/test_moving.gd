@@ -37,7 +37,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -67,15 +69,15 @@ func _run() -> void:
 	check("says it can be picked up", hud.crop_status_label.text == "Shipping box: press 4, then Space to pick up.")
 	await press("use_tool")
 	await process_frame
-	var box_data: Resource = gs.building_by_id(&"shipping_box")
-	check("box in the bag", gs.building_count(box_data) == 1 and not builder.placed.has(box_cell))
+	var box_data: Resource = inv.building_by_id(&"shipping_box")
+	check("box in the bag", inv.building_count(box_data) == 1 and not builder.placed.has(box_cell))
 	check("box gone from the map", not main.has_node("World/ShippingBox"))
 	check("no longer a starting object", not builder.starting_left().has("ShippingBox"))
 
 	# The Build tool offers it only while one is in the bag.
 	await press("tool_6")
 	var offered := []
-	for i in gs.BUILDINGS.size():
+	for i in inv.BUILDINGS.size():
 		offered.append(player.selected_building().id)
 		await press("seed_next")
 	check("build tool offers the box", offered.has(&"shipping_box"))
@@ -86,18 +88,18 @@ func _run() -> void:
 	check("can build there", farm.can_build(new_cell))
 	builder.place(new_cell, box_data)
 	var box: Node = builder.placed[new_cell]["node"]
-	check("placed", gs.building_count(box_data) == 0 and box.scene_file_path == "res://scenes/farm/shipping_box.tscn")
-	gs.add_harvest(gs.CROPS[0])
+	check("placed", inv.building_count(box_data) == 0 and box.scene_file_path == "res://scenes/farm/shipping_box.tscn")
+	inv.add_harvest(inv.CROPS[0])
 	box.get_node("Interact").interact(player)
-	check("still ships", gs.harvest_count(gs.CROPS[0]) == 0 and not gs.shipped.is_empty())
+	check("still ships", inv.harvest_count(inv.CROPS[0]) == 0 and not inv.shipped.is_empty())
 
 	# A map lantern picked up is an old lantern: it keeps its light, but doesn't heal.
 	builder.pick_up(cell_of(builder, "LanternSouthWest"))
-	var old: Resource = gs.building_by_id(&"old_lantern_post")
-	check("old lantern in the bag", gs.building_count(old) == 1)
+	var old: Resource = inv.building_by_id(&"old_lantern_post")
+	check("old lantern in the bag", inv.building_count(old) == 1)
 
-	gs.end_day()
-	var state: Dictionary = gs.farm_state
+	progress.end_day()
+	var state: Dictionary = saves.farm_state
 	check("saved what's left", state["starting_objects"].size() == 4)
 	check("saved the moved box", state["buildings"].has({"cell": new_cell, "id": &"shipping_box"}))
 	print("FAILS: %d" % fails)

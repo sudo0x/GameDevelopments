@@ -25,7 +25,8 @@ func _initialize() -> void:
 	_run()
 
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -44,24 +45,24 @@ func _run() -> void:
 	await press("tool_3")
 	await press("use_tool")
 	check("planted", farm.crops.has(cell))
-	var radish = gs.CROPS[0]
-	check("seed used", gs.seed_count(radish) == 9)
+	var radish = inv.CROPS[0]
+	check("seed used", inv.seed_count(radish) == 9)
 
 	await press("tool_4")
 	check("hand refuses empty-ripe check on unripe", not farm.can_use(3, cell))
 	await press("use_tool")
-	check("unripe crop stays", farm.crops.has(cell) and gs.harvest_count(radish) == 0)
+	check("unripe crop stays", farm.crops.has(cell) and inv.harvest_count(radish) == 0)
 
 	var neighbour := cell + Vector2i(5, 0)
 	check("hand refuses empty cell", not farm.can_use(3, neighbour))
 
-	gs.end_day()
+	progress.end_day()
 	check("unwatered does not grow", farm.crops[cell].days_grown == 0)
 	for d in 3:
 		await press("tool_2")
 		await press("use_tool")
 		check("watered day %d" % d, farm.is_watered(cell))
-		gs.end_day()
+		progress.end_day()
 	var crop: Node = farm.crops[cell]
 	check("ripe after 3 watered days", crop.is_ripe())
 
@@ -69,18 +70,18 @@ func _run() -> void:
 	check("hand usable on ripe", farm.can_use(3, cell))
 	await press("use_tool")
 	await process_frame
-	check("harvest counted", gs.harvest_count(radish) == 1)
+	check("harvest counted", inv.harvest_count(radish) == 1)
 	check("crop removed from grid", not farm.crops.has(cell))
 	check("crop node freed", not is_instance_valid(crop))
 	check("soil stays tilled", farm.is_tilled(cell))
 	await press("use_tool")
-	check("second press harvests nothing", gs.harvest_count(radish) == 1)
+	check("second press harvests nothing", inv.harvest_count(radish) == 1)
 	check("HUD status text", hud.status_label.text.contains("Island healed"))
 	check("HUD money text", hud.money_label.text == "0")
 	print("inventory label:\n" + hud.status_label.text)
 
 	await press("tool_3")
 	await press("use_tool")
-	check("can replant", farm.crops.has(cell) and gs.seed_count(radish) == 8)
+	check("can replant", farm.crops.has(cell) and inv.seed_count(radish) == 8)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

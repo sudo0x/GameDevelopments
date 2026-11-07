@@ -32,6 +32,9 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
+	var progress: Node = root.get_node("Progress")
+	var saves: Node = root.get_node("SaveGame")
 	var audio: Node = root.get_node("Audio")
 	await process_frame
 	for bus in ["Music", "Effects"]:
@@ -58,8 +61,8 @@ func _run() -> void:
 	audio.music_volume = 1.0
 	audio.load_settings()
 	check("settings load back", is_equal_approx(audio.music_volume, 0.5) and audio.effects_volume == 0.0)
-	gs.start_new_game()
-	gs.show_story = false
+	saves.start_new_game()
+	progress.show_story = false
 	check("New Game keeps the volume", is_equal_approx(audio.music_volume, 0.5))
 	audio.set_effects_volume(0.8)
 
@@ -116,16 +119,16 @@ func _run() -> void:
 		await press(step[0])
 		await press("use_tool")
 		check(step[1] + " sound", audio.last_requested == StringName(step[1]))
-	gs.holy_water = 1
+	inv.holy_water = 1
 	farm.healing.cleanse(Vector2i(38, 13))
 	check("cleanse sound", audio.last_requested == &"cleanse")
 	gs.request_shop()
 	await process_frame
 	check("menu opens with a sound", audio.last_requested == &"menu_open")
-	gs.money = 100
+	inv.money = 100
 	var shop: Node = main.find_child("ShopMenu", true, false)
 	shop._buttons[0].pressed.emit()
-	check("buying", audio.last_requested == &"buy" and gs.seed_count(gs.CROPS[0]) > 0)
+	check("buying", audio.last_requested == &"buy" and inv.seed_count(inv.CROPS[0]) > 0)
 	shop.close()
 	check("menu closes with a sound", audio.last_requested == &"menu_close")
 	main.get_node("World/ShippingBox/Interact").interact(player)

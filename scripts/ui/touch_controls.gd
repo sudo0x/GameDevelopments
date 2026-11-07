@@ -171,7 +171,7 @@ func set_active(value: bool) -> void:
 		_release_movement()
 	_show_selected_tool()
 	# Help text on screen depends on the controls in use.
-	GameState.inventory_changed.emit()
+	Inventory.inventory_changed.emit()
 
 
 func _make_room_for_pause(on: bool) -> void:

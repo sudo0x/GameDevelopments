@@ -10,7 +10,7 @@ func check(name: String, ok: bool) -> void:
 func _initialize() -> void:
 	_run()
 func _run() -> void:
-	var gs: Node = root.get_node("GameState")
+	var inv: Node = root.get_node("Inventory")
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
@@ -31,9 +31,9 @@ func _run() -> void:
 	file.close()
 	check("a restart marks the same tiles", marked_before == Array(healing.marked))
 	check("a blighted crop stays blighted", farm.crops[Vector2i(20, 13)].blighted)
-	var money: int = gs.money
-	gs.holy_water = 1
+	var money: int = inv.money
+	inv.holy_water = 1
 	healing.cleanse(find)
-	check("healing it again pays nothing", g.get_cell_source_id(find) == GRASS and gs.money == money)
+	check("healing it again pays nothing", g.get_cell_source_id(find) == GRASS and inv.money == money)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)
