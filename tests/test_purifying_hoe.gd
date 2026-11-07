@@ -70,7 +70,7 @@ func _run() -> void:
 	await process_frame
 	check("menu text", menu._labels[1].text == "Purifying hoe\n10 Wood (12), 5 Stone (5)")
 	menu._buttons[1].pressed.emit()
-	check("made", inv.has_purifying_hoe and inv.hoe_uses_left == 5)
+	check("made", inv.has_purifying_hoe and inv.hoe_uses_left == 2)
 	check("spent", inv.material_count(wood) == 2 and inv.material_count(stone) == 0)
 	check("menu shows it's done", menu._labels[1].text == "Purifying hoe\nUse the hoe on cursed land.")
 	check("button says Made", menu._buttons[1].text == "Made" and menu._buttons[1].disabled)
@@ -88,17 +88,17 @@ func _run() -> void:
 		await physics_frame
 	check("facing the curse", farm.target_cell == edge)
 	await press("tool_1")
-	check("HUD shows uses", hud.tool_label.text == "Tool: Hoe  |  Purify left today: 5")
+	check("HUD shows uses", hud.tool_label.text == "Tool: Hoe  |  Purify left today: 2")
 	check("highlight valid on curse", farm.can_use(0, edge))
 	await press("use_tool")
 	check("healed one tile", g.get_cell_source_id(edge) == 0)
 	check("only one tile", g.get_cell_source_id(edge + Vector2i(1, 0)) == 1 and farm.healing.cleansed.size() == 1)
 	check("not tilled by the same hit", not farm.is_tilled(edge))
-	check("one use spent", inv.hoe_uses_left == 4)
+	check("one use spent", inv.hoe_uses_left == 1)
 	check("holy water untouched", inv.holy_water == 0)
-	check("HUD counts down", hud.tool_label.text.ends_with(": 4"))
+	check("HUD counts down", hud.tool_label.text.ends_with(": 1"))
 	await press("use_tool")
-	check("second press tills the healed tile, for free", farm.is_tilled(edge) and inv.hoe_uses_left == 4)
+	check("second press tills the healed tile, for free", farm.is_tilled(edge) and inv.hoe_uses_left == 1)
 
 	# Healing still does everything else.
 	inv.hoe_uses_left = 5
@@ -121,18 +121,18 @@ func _run() -> void:
 	farm.healing.purify(Vector2i(41, 3))
 	check("no uses, no healing", g.get_cell_source_id(Vector2i(41, 3)) == 1)
 	progress.end_day()
-	check("full again in the morning", inv.hoe_uses_left == 5)
+	check("full again in the morning", inv.hoe_uses_left == 2)
 
 	bag.open()
-	check("bag shows it", bag.items_text.contains("Hoe: 5 of 5 left"))
+	check("bag shows it", bag.items_text.contains("Hoe: 2 of 2 left"))
 	bag.close()
 
 	# Saved, with full uses after loading.
-	inv.hoe_uses_left = 2
+	inv.hoe_uses_left = 1
 	saves.save_game()
 	inv.has_purifying_hoe = false
 	saves.load_game()
 	check("hoe saved", inv.has_purifying_hoe)
-	check("full uses after a reload", inv.hoe_uses_left == 5)
+	check("full uses after a reload", inv.hoe_uses_left == 2)
 	print("FAILS: %d" % fails)
 	quit(1 if fails > 0 else 0)

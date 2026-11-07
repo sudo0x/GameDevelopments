@@ -43,7 +43,7 @@ func _ready() -> void:
 	farm.heal_changed.connect($TouchControls.show_heal)
 	farm.water_choice_needed.connect(_ask_water)
 	player.seed_menu_pressed.connect(_ask_seed)
-	$BagMenu.build_pressed.connect(player.start_building)
+	$BagMenu.build_pressed.connect(_ask_building)
 	$BagMenu.book_pressed.connect(_book_menu.open)
 	farm.mover.is_free_spot = $TouchControls.is_free_spot
 	_add_goal_guide()
@@ -81,6 +81,24 @@ func _ask_seed() -> void:
 	_pick_menu.ask("Which seed?", choices)
 
 
+## Only what the player owns, so nothing in the list is a dead end.
+func _ask_building() -> void:
+	var choices: Array[Dictionary] = []
+	for i in Inventory.BUILDINGS.size():
+		var building := Inventory.BUILDINGS[i]
+		var count := Inventory.building_count(building)
+		if count > 0:
+			choices.append({
+				"text": "%s: %d" % [building.display_name, count],
+				"icon": building.preview_texture,
+				"pick": player.start_building.bind(i),
+			})
+	if choices.is_empty():
+		GameState.notice.emit("Nothing to build. Craft something at the workbench.")
+	else:
+		_pick_menu.ask("What to build?", choices)
+
+
 func _ask_water() -> void:
 	var choices: Array[Dictionary] = [
 		{"text": "Holy water: %d" % Inventory.holy_water, "icon": GameMenu.HOLY_WATER_ICON, "pick": farm.heal_with.bind(false)},
@@ -93,7 +111,7 @@ func _refresh() -> void:
 	day_label.text = "Day %d" % Progress.day
 	money_label.text = str(Inventory.money)
 	status_label.text = _status_text()
-	if GameState.touch_mode and player.tool != Player.Tool.BUILD:
+	if GameState.touch_mode:
 		tool_label.text = _touch_tool_text()
 		return
 	var text := "Tool: %s" % Player.TOOL_NAMES[player.tool]
@@ -114,6 +132,9 @@ func _refresh() -> void:
 
 ## Phones have no tools to show, so this line holds what the buttons can't.
 func _touch_tool_text() -> String:
+	if player.tool == Player.Tool.BUILD:
+		var building := player.selected_building()
+		return "Building: %s, %d left" % [building.display_name, Inventory.building_count(building)]
 	var crop := player.selected_seed()
 	var text := "%s seeds: %d" % [crop.display_name, Inventory.seed_count(crop)]
 	if Inventory.has_purifying_hoe:
@@ -121,8 +142,9 @@ func _touch_tool_text() -> String:
 	return text
 
 
+## Only computers reach this: phones show _touch_tool_text() instead.
 func _change_hint() -> String:
-	return GameState.controls("(Q / E to change)", "(< > to change)")
+	return "(Q / E to change)"
 
 
 func _water_text() -> String:

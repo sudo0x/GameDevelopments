@@ -28,6 +28,10 @@ const SAFE_SECONDS := 1.0
 const KNOCKBACK_SPEED := 200.0
 ## How quickly a knockback dies away, in speed per second.
 const KNOCKBACK_FADE := 900.0
+## The Action button only uses objects inside this circle, this far in front of the player,
+## so a workbench beside or behind them doesn't get in the way of farming.
+const FACED_RADIUS := 10.0
+const FACED_DISTANCE := 14.0
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -53,6 +57,7 @@ var building_index := 0
 var _walk_time: float = 0.0
 var _safe_left := 0.0
 var _knockback := Vector2.ZERO
+var _faced_query := PhysicsShapeQueryParameters2D.new()
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
@@ -60,6 +65,14 @@ var _knockback := Vector2.ZERO
 @onready var _idle_texture: Texture2D = sprite.texture
 ## Where the player wakes after fainting.
 @onready var _home_position: Vector2 = global_position
+
+
+func _ready() -> void:
+	var circle := CircleShape2D.new()
+	circle.radius = FACED_RADIUS
+	_faced_query.shape = circle
+	_faced_query.collide_with_areas = true
+	_faced_query.collide_with_bodies = false
 
 
 func _physics_process(delta: float) -> void:
@@ -128,8 +141,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("seed_menu"):
 		seed_menu_pressed.emit()
 	if event.is_action_pressed("build_mode"):
-		tool = Tool.HOE if tool == Tool.BUILD else Tool.BUILD
-		tool_changed.emit()
+		stop_building()
 	if event.is_action_pressed("interact"):
 		_interact()
 
@@ -155,9 +167,15 @@ func selected_seed() -> CropData:
 	return Inventory.CROPS[seed_index]
 
 
-## Starts Build mode on phones. The hammer button ends it.
-func start_building() -> void:
+## Starts Build mode on phones, with this entry of Inventory.BUILDINGS in hand.
+func start_building(index: int) -> void:
+	building_index = index
 	tool = Tool.BUILD
+	tool_changed.emit()
+
+
+func stop_building() -> void:
+	tool = Tool.HOE
 	tool_changed.emit()
 
 
@@ -200,7 +218,7 @@ func swing_at(point: Vector2) -> void:
 ## What the Action button does with an object. An object with action_interact() can treat
 ## Action differently from F, like the door, which asks first.
 func use_nearby() -> void:
-	var target := interact_target(true)
+	var target := action_target()
 	if not target:
 		return
 	if target.has_method("action_interact"):
@@ -216,16 +234,34 @@ func _interact() -> void:
 		target.interact(self)
 
 
-## The first nearby area with an interact() method, or null. With useful_only, areas whose
-## can_interact() says it would do nothing right now are skipped.
-func interact_target(useful_only := false) -> Area2D:
+## The first nearby area with an interact() method, or null. F uses this.
+func interact_target() -> Area2D:
 	for area in reach.get_overlapping_areas():
-		if not area.has_method("interact"):
+		if area.has_method("interact"):
+			return area
+	return null
+
+
+## What the Action button would use: a nearby object the player faces, if using it would do
+## something. It's stricter than F, because Action also farms, and a tap beside the workbench
+## usually means the field.
+func action_target() -> Area2D:
+	var faced := _faced_areas()
+	for area in reach.get_overlapping_areas():
+		if not area.has_method("interact") or not faced.has(area):
 			continue
-		if useful_only and area.has_method("can_interact") and not area.can_interact():
+		if area.has_method("can_interact") and not area.can_interact():
 			continue
 		return area
 	return null
+
+
+func _faced_areas() -> Array[Object]:
+	_faced_query.transform = Transform2D(0.0, reach.global_position + FACING_DIRECTIONS[facing] * FACED_DISTANCE)
+	var areas: Array[Object] = []
+	for hit in get_world_2d().direct_space_state.intersect_shape(_faced_query):
+		areas.append(hit["collider"])
+	return areas
 
 
 ## Sticky facing: keeps the current pose while it still points the way you're walking, so a

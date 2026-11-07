@@ -142,6 +142,26 @@ func _run() -> void:
 	check("a restored shrine leaves the tile free", farm.smart_action(free_cell) == TILL)
 	shrine.restored = false
 
+	# Only objects the player faces count: a workbench behind you mustn't stop the farming.
+	inv.harvest[radish.id] = 1
+	for area: Node2D in [door, stall, box, bench]:
+		var closest := -1
+		for gap in range(6, 44, 2):
+			player.global_position = area.global_position + Vector2(0, gap + 5)
+			await wait(3)
+			if player.reach.get_overlapping_areas().has(area):
+				closest = gap
+		check(area.get_parent().name + " can be reached from below", closest != -1)
+		player.global_position = area.global_position + Vector2(0, closest + 5)
+		await wait(3)
+		player.facing = 1  # Up, toward it.
+		check(area.get_parent().name + " is used when faced", farm.smart_action(free_cell) == INTERACT)
+		player.facing = 0  # Down, away from it.
+		check(area.get_parent().name + " isn't used with your back to it", farm.smart_action(free_cell) == TILL)
+		check("F still reaches " + area.get_parent().name, player.interact_target() == area)
+		player.facing = 0
+	inv.harvest.clear()
+
 	# Order: objects come before the tile.
 	inv.harvest[radish.id] = 1
 	await stand_on(box)

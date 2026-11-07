@@ -10,6 +10,8 @@ Newest first. Bigger plan decisions are also in each plan's "Design decisions" t
 
 | Question | Decision | Why |
 |---|---|---|
+| How many free heals does the purifying hoe give? | **2 a day, down from 5** (2026-11-07, the user's catch) | 5 beat the curse's 3 to 5 tiles a night, so one cheap tool made holy water, lanterns and wardthorn optional early on. At 2 it helps, but can't win alone |
+| How should Build work on phones? | **Pick from a list of what you own, then the big button places it, with an X to leave** (2026-11-07, after the user disliked the hammer and arrows) | It works like the Seed popup, never shows something you can't place, and ends by itself when you run out |
 | Should a tap on a tile farm it? | **No** (2026-11-07, the user's choice). The character walks there and the big button does the work. Holding a building to move it stays | The user felt it was wrong with a walking character, and that's right: tapping would make the character stand idle, and walking into the curse is part of the game. Moving buildings is arranging the farm, not the character's work |
 | What comes after the controls phone test? | **Moving objects by press and hold, then the ancient book, both built during the phone test at the user's request. A quest board waits for the outside test** (2026-11-07, the user's choice) | Moving objects is small and part of the controls. The book adds story with little risk. A board is a new system with balance work, so it needs proof that players want it |
 | Do book pages go away if the curse takes land back? | **No, a found page stays** (2026-11-07) | Losing story you already read would feel like a bug, not a danger. It costs one saved number |

@@ -46,7 +46,7 @@ func _run() -> void:
 	check("touch mode on", gs.touch_mode)
 
 	# The buttons use art.
-	for action: String in ["action", "heal", "seed_menu", "inventory", "build_mode", "use_tool", "ui_cancel"]:
+	for action: String in ["action", "heal", "seed_menu", "inventory", "ui_cancel"]:
 		var button: Node2D = controls._buttons[action]
 		var icons := button.get_children().filter(func(n: Node) -> bool: return n is Sprite2D)
 		check(action + " has an icon", icons.size() == 1 and icons[0].texture != null)
@@ -61,7 +61,7 @@ func _run() -> void:
 	player.tool = 5
 	player.tool_changed.emit()
 	no_keys("build mode", hud.tool_label.text)
-	check("names the buttons", hud.tool_label.text.contains("< >"))
+	check("says what's being built", hud.tool_label.text.contains("left"))
 	player.tool = 4
 	player.tool_changed.emit()
 	no_keys("holy water", hud.tool_label.text)
@@ -84,11 +84,7 @@ func _run() -> void:
 	no_keys("placed building", farm.builder.status(Vector2i(16, 14)))
 
 	# Menus. They must never cover the button that closes them.
-	var act: Dictionary = {}
-	for entry in controls.ACTION_BUTTONS:
-		if entry[1] == "use_tool":
-			act = {"center": entry[2], "size": entry[3]}
-	var menu_limit: float = act["center"].x - act["size"] / 2.0
+	var menu_limit: float = controls.MENU_LIMIT
 	shop.open()
 	await process_frame
 	no_keys("shop help", shop.get_node("Margin/Box/Help").text)
@@ -136,8 +132,8 @@ func _run() -> void:
 	craft.open()
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
-	# Heal, Seed, Build, Use, < and >, and pause.
-	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 7)
+	# Heal, Seed, X and pause.
+	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 4)
 	craft.close()
 	await wait(2)
 

@@ -15,7 +15,7 @@ signal water_choice_needed
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
-enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL }
+enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP }
 ## What the Heal button would do. The hoe's free daily uses come before holy water.
 enum Heal { NONE, PURIFY, HOLY_WATER }
 
@@ -49,6 +49,8 @@ const ACTION_TOOLS := {
 	Action.PLANT: Player.Tool.SEEDS,
 	Action.GATHER: Player.Tool.HAND,
 	Action.TILL: Player.Tool.HOE,
+	Action.PLACE: Player.Tool.BUILD,
+	Action.PICK_UP: Player.Tool.BUILD,
 }
 
 @export var player_path: NodePath
@@ -180,7 +182,7 @@ func smart_target_for(p: Player) -> Vector2i:
 ## can't be tilled, because new soil should only ever appear straight ahead.
 func action_target_for(p: Player) -> Vector2i:
 	var ahead := target_cell_for(p)
-	if _tile_action(ahead) != Action.NONE:
+	if _is_building() or _tile_action(ahead) != Action.NONE:
 		return ahead
 	return _beside(p, ahead, func(cell: Vector2i) -> bool:
 		return _tile_action(cell) != Action.NONE and _tile_action(cell) != Action.TILL)
@@ -250,10 +252,10 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 func smart_action(cell: Vector2i) -> Action:
 	if _creature_to_swing_at():
 		return Action.SWING
-	# While building on a phone, a stray tap mustn't till the tile you're about to build on.
-	if GameState.touch_mode and player.tool == Player.Tool.BUILD:
-		return Action.NONE
-	if player.interact_target(true):
+	# While building, a stray tap mustn't till the tile you're about to build on.
+	if _is_building():
+		return _build_action(cell)
+	if player.action_target():
 		return Action.INTERACT
 	return _tile_action(cell)
 
@@ -273,6 +275,20 @@ func run_action() -> void:
 			player.use_nearby()
 		_:
 			_use_tool(ACTION_TOOLS[action], cell)
+	# Nothing left to place, so there's nothing left to do here.
+	if action == Action.PLACE and Inventory.building_count(player.selected_building()) == 0:
+		player.stop_building()
+
+
+## Build mode on a phone. Computers use the Build tool with Space instead.
+func _is_building() -> bool:
+	return GameState.touch_mode and player.tool == Player.Tool.BUILD
+
+
+func _build_action(cell: Vector2i) -> Action:
+	if builder.placed.has(cell):
+		return Action.PICK_UP
+	return Action.PLACE if _can_place(cell) else Action.NONE
 
 
 func _creature_to_swing_at() -> Creature:

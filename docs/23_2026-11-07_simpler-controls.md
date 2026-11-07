@@ -23,7 +23,7 @@ The sword doesn't need its own button: Action swings it when a creature is close
 
 ## How the Action button decides
 
-The first row that fits wins. The button's icon always shows what will happen, so there are no surprises. An object only counts as in reach if using it would do something, so an empty box or a restored shrine doesn't stop you tilling beside it.
+The first row that fits wins. The button's icon always shows what will happen, so there are no surprises. An object only counts if you're facing it and using it would do something, so a workbench behind you, an empty box or a restored shrine doesn't stop you farming beside it. F still uses anything in reach.
 
 ```mermaid
 flowchart TD
@@ -62,7 +62,7 @@ Say "controls step N" so these aren't mixed up with other plans.
 | 2 ✅ | `Farm.smart_action(cell)`: returns what Action would do, with one test per row of the chart. Nothing on screen changes yet. Built 2026-11-07 | Tests cover every row and the order between them |
 | 3 ✅ | Action button: replaces Act and takes Use's big spot, and its icon follows the player's target. At the door it asks "Sleep?" first. Built 2026-11-07, on key R too. A small Use stays in Act's old spot, because holy water, Build and the purifying hoe need it until steps 4 and 5. **Still to try on the phone** | Playing a full day on the phone needs no tool button |
 | 4 ✅ | Seed popup and Heal button; remove the arrows and tool bar on phones. Built 2026-11-07. Heal uses the hoe first, then holy water, and asks which water if you own both. A small hammer turns on Build mode, where Use and the arrows show, so Build still works until step 5. **Still to try on the phone** | 5 buttons plus the joystick (6 until step 5, now done). Menus still clear the buttons |
-| 5 ✅ | Move the hammer into the Bag, so Build mode starts there. Placing and picking up already work. Built 2026-11-07. The hammer only shows while building, as the way out, and Action only swings then. **Still to try on the phone** | 5 buttons plus the joystick, and placing and picking up buildings works on the phone |
+| 5 ✅ | Move the hammer into the Bag, so Build mode starts there. Placing and picking up already work. Built 2026-11-07. Reworked the same day after play: Build lists what you own, Action places, and an X leaves, so Use and the arrows are gone from phones. **Still to try on the phone** | 5 buttons plus the joystick, and placing and picking up buildings works on the phone |
 | 6 ✅ | Rewrite the keyboard goals and help text for the new key. The phone's text moved to step 4, because the old goals became impossible there. Built 2026-11-07. Holy water still teaches 5 and Space, and sleeping still teaches F, because R doesn't heal and F is instant | `tests/test_phone_ui.gd` passes, and goals match the buttons |
 | 7 | The user plays on the phone, then the plan's checks. The old buttons are gone from the code. The user played the build and liked it (2026-11-07), but rows weren't reported one by one, so anything below can still be logged. Recheck in the curse play test | Findings are logged, and the old buttons are gone |
 
@@ -82,7 +82,7 @@ Start a **New Game** for this if you can, because it tests the goals too. That e
 | 6 | Tap the bottle facing the curse | It heals, it's dim when it can't, and you never hit it by accident |
 | 7 | Harvest, then ship at the box | Both work with the big button |
 | 8 | Shop and workbench: open, buy, close with ! | Nothing covers the buttons you need |
-| 9 | Open the bag, tap Build, place and pick up something | It's easy to find, and the hammer is clearly the way out |
+| 9 | Open the bag, tap Build, pick something, place it with the big button, and take it back | It's easy to find, and the X is clearly the way out |
 | 10 | With a sword, fight a creature from each side | The player turns and hits it |
 | 11 | Own the purifying hoe, tap the bottle on a cursed tile | One tile heals, and holy water is kept |
 | 12 | Own both kinds of water, tap the bottle | It asks which, and the popup looks right |

@@ -61,30 +61,27 @@ const ACTION_ICONS := {
 	Farm.Action.PLANT: Player.Tool.SEEDS,
 	Farm.Action.GATHER: Player.Tool.HAND,
 	Farm.Action.TILL: Player.Tool.HOE,
+	Farm.Action.PICK_UP: Player.Tool.HAND,
 }
 const ACTION_DIM_COLOR := Color(1, 1, 1, 0.45)
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
-const BUILD_TOOL_ICON := 5
 ## Stands for an open menu in _shown_action, where Action shows ACT_ICON.
 const MENU_OPEN := -1
+## Makes _process() redraw Action's icon.
+const ICON_OUT_OF_DATE := -2
 const ACTION_BUTTONS: Array[Array] = [
 	["", "action", Vector2(596, 296), 68.0, Vector2.ONE],
 	# Well away from Action, so holy water is never spent by accident.
 	["", "heal", Vector2(596, 216), 42.0, Vector2.ONE],
 	["", "seed_menu", Vector2(526, 322), 50.0, Vector2.ONE],
 	["", "inventory", Vector2(526, 262), 42.0, Vector2.ONE],
-	["", "build_mode", Vector2(476, 262), 34.0, Vector2.ONE],
-	# In Seed's spot: they're never both showing.
-	["", "use_tool", Vector2(526, 322), 50.0, Vector2.ONE],
-	["<", "seed_prev", Vector2(476, 300), 34.0, Vector2.ONE],
-	[">", "seed_next", Vector2(476, 340), 34.0, Vector2.ONE],
+	# Leaves Build mode. In Seed's spot: they're never both showing.
+	["X", "build_mode", Vector2(526, 322), 50.0, Vector2.ONE],
 	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
 	["", "ui_cancel", Vector2(614, 24), 34.0, Vector2(1, 0)],
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["action", "inventory"]
-## Only showing in Build mode, which starts from the Bag. The hammer ends it.
-const BUILD_MODE_BUTTONS: Array[String] = ["use_tool", "seed_prev", "seed_next", "build_mode"]
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -116,8 +113,6 @@ func _ready() -> void:
 		_buttons[entry[1]] = button
 	_add_icon(_buttons["inventory"], BAG_ICON)
 	_add_icon(_buttons["heal"], HOLY_WATER_ICON)
-	_add_icon(_buttons["build_mode"], tool_icon(BUILD_TOOL_ICON))
-	_add_icon(_buttons["use_tool"], tool_icon(BUILD_TOOL_ICON))
 	var pause_icon := _add_icon(_buttons["ui_cancel"], PAUSE_ICON)
 	pause_icon.scale *= PAUSE_ICON_SIZE
 	pause_icon.modulate = PAUSE_ICON_COLOR
@@ -172,7 +167,9 @@ func _update_action_button() -> void:
 	if _shown_action == Farm.Action.NONE:
 		return
 	var icon: Texture2D = ACT_ICON
-	if ACTION_ICONS.has(_shown_action):
+	if _shown_action == Farm.Action.PLACE:
+		icon = player.selected_building().preview_texture
+	elif ACTION_ICONS.has(_shown_action):
 		icon = tool_icon(ACTION_ICONS[_shown_action])
 	_fit_icon(_action_icon, icon)
 
@@ -268,10 +265,10 @@ func _release_movement() -> void:
 
 func _show_selected_tool() -> void:
 	var building := player.tool == Player.Tool.BUILD
-	for action in BUILD_MODE_BUTTONS:
-		_buttons[action].visible = building
+	_buttons["build_mode"].visible = building
 	_buttons["seed_menu"].visible = not building
-	_buttons["build_mode"].modulate = SELECTED_COLOR if building else Color.WHITE
+	# A different building can mean a different icon with the same action.
+	_shown_action = ICON_OUT_OF_DATE
 	_show_seed()
 
 

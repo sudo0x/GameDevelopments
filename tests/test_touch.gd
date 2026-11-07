@@ -54,11 +54,9 @@ func _run() -> void:
 	var player: Node2D = main.get_node("World/Player")
 	var shop: Control = main.get_node("HUD/ShopMenu")
 	var bag: Control = main.get_node("HUD/BagMenu")
-	var build_at := Vector2(476, 262)
+	var x_at := Vector2(526, 322)
 	var interact_at := Vector2(596, 296)
 	var bag_at := Vector2(526, 262)
-	var prev_at := Vector2(476, 300)
-	var next_at := Vector2(476, 340)
 	print("window ", root.size, " transform ", root.get_final_transform(), " visible ", root.get_visible_rect())
 
 	# Hidden without a touch screen.
@@ -191,22 +189,22 @@ func _run() -> void:
 	touch(center, 0, false)
 	await wait(2)
 
-	# Build mode: Use and the arrows only show here.
-	check("no Use or hammer outside Build mode", not controls._buttons["use_tool"].visible and not controls._buttons["build_mode"].visible and controls._buttons["seed_menu"].visible)
+	# Build mode: pick from the bag, and the X leaves.
+	var owned: Node = root.get_node("Inventory")
+	owned.add_building(owned.building_by_id(&"fence"))
+	var pick: Control = main.get_node("HUD/PickMenu")
+	check("no X outside Build mode", not controls._buttons["build_mode"].visible and controls._buttons["seed_menu"].visible)
 	await tap(bag_at)
 	check("the bag offers Build", bag.build_button.visible)
 	bag.build_button.pressed.emit()
 	await wait(2)
-	check("Build closes the bag", not bag.visible and not paused)
-	check("and starts Build mode", player.tool == 5 and controls._buttons["use_tool"].visible and not controls._buttons["seed_menu"].visible)
-	check("the hammer shows to end it", controls._buttons["build_mode"].visible)
-	var first_building: int = player.building_index
-	await tap(next_at)
-	check("> picks the next building", player.building_index != first_building)
-	await tap(prev_at)
-	check("< goes back", player.building_index == first_building)
-	await tap(build_at)
-	check("the hammer ends Build mode", player.tool == 0 and not controls._buttons["use_tool"].visible and not controls._buttons["build_mode"].visible)
+	check("Build asks what to build", not bag.visible and pick.visible)
+	pick._rows.get_child(0).pressed.emit()
+	await wait(2)
+	check("picking starts Build mode", player.tool == 5 and not paused and not controls._buttons["seed_menu"].visible)
+	check("the X shows to end it", controls._buttons["build_mode"].visible)
+	await tap(x_at)
+	check("the X ends Build mode", player.tool == 0 and not controls._buttons["build_mode"].visible)
 
 	# Menus.
 	var stall: Node2D = main.get_node("World/ShopStall")

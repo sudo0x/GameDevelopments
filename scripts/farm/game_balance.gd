@@ -10,7 +10,7 @@ extends Resource
 ## The same for strong holy water: 2 makes a 5×5 patch.
 @export var strong_cleanse_radius: int = 2
 ## Cursed tiles the purifying hoe can heal each day.
-@export var hoe_daily_uses: int = 5
+@export var hoe_daily_uses: int = 2
 ## The first day creatures appear, so a new player has time to settle in.
 @export var creature_first_day: int = 3
 ## How many creatures appear each morning, before counting how much land is healed.
