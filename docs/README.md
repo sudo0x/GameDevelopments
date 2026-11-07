@@ -28,3 +28,4 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name).
 | 20 | 2026-11-04 | [Release plan: phone, ads and Google Play](20_2026-11-04_release.md) |
 | 21 | 2026-11-07 | [Curse test plan: the land fights back](21_2026-11-07_curse-returns-test.md) |
 | 22 | 2026-11-07 | [Art prompts: wardthorn](22_2026-11-07_art-prompts-wardthorn.md) |
+| 23 | 2026-11-07 | [Simpler controls plan](23_2026-11-07_simpler-controls.md) |

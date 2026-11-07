@@ -19,7 +19,7 @@ Plans have their own step numbers, so **always say which plan you mean**: "relea
 | 3 | **Phone checks** (release step 1): the build runs on the user's phone, and findings 14 to 20 and 22 are fixed | `docs/20_...` | ✅ Main checks okay on the user's phone (2026-11-07). The rest are in the plan's checks table, each with when to do it |
 | 4 | **Curse test:** the curse takes healed land back at night; keep it only if it plays better | `docs/21_...` | **👉 Next.** Second try built, the user's play test is next. At most two tries, then keep it or move on |
 | 5 | **First 15 minutes:** a story on New Game, then one goal at a time (findings 4, 33 and 36) | `scripts/ui/goal_guide.gd` | ✅ Built early, on 2026-11-07, because the curse test needs a New Game that makes sense. Recheck with outside players |
-| 6 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26). Update the goal text in `GoalGuide.STEPS` too | Write its plan when the curse test ends | Waiting |
+| 6 | **Simpler controls:** one smart action button and fewer buttons (finding 25), splitting `GameState` during this work (finding 26). Update the goal text in `GoalGuide.STEPS` too | `docs/23_...` | Planned, not started. Do it after the curse play test, and recheck the plan against the result |
 | 7 | **Outside test:** 5 to 10 players who aren't the user, while the user plays sessions 2 to 7 | `docs/19_...`, `docs/20_...` | Waiting. Needs the real title and testers. Start the Google Play account before this |
 | 8 | Release step 2: final balance on the phone | `docs/20_...` | Waiting |
 | 9 | Release step 3: rewarded ads | `docs/20_...` | Waiting. Needs an ad account and a privacy policy |
