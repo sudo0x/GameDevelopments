@@ -19,7 +19,7 @@ Plans have their own step numbers, so **always say which plan you mean**: "anima
 | 2 | Phone checks (release step 1) | `docs/20_...` | ✅ Okay on the user's phone. Remaining checks are in the plan's table |
 | 3 | First 15 minutes: story, one goal at a time, Tasks, the old book | `scripts/ui/goal_guide.gd` | ✅ Built. Recheck with outside players |
 | 4 | Curse test: the curse takes healed land back at night | decisions log | ✅ **Kept**, played and passed 2026-11-09 |
-| 5 | Controls: Farm, Combat and Build modes, bag and storage, combat buttons, six basic weapons, build tools, game icon | `docs/28_...` | ✅ Played and okay on the phone and computer (2026-11-09), on the `storage-prototype` branch. Not merged into `development` yet: ask the user |
+| 5 | Controls: Farm, Combat and Build modes, bag and storage, combat buttons, six basic weapons, build tools, game icon | `docs/28_...` | ✅ Played and okay on the phone and computer (2026-11-09), merged into `development` |
 | 6 | **Animation:** wind, tall grass that bends as you walk, swaying trees and crops, a living curse, particles, action feedback | `docs/29_...` | **👉 Next: animation step 1** (wind and tall grass; ask for the grass tuft art with its prompt first) |
 | 7 | Cleanup: move the older tests off `--classic-controls`, then delete the classic controls' code | `docs/28_...`, "Open" | Waiting. Before the outside test |
 | 8 | Outside test: 5 to 10 players who aren't the user | `docs/19_...`, `docs/20_...` | Waiting. Needs the real title and testers. Start the Google Play account before this |
@@ -63,7 +63,7 @@ The user works on both, sometimes in separate chats. Check which one this chat i
 
 - GitHub is the only link between the machines. `.godot/` isn't in git, so each machine needs `--headless --import`
 - `tests/run_all.sh` needs Git Bash on Windows. A full run takes several minutes; run it in the background
-- Branches: `development` is the main line; current work is on `storage-prototype`. Remote `sudo0x/GameDevelopments`
+- Branches: work on `development` (the main line). Try risky ideas on a short branch, and merge it back as soon as the user accepts it (`storage-prototype` was merged on 2026-11-09). Remote `sudo0x/GameDevelopments`
 
 ## Touch emulation and builds
 - The user keeps `[input_devices] pointing/emulate_touch_from_mouse=true` in `project.godot` locally, to see the phone controls on the computer. **Turn it off for tests, builds and commits, and back on after**, and tell the user. Simplest for tests: a temporary `override.cfg` with `[input_devices]` and `pointing/emulate_touch_from_mouse=false`, deleted afterwards
