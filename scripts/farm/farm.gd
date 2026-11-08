@@ -338,7 +338,7 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 
 ## What the Action button would do with this cell in front of the player. It changes nothing.
 ## Holy water, picking up buildings and hoeing soil back are left out on purpose, so they
-## can't happen by accident (docs/24_...).
+## can't happen by accident (the classic controls; decisions log).
 func smart_action(cell: Vector2i) -> Action:
 	if GameState.carry_mode:
 		return _carry_action(cell)

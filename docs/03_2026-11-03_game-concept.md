@@ -52,13 +52,14 @@ Each day asks one question: earn money, heal new land, or protect what you have?
 | **Guards** | Lanterns are rare and permanent: 5×5, 6 tiles apart. Wardthorn is rare: 150 money, 1 seed a day, 6 days to grow, and the 8 tiles around it must stay clear, which it explains when you face one. It guards once it sprouts: 3×3 while dry, 7×7 while watered, and 5×5 with no water once ripe. Walk up and tap a ripe one to burst it, which heals 5×5. Its light shows about how far it guards |
 | **Gathering and crafting** | Healed land reveals trees and rocks. The workbench turns wood, stone and curse shards into tools and buildings |
 | **Buildings** | Lanterns, fences and wells. Place from the Bag, and press and hold to move them. The house and stall stay fixed |
-| **Combat** | Shades and hollows appear near the curse from day 3, and avoid lantern light. The big button swings the crafted sword. Fainting costs money and the rest of the day |
+| **Combat** | Shades and hollows appear near the curse from day 3, and avoid lantern light. In Combat mode the big button attacks with the weapon picked on the combat buttons: the sword (every game starts with one), the bow, or six cheap homemade weapons (club, pitchfork, sickle, torch, sling, throwing stones). Fainting costs money and the rest of the day |
+| **The curse fights back** | Each night the curse takes back a few healed tiles at its edge (marked in the morning), unless lanterns, wardthorn or a restored shrine guard them |
 | **Guidance** | A short story on New Game, then one goal at a time, shown for a moment and kept in Tasks. The old book teaches and tells the story |
 | **Saving** | Saves each morning, so a game always resumes at the start of a day |
 
 ## Controls
 
-Phones have the joystick, a big Action button that changes with what's in front of you, Heal, Seed, Bag, Pause and a small Tasks button. Computers keep the number keys and tool bar, with R for Action. [The controls doc](24_2026-11-07_controls-comparison.md) explains why, and how it compares with other games.
+Phones have the joystick and one big button that does the job of the mode you're in (Farm, Combat or Build), a mode button, Bag, Tasks, the old book and pause; objects are tapped. Computers use the same modes with keys. [The controls doc](28_2026-11-08_storage-controls.md) explains how and why.
 
 ## The island
 
@@ -89,5 +90,5 @@ The [areas plan](15_2026-11-04_areas-woods-marsh.md) covers 3 and 4, and ends th
 ## Open questions
 
 - The game's real title
-- Does the curse taking land back stay? [The curse test](21_2026-11-07_curse-returns-test.md) decides
+- ~~Does the curse taking land back stay?~~ Yes: kept after the 2026-11-09 play test (decisions log)
 - Later ideas that wait for real players: building upgrades, a quest board, and Bag tabs (needed before the areas work)

@@ -29,7 +29,7 @@ flowchart LR
 | What's new in the woods? | **Darkwood** from dark trees, and a sturdier sword made from it | The concept gives this area wood and its first real enemies |
 | What's new in the marsh? | **Moonreed**, a rare crop that only grows there, and **healing potions** | The concept gives this area rare crops and potion ingredients |
 | Should new creatures do new things? | **Slightly**: thornlings are fast, and the drowned slow the player | Simple changes that feel different, without ranged attacks |
-| Does the curse fight back? | **Same as the main game**, whatever [the curse test](21_2026-11-07_curse-returns-test.md) decides | The areas shouldn't have their own rules |
+| Does the curse fight back? | **Same as the main game**, the returning curse (kept on 2026-11-09) | The areas shouldn't have their own rules |
 
 Numbers are starting values, kept in data files, and none of them have been played.
 
