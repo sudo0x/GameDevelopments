@@ -40,7 +40,7 @@ flowchart LR
 1. Is fetching from storage fun planning, or a chore? If a chore, let the bag take from storage when standing by the house.
 2. Does a creature catch you in Farm mode before you can switch? If so, let the big button swing at a creature that's very close, in any mode.
 3. Is picking a weapon, then tapping the big button, fast enough in a fight? If not, let each combat button attack straight away.
-4. In Combat mode, do the buttons on the right feel crowded? If so, put the combat buttons in an even curve around the big button, and keep Bag and pause farther away.
+4. In Combat mode, do the buttons on the right still feel crowded? They were made bigger and put in an even curve around the big button on 2026-11-09 (finding 106).
 5. Does holy water ever get spent when you didn't mean it?
 
 ## Open

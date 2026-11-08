@@ -28,7 +28,7 @@ Plans have their own step numbers, so **always say which plan you mean**: "anima
 | 11 | Release step 4: Google Play, with the real title and logo | `docs/20_...` | Waiting. Needs a developer account and the real title |
 | 12 | Areas steps 1 to 10 (woods, marsh, ending), a free update, only if players stay and want more | `docs/15_...` | Waiting. Before step 1, do its math check on healing a path across 80 more columns |
 
-Each step gets a time limit, so nothing stays almost finished forever. Update this table whenever a step finishes. A ✅ means built and passing tests; say so when it hasn't been played on a phone. Open findings are in `docs/19_...` (**next finding number: 106**); phone-only checks are in `docs/20_...`.
+Each step gets a time limit, so nothing stays almost finished forever. Update this table whenever a step finishes. A ✅ means built and passing tests; say so when it hasn't been played on a phone. Open findings are in `docs/19_...` (**next finding number: 108**); phone-only checks are in `docs/20_...`.
 
 ### How we work
 

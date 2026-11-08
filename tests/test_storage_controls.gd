@@ -343,7 +343,7 @@ func _run() -> void:
 	inv.set_build_tool(&"place")
 	touch._shown_action = 0
 	touch._update_action_button()
-	check("Build mode keeps the building's picture on a taken spot, only dimmed", inv.ready_now(inv.build_set).is_empty() or touch._action_icon.texture == player.selected_building().preview_texture)
+	check("Build mode keeps the building's picture on a taken spot, and stays bright", inv.ready_now(inv.build_set).is_empty() or (touch._action_icon.texture == player.selected_building().preview_texture and touch._buttons["action"].modulate == Color.WHITE))
 	player.set_mode(0)
 	check("no Build X with storage controls", not touch._buttons["build_mode"].visible)
 

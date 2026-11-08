@@ -106,8 +106,17 @@ const WHEEL_HOLD_SECONDS := 0.3
 const WHEEL_OFFSETS: Array[Vector2] = [Vector2(-84, 22), Vector2(-80, -32), Vector2(-50, -74)]
 ## Storage controls: the Bag is for preparing sets, not for every moment, so it sits small above
 ## the mode button, in the right-hand column with pause, clear of the top right icons.
-const CARRY_BAG_CENTER := Vector2(614, 160)
-const CARRY_BAG_SIZE := 34.0
+const CARRY_BAG_CENTER := Vector2(614, 112)
+const CARRY_BAG_SIZE := 36.0
+## Storage controls: the right thumb's buttons, bigger than before and in an even curve around
+## the big button, so each is the same short move away and none touch (phone test, finding 106).
+## Center, size; the combat buttons sit on an arc of ARC_RADIUS around Action's center.
+const CARRY_ACTION := [Vector2(596, 294), 76.0]
+const CARRY_MODE := [Vector2(598, 180), 44.0]
+const ARC_RADIUS := 72.0
+const ARC_ANGLES: Array[float] = [238.0, 194.0, 150.0]
+const ARC_BUTTON_SIZE := 44.0
+const CARRY_BUILD_TOOL_SIZE := 50.0
 const WHEEL_SLOT := 44.0
 const WHEEL_PICK_RADIUS := 30.0
 const MODE_ICONS := preload("res://assets/ui/mode_icons.png")
@@ -201,6 +210,7 @@ func _ready() -> void:
 		_buttons["switch_mode"].action = ""
 		_add_wheel()
 		_move_button("inventory", CARRY_BAG_CENTER, CARRY_BAG_SIZE)
+		_lay_out_right_thumb()
 		for action: String in _buttons:
 			_buttons[action].process_mode = Node.PROCESS_MODE_PAUSABLE
 		Inventory.inventory_changed.connect(_show_build_tool)
@@ -265,7 +275,10 @@ func show_heal(heal: Farm.Heal) -> void:
 
 
 func _update_action_button() -> void:
-	_buttons["action"].modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE else Color.WHITE
+	# Carrying or placing a building, the button stays bright: walking past taken tiles would
+	# otherwise dim it on and off. The green or red preview on the ground says where it fits.
+	var steady := _shown_action == Farm.Action.NONE and _building_in_hand()
+	_buttons["action"].modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE and not steady else Color.WHITE
 	if _shown_action == Farm.Action.NONE:
 		# Nothing to do here: storage controls show the mode's own picture, dimmed, so a picture
 		# from another mode (the attack slashes in Farm mode) never stays behind.
@@ -656,3 +669,30 @@ func _show_dots(index: int) -> void:
 		dot.visible = count > 1 and i < count
 		dot.position = Vector2((TEXTURE_SIZE - width) / 2.0 + i * (DOT_SIZE + DOT_GAP), DOT_Y)
 		(dot.get_child(0) as ColorRect).color = DOT_ON_COLOR if i == active else DOT_OFF_COLOR
+
+
+## Storage controls: bigger right-hand buttons, the combat ones in an even curve around Action,
+## and the build tool button in the middle of that curve.
+func _lay_out_right_thumb() -> void:
+	var center: Vector2 = CARRY_ACTION[0]
+	_move_button("action", center, CARRY_ACTION[1])
+	_move_button("switch_mode", CARRY_MODE[0], CARRY_MODE[1])
+	for i in Inventory.COMBAT_BUTTONS:
+		_move_button("combat_slot_%d" % (i + 1), arc_spot(center, ARC_ANGLES[i]), ARC_BUTTON_SIZE)
+	_move_button("build_tool", arc_spot(center, ARC_ANGLES[1]), CARRY_BUILD_TOOL_SIZE)
+	_fit_screen()
+
+
+## A spot on the curve around the big button, by angle in degrees (0 is to the right, 90 down).
+static func arc_spot(center: Vector2, degrees: float) -> Vector2:
+	return center + Vector2.from_angle(deg_to_rad(degrees)) * ARC_RADIUS
+
+
+## Build mode with a building to put down: one lifted with Move, or one to place from the bag.
+func _building_in_hand() -> bool:
+	if not GameState.carry_mode or player.mode != Player.Mode.BUILD:
+		return false
+	var farm: Farm = get_parent().farm
+	if farm.builder.placed.has(farm.lifted):
+		return true
+	return Inventory.build_tool == &"place" and not Inventory.ready_now(Inventory.build_set).is_empty()

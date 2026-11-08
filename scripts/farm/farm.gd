@@ -461,6 +461,9 @@ func _run_carry(action: Action, cell: Vector2i) -> void:
 				GameState.notice.emit(_no_weapon_text())
 			elif player.mode == Player.Mode.BUILD and Inventory.build_tool == &"place" and Inventory.ready_now(Inventory.build_set).is_empty():
 				GameState.notice.emit("Nothing in the build set. Add a building on the Modes page.")
+			elif player.mode == Player.Mode.BUILD and (lifted != Builder.NO_CELL or Inventory.build_tool == &"place"):
+				var why := spacing_status(cell)
+				GameState.notice.emit(why if not why.is_empty() else "It can't go here. Walk to a free spot, where the picture is green.")
 			return
 		Action.SWING:
 			var creature := _creature_to_swing_at()
