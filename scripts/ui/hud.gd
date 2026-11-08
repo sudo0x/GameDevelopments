@@ -58,6 +58,7 @@ var _notice_left := 0.0
 
 func _ready() -> void:
 	player.tool_changed.connect(_refresh)
+	player.mode_changed.connect(_refresh)
 	Inventory.inventory_changed.connect(_refresh)
 	Progress.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
@@ -80,6 +81,8 @@ func _ready() -> void:
 
 
 func _add_status_rows() -> void:
+	# The money row matches: number, then coin.
+	money_label.get_parent().move_child(money_label, 0)
 	status_rows.add_theme_constant_override("separation", 0)
 	for row_name in STATUS_ROWS:
 		var row := HBoxContainer.new()
@@ -93,8 +96,11 @@ func _add_status_rows() -> void:
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var value := Label.new()
-		row.add_child(icon)
+		icon.name = "Icon"
+		value.name = "Value"
+		# Number first, then the picture, so the pictures line up along the screen edge.
 		row.add_child(value)
+		row.add_child(icon)
 		status_rows.add_child(row)
 		_status_values[row_name] = value
 
@@ -135,7 +141,8 @@ func _show_goal(goal: String) -> void:
 
 ## With the other menus: under the fade, and over everything else.
 func _add_menus() -> void:
-	for menu: GameMenu in [SleepMenu.new(), _pick_menu, _book_menu, _tasks_menu]:
+	var sets := SetsMenu.new()
+	for menu: GameMenu in [SleepMenu.new(), _pick_menu, _book_menu, _tasks_menu, StorageMenu.new(), sets, WorkbenchMenu.new(), StallMenu.new()]:
 		add_child(menu)
 		move_child(menu, fade.get_index())
 
@@ -159,7 +166,7 @@ func _ask_building() -> void:
 	var choices: Array[Dictionary] = []
 	for i in Inventory.BUILDINGS.size():
 		var building := Inventory.BUILDINGS[i]
-		var count := Inventory.building_count(building)
+		var count := Inventory.carried(Inventory.building_item(building))
 		if count > 0:
 			choices.append({
 				"text": "%s: %d" % [building.display_name, count],
@@ -194,6 +201,9 @@ func _refresh() -> void:
 	day_label.text = "Day %d" % Progress.day
 	money_label.text = str(Inventory.money)
 	_refresh_status()
+	if GameState.carry_mode:
+		tool_label.text = _held_text()
+		return
 	if GameState.touch_mode:
 		tool_label.text = _touch_tool_text()
 		return
@@ -225,6 +235,31 @@ func _touch_tool_text() -> String:
 	return text
 
 
+## Storage controls: the mode, and what the big button can use in it.
+func _held_text() -> String:
+	if player.mode == Player.Mode.BUILD:
+		if Inventory.ready_now(Inventory.build_set).is_empty():
+			return "Build: nothing in the build set"
+		var building := player.selected_building()
+		return "Build: %s, %d" % [building.display_name, Inventory.carried(Inventory.building_item(building))]
+	if player.mode == Player.Mode.COMBAT:
+		var weapon := farm.weapon()
+		if weapon == &"bow":
+			return "Combat: Bow, %d arrows" % Inventory.carried(&"arrows")
+		return "Combat: %s" % (Inventory.item_name(weapon) if weapon != &"" else "no weapon set")
+	var text := "Farming"
+	if Inventory.has_purifying_hoe and _farm_ready(&"hoe"):
+		text += "  |  Purify left today: %d" % Inventory.hoe_uses_left
+	var seeds := 0
+	for item in Inventory.ready_now(Inventory.plant_set):
+		seeds += Inventory.carried(item)
+	return text + "  |  Seeds ready: %d" % seeds
+
+
+func _farm_ready(item: StringName) -> bool:
+	return Inventory.carried(item) > 0 and Inventory.job_on(&"heal")
+
+
 ## Only computers reach this: phones show _touch_tool_text() instead.
 func _change_hint() -> String:
 	return "(Q / E to change)"
@@ -241,11 +276,12 @@ func _water_text() -> String:
 func _refresh_status() -> void:
 	var capacity := GameState.BALANCE.can_capacity
 	var lines: PackedStringArray = []
-	_set_status(&"holy_water", Inventory.holy_water > 0, str(Inventory.holy_water), "Holy water: %d" % Inventory.holy_water, lines)
-	_set_status(&"strong_water", Inventory.strong_holy_water > 0, str(Inventory.strong_holy_water), "Strong holy water: %d" % Inventory.strong_holy_water, lines)
+	_set_status(&"holy_water", Inventory.holy_water > 0 and not GameState.carry_mode, str(Inventory.holy_water), "Holy water: %d" % Inventory.holy_water, lines)
+	_set_status(&"strong_water", Inventory.strong_holy_water > 0 and not GameState.carry_mode, str(Inventory.strong_holy_water), "Strong holy water: %d" % Inventory.strong_holy_water, lines)
 	_set_status(&"shipping", not Inventory.shipped.is_empty(), "+%d" % Inventory.shipped_value(), "Shipping: %d overnight" % Inventory.shipped_value(), lines)
 	# Only once it matters, to keep the corner calm.
 	_set_status(&"water", Inventory.can_water < capacity, "%d/%d" % [Inventory.can_water, capacity], "Water: %d of %d" % [Inventory.can_water, capacity], lines)
+	# Storage controls show holy water on the bag page, so the corner leaves it out.
 	_set_status(&"healed", true, "%.1f%%" % Progress.healed_percent, "Island healed: %.1f%%" % Progress.healed_percent, lines)
 	status_text = "\n".join(lines)
 

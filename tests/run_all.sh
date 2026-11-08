@@ -26,7 +26,10 @@ failed=0
 
 # A test with a script error never quits, so each one gets a time limit.
 run() {
-	perl -e 'alarm 60; exec @ARGV' "$GODOT" --headless --path . --fixed-fps 60 --script "tests/$1.gd" 2>&1
+	# Storage-controls tests (test_storage_*) use the new controls; the rest check the classic ones.
+	local controls="--classic-controls"
+	case "$1" in test_storage_*) controls="" ;; esac
+	perl -e 'alarm 60; exec @ARGV' "$GODOT" --headless --path . --fixed-fps 60 --script "tests/$1.gd" -- $controls 2>&1
 }
 
 clear_save() {

@@ -86,8 +86,8 @@ func _run() -> void:
 	check("the corner shows what's left", hud.status_text.contains("Water: %d of %d" % [capacity - 1, capacity]))
 
 	var water_row: Node = hud.status_rows.get_node("water")
-	check("the row shows a picture and a number", water_row.visible and water_row.get_child(0).texture != null and water_row.get_child(1).text == "%d/%d" % [capacity - 1, capacity])
-	check("healing shows a number, not words", hud.status_rows.get_node("healed").get_child(1).text == "0.0%")
+	check("the row shows a picture and a number", water_row.visible and water_row.get_node("Icon").texture != null and water_row.get_node("Value").text == "%d/%d" % [capacity - 1, capacity])
+	check("healing shows a number, not words", hud.status_rows.get_node("healed/Value").text == "0.0%")
 
 	# Empty.
 	var notices: Array[String] = []

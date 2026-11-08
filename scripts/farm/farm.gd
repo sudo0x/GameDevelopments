@@ -17,7 +17,7 @@ signal burst_asked(cell: Vector2i)
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
-enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP }
+enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP, HEAL, SHOOT }
 ## What the Heal button would do. The hoe's free daily uses come before holy water.
 enum Heal { NONE, PURIFY, HOLY_WATER }
 
@@ -96,6 +96,9 @@ var _build_query := PhysicsShapeQueryParameters2D.new()
 
 
 func _ready() -> void:
+	# First, because the player, HUD and storage chest all read it as they start.
+	GameState.apply_controls_setting()
+	Inventory.give_starter_kit()
 	var shape := RectangleShape2D.new()
 	# A little smaller than a tile, so a neighbor's collision doesn't count.
 	shape.size = Vector2(ground.tile_set.tile_size) - Vector2(4, 4)
@@ -138,16 +141,21 @@ func _physics_process(delta: float) -> void:
 	target_cell = smart_target_for(player)
 	var action := Action.NONE
 	# Only the phone's buttons show these, so computers skip the work.
-	if GameState.touch_mode:
+	if GameState.touch_mode or GameState.carry_mode:
 		action_cell = action_target_for(player)
 		action = smart_action(action_cell)
 		_tell_buttons(action)
-	var by_action: bool = GameState.touch_mode and player.tool not in USE_BUTTON_TOOLS
+	var by_action: bool = GameState.carry_mode or (GameState.touch_mode and player.tool not in USE_BUTTON_TOOLS)
 	_shown_cell = action_cell if by_action else target_cell
 	var tile := Vector2(ground.tile_set.tile_size)
 	var rect := Rect2(ground.map_to_local(_shown_cell) - tile / 2.0, tile)
-	if player.tool == Player.Tool.HOLY_WATER:
+	if GameState.carry_mode and action == Action.HEAL:
+		rect = rect.grow(tile.x * healing.radius_for(_water_for(action_cell) == &"strong_holy_water"))
+	elif player.tool == Player.Tool.HOLY_WATER and not GameState.carry_mode:
 		rect = rect.grow(tile.x * healing.radius_for(player.strong_water))
+	# The Action button's seed picture follows the seed it would plant.
+	if GameState.carry_mode and action == Action.PLANT:
+		player.seed_index = Inventory.CROPS.find(_seed_for(action_cell))
 	# Placing a guard shows what it would protect. In play, light shows that instead.
 	var guard := _placing_guard_radius()
 	if guard > 0:
@@ -156,7 +164,7 @@ func _physics_process(delta: float) -> void:
 	elif by_action:
 		highlight.show_cell(rect, action != Action.NONE)
 		# Swinging and using an object don't happen on the tile, so don't point at it.
-		highlight.visible = action != Action.SWING and action != Action.INTERACT
+		highlight.visible = action not in [Action.SWING, Action.SHOOT, Action.INTERACT]
 	else:
 		highlight.show_cell(rect, can_use(player.tool, target_cell))
 		# The sword works on whatever is in front, not on a tile.
@@ -195,6 +203,12 @@ func smart_target_for(p: Player) -> Vector2i:
 ## can't be tilled, because new soil should only ever appear straight ahead.
 func action_target_for(p: Player) -> Vector2i:
 	var ahead := target_cell_for(p)
+	if GameState.carry_mode:
+		if _is_building() or _carry_action(ahead) != Action.NONE:
+			return ahead
+		# New soil and healing only ever happen straight ahead.
+		return _beside(p, ahead, func(cell: Vector2i) -> bool:
+			return _carry_action(cell) not in [Action.NONE, Action.TILL, Action.HEAL])
 	if _is_building() or _tile_action(ahead) != Action.NONE:
 		return ahead
 	return _beside(p, ahead, func(cell: Vector2i) -> bool:
@@ -251,7 +265,7 @@ static func tiles_apart(a: Vector2i, b: Vector2i) -> int:
 
 ## How far the building about to be placed would guard. 0 when not placing one.
 func _placing_guard_radius() -> int:
-	if player.tool != Player.Tool.BUILD or builder.placed.has(_shown_cell):
+	if player.tool != Player.Tool.BUILD or builder.placed.has(_shown_cell) or _nothing_to_build():
 		return 0
 	return player.selected_building().guard_radius
 
@@ -296,16 +310,16 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 			return is_tilled(cell) and not is_watered(cell) and Inventory.can_water > 0
 		Player.Tool.SEEDS:
 			var seed_crop := player.selected_seed()
-			return is_tilled(cell) and not crops.has(cell) and Inventory.seed_count(seed_crop) > 0 \
+			return is_tilled(cell) and not crops.has(cell) and Inventory.carried(Inventory.seed_item(seed_crop)) > 0 \
 					and not in_ward_space(cell) and _has_room_for(seed_crop, cell)
 		Player.Tool.HAND:
 			return (crops.has(cell) and crops[cell].can_harvest()) or gathering.can_hit(cell) or builder.placed.has(cell)
 		Player.Tool.HOLY_WATER:
-			var owned := Inventory.strong_holy_water if player.strong_water else Inventory.holy_water
+			var owned := Inventory.carried(&"strong_holy_water" if player.strong_water else &"holy_water")
 			return owned > 0 and not healing.cleansable_cells(cell, player.strong_water).is_empty()
 		Player.Tool.BUILD:
 			# Phones pick buildings up here. Computers have the Hand tool for that.
-			return _can_place(cell) or (GameState.touch_mode and builder.placed.has(cell))
+			return _can_place(cell) or ((GameState.touch_mode or GameState.carry_mode) and builder.placed.has(cell))
 	return false
 
 
@@ -313,6 +327,8 @@ func can_use(tool: Player.Tool, cell: Vector2i) -> bool:
 ## Holy water, picking up buildings and hoeing soil back are left out on purpose, so they
 ## can't happen by accident (docs/24_...).
 func smart_action(cell: Vector2i) -> Action:
+	if GameState.carry_mode:
+		return _carry_action(cell)
 	if _creature_to_swing_at():
 		return Action.SWING
 	# While building, a stray tap mustn't till the tile you're about to build on.
@@ -329,6 +345,9 @@ func run_action() -> void:
 		return
 	var cell := action_target_for(player)
 	var action := smart_action(cell)
+	if GameState.carry_mode:
+		_run_carry(action, cell)
+		return
 	match action:
 		Action.NONE:
 			return
@@ -344,8 +363,138 @@ func run_action() -> void:
 		player.stop_building()
 
 
-## Build mode on a phone. Computers use the Build tool with Space instead.
+## Storage controls (docs/28_...): what the big button would do. In Farm mode it's smart, like
+## the classic Action button, but only with what the farming set holds. In Combat mode it uses
+## the combat set's first weapon with something left. In Build mode it picks up the building
+## ahead, or places the build set's first. Objects aren't used: they're tapped.
+func _carry_action(cell: Vector2i) -> Action:
+	match player.mode:
+		Player.Mode.COMBAT:
+			match weapon():
+				&"bow":
+					return Action.SHOOT
+				&"":
+					return Action.NONE
+			return Action.SWING
+		Player.Mode.BUILD:
+			# Build jobs: each of placing and picking up can be switched off.
+			if builder.placed.has(cell):
+				return Action.PICK_UP if Inventory.job_on(&"pick_up") else Action.NONE
+			var can_place := Inventory.job_on(&"place") and not Inventory.ready_now(Inventory.build_set).is_empty()
+			return Action.PLACE if can_place and _can_place(cell) else Action.NONE
+	return _farm_action(cell)
+
+
+## The combat set's weapon in use: the first with something left, so the sword takes over
+## when the arrows run out. Empty when there's none.
+func weapon() -> StringName:
+	for item in Inventory.ready_now(Inventory.combat_set):
+		# A bow with no arrows can't be used.
+		if item != &"bow" or Inventory.carried(&"arrows") > 0:
+			return item
+	return &""
+
+
+## A farm job is switched on, and the tool it needs is carried.
+func _can_do(job: StringName, tool_item: StringName = &"") -> bool:
+	return Inventory.job_on(job) and (tool_item == &"" or Inventory.carried(tool_item) > 0)
+
+
+## The classic button's farming order, doing only the farm jobs that are on. Holy water is only
+## used on a cursed tile straight ahead, so it's never spent by farming beside the curse.
+func _farm_action(cell: Vector2i) -> Action:
+	if crops.has(cell):
+		# Bursting can't be undone, so farming beside a ward plant must never do it.
+		# A ripe crop is left alone with Harvest off: it may be kept for its looks.
+		if crops[cell].can_harvest():
+			return Action.HARVEST if _can_do(&"harvest") and not _is_ripe_ward(cell) else Action.NONE
+		return Action.WATER if _can_do(&"water", &"can") and can_use(Player.Tool.WATERING_CAN, cell) else Action.NONE
+	if is_tilled(cell):
+		return Action.PLANT if _can_do(&"plant") and _seed_for(cell) else Action.NONE
+	if gathering.can_hit(cell):
+		return Action.GATHER if _can_do(&"gather") else Action.NONE
+	if is_farmable(cell) and _can_do(&"till", &"hoe"):
+		return Action.TILL
+	if ground.get_cell_source_id(cell) == Source.CURSED and _can_do(&"heal"):
+		if Inventory.carried(&"hoe") > 0 and healing.can_purify(cell):
+			return Action.TILL
+		if _water_for(cell) != &"":
+			return Action.HEAL
+	return Action.NONE
+
+
+## The first seed to plant that can grow here. Seeds the player didn't pick are never planted.
+func _seed_for(cell: Vector2i) -> CropData:
+	if in_ward_space(cell):
+		return null
+	for item in Inventory.ready_now(Inventory.plant_set):
+		var crop := Inventory.crop_by_id(StringName(String(item).substr(5)))
+		if _has_room_for(crop, cell):
+			return crop
+	return null
+
+
+## The carried holy water that would heal something here: the plain kind first, because the
+## strong kind is rarer.
+func _water_for(cell: Vector2i) -> StringName:
+	for item: StringName in [&"holy_water", &"strong_holy_water"]:
+		if Inventory.carried(item) > 0 and not healing.cleansable_cells(cell, item == &"strong_holy_water").is_empty():
+			return item
+	return &""
+
+
+func _run_carry(action: Action, cell: Vector2i) -> void:
+	match action:
+		Action.NONE:
+			if player.mode == Player.Mode.COMBAT:
+				GameState.notice.emit("No weapon in the combat set. Add one on the bag page.")
+			elif player.mode == Player.Mode.BUILD and Inventory.ready_now(Inventory.build_set).is_empty():
+				GameState.notice.emit("Nothing in the build set. Add a building on the bag page.")
+			return
+		Action.SWING:
+			var creature := _creature_to_swing_at()
+			var at := creature.global_position if creature else player.global_position + Player.FACING_DIRECTIONS[player.facing]
+			player.swing_at(at)
+		Action.SHOOT:
+			var target := spawner.nearest_within(player.global_position, GameState.BALANCE.bow_range)
+			var aim := target.global_position if target else player.global_position + Player.FACING_DIRECTIONS[player.facing]
+			player.shoot_at(aim)
+		Action.HARVEST, Action.GATHER:
+			_use_tool(Player.Tool.HAND, cell)
+		Action.WATER:
+			_use_tool(Player.Tool.WATERING_CAN, cell)
+		Action.TILL:
+			_use_tool(Player.Tool.HOE, cell)
+		Action.PLANT:
+			player.seed_index = Inventory.CROPS.find(_seed_for(cell))
+			_use_tool(Player.Tool.SEEDS, cell)
+		Action.HEAL:
+			player.strong_water = _water_for(cell) == &"strong_holy_water"
+			_use_tool(Player.Tool.HOLY_WATER, cell)
+		Action.PLACE:
+			_use_tool(Player.Tool.BUILD, cell)
+		Action.PICK_UP:
+			# Moving is picking up, then placing: what was just picked up is placed next.
+			var item := Inventory.building_item(builder.placed[cell]["data"])
+			# A full bag would send it to storage, where it seems lost: make room first.
+			if not Inventory.has_room_for(item):
+				GameState.notice.emit("Your bag is full. Put something in storage first.")
+				return
+			_use_tool(Player.Tool.BUILD, cell)
+			if Inventory.carried(item) > 0:
+				Inventory.to_front(item)
+				player.pick_building()
+
+
+## Storage controls: Build mode with an empty build set has nothing to show.
+func _nothing_to_build() -> bool:
+	return GameState.carry_mode and Inventory.ready_now(Inventory.build_set).is_empty()
+
+
+## Build mode: on a phone, or with storage controls. Computers use the Build tool with Space instead.
 func _is_building() -> bool:
+	if GameState.carry_mode:
+		return player.mode == Player.Mode.BUILD
 	return GameState.touch_mode and player.tool == Player.Tool.BUILD
 
 
@@ -383,7 +532,7 @@ func move_building(from: Vector2i, to: Vector2i) -> void:
 
 func _can_place(cell: Vector2i) -> bool:
 	var building := player.selected_building()
-	return Inventory.building_count(building) > 0 and can_build(cell) and builder.has_room(cell, building)
+	return Inventory.carried(Inventory.building_item(building)) > 0 and can_build(cell) and builder.has_room(cell, building)
 
 
 ## Whether a placed building can move to this cell. Its own spot doesn't count against it.
@@ -427,9 +576,9 @@ func smart_heal(cell: Vector2i) -> Heal:
 ## Which kinds of holy water would heal something here: false is normal, true is strong.
 func _waters_for(cell: Vector2i) -> Array[bool]:
 	var waters: Array[bool] = []
-	if Inventory.holy_water > 0 and not healing.cleansable_cells(cell, false).is_empty():
+	if Inventory.carried(&"holy_water") > 0 and not healing.cleansable_cells(cell, false).is_empty():
 		waters.append(false)
-	if Inventory.strong_holy_water > 0 and not healing.cleansable_cells(cell, true).is_empty():
+	if Inventory.carried(&"strong_holy_water") > 0 and not healing.cleansable_cells(cell, true).is_empty():
 		waters.append(true)
 	return waters
 
@@ -501,7 +650,7 @@ func _update_build_preview() -> void:
 	# The mover draws the preview while it's dragging.
 	if mover.moving:
 		return
-	if player.tool != Player.Tool.BUILD:
+	if player.tool != Player.Tool.BUILD or _nothing_to_build():
 		build_preview.hide()
 		return
 	var at := ground.map_to_local(target_cell) + BUILDING_BASE

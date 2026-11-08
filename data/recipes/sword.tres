@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="RecipeData" format=3]
+[gd_resource type="Resource" script_class="RecipeData" format=3 uid="uid://d03bq4r8ejyfd"]
 
-[ext_resource type="Script" path="res://scripts/farm/recipe_data.gd" id="1_recipe"]
-[ext_resource type="Script" path="res://scripts/farm/recipe_need.gd" id="2_need"]
+[ext_resource type="Script" uid="uid://cp1nm5ww1qnou" path="res://scripts/farm/recipe_data.gd" id="1_recipe"]
+[ext_resource type="Script" uid="uid://oesdsg7xli4k" path="res://scripts/farm/recipe_need.gd" id="2_need"]
 [ext_resource type="Resource" path="res://data/materials/wood.tres" id="3_wood"]
 [ext_resource type="Resource" path="res://data/materials/stone.tres" id="4_stone"]
-[ext_resource type="Texture2D" path="res://assets/objects/sword.png" id="icon_0"]
+[ext_resource type="Texture2D" uid="uid://i83gkhd3xwvg" path="res://assets/objects/sword.png" id="icon_0"]
 
 [sub_resource type="Resource" id="need_wood"]
 script = ExtResource("2_need")
@@ -18,10 +18,9 @@ amount = 3
 
 [resource]
 script = ExtResource("1_recipe")
-icon = ExtResource("icon_0")
 display_name = "Sword"
+icon = ExtResource("icon_0")
 needs = Array[ExtResource("2_need")]([SubResource("need_wood"), SubResource("need_stone")])
 result = 3
-result_amount = 1
 made_text = "Press R when a creature is close."
 made_text_touch = "Tap the big button when a creature is close."

@@ -30,7 +30,7 @@ extends Resource
 ## along a row can't open a menu by accident.
 @export var action_object_pause: float = 0.5
 ## Waters the can holds. It's full each morning, and wells refill it.
-@export var can_capacity: int = 10
+@export var can_capacity: int = 100
 ## Tilled soil with no crop turns back into grass after this many nights.
 @export var soil_idle_nights: int = 3
 ## Hearts the player starts each day with.
@@ -51,3 +51,14 @@ extends Resource
 @export var blighted_crop_money: int = 5
 ## Holy water the stall can sell in one day, so money alone can't beat the curse.
 @export var holy_water_daily_limit: int = 3
+## Storage controls (a prototype, docs/28_...): kinds of items the bag holds on a new game.
+@export var bag_start_slots: int = 12
+## Each bag upgrade at the stall adds this many slots, up to bag_max_slots.
+@export var bag_upgrade_slots: int = 4
+@export var bag_max_slots: int = 20
+@export var bag_upgrade_price: int = 150
+## The bow (storage controls): hearts of damage per arrow, how far it aims and flies, in pixels,
+## and how fast the arrow flies, in pixels a second.
+@export var bow_damage: int = 1
+@export var bow_range: float = 170.0
+@export var arrow_speed: float = 280.0

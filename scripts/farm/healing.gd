@@ -193,7 +193,10 @@ func _on_shrine_activated() -> void:
 	if shrine.restored:
 		GameState.notice.emit("The shrine is at peace.")
 	elif not Inventory.use_holy_water(cost):
-		GameState.notice.emit("The shrine needs %d holy water." % cost)
+		if GameState.carry_mode and Inventory.total(&"holy_water") >= cost:
+			GameState.notice.emit("Carry %d holy water in your bag to restore the shrine." % cost)
+		else:
+			GameState.notice.emit("The shrine needs %d holy water." % cost)
 	else:
 		shrine.restored = true
 		var center := _shrine_cell()

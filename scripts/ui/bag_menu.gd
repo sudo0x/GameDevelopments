@@ -28,7 +28,8 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible and not get_tree().paused and event.is_action_pressed("inventory"):
+	# Storage controls open the bag page (SetsMenu) instead.
+	if not GameState.carry_mode and not visible and not get_tree().paused and event.is_action_pressed("inventory"):
 		get_viewport().set_input_as_handled()
 		open()
 	else:

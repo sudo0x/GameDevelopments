@@ -8,5 +8,8 @@ func can_interact() -> bool:
 
 
 func interact(_player: Player) -> void:
+	if GameState.carry_mode and not Inventory.has_harvest():
+		GameState.notice.emit("Nothing to ship. Carry crops in your bag.")
+		return
 	Inventory.ship_all()
 	Audio.play(&"ship")

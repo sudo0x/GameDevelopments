@@ -18,7 +18,7 @@ var _first_row: Button
 func _init() -> void:
 	name = "PickMenu"
 	keyboard_help = "Enter: pick   Esc: close"
-	touch_help = "Tap ! to close"
+	touch_help = ""
 	_build_frame()
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_add_above_help(_title)

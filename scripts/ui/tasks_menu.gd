@@ -17,7 +17,7 @@ var _rows := VBoxContainer.new()
 func _init() -> void:
 	name = "TasksMenu"
 	keyboard_help = "G / Esc: close"
-	touch_help = "Tap ! to close"
+	touch_help = ""
 	_build_frame()
 	var title := Label.new()
 	title.text = "Tasks"

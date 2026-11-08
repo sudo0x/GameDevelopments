@@ -20,7 +20,7 @@ var _next := Button.new()
 func _init() -> void:
 	name = "BookMenu"
 	keyboard_help = "Left / Right: turn   B / Esc: close"
-	touch_help = "Tap ! to close"
+	touch_help = ""
 	_build_frame()
 	add_theme_stylebox_override("panel", PAGE_STYLE)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -83,7 +83,10 @@ func _refresh() -> void:
 	_title.text = entry[1]
 	var text: String = entry[2]
 	text = text.replace("{action}", GameState.controls("R", "the big button"))
-	_text.text = text.replace("{heal}", GameState.controls("the holy water tool (5, then Space)", "the bottle"))
+	var heal := GameState.controls("the holy water tool (5, then Space)", "the bottle")
+	if GameState.carry_mode:
+		heal = "the big button on a cursed tile, with holy water in your farming set"
+	_text.text = text.replace("{heal}", heal)
 	_count.text = "%d / %d" % [page + 1, Progress.book_pages]
 	_back.disabled = page == 0
 	_next.disabled = page == Progress.book_pages - 1

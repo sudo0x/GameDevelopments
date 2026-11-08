@@ -16,7 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_crafting")
 keyboard_help = "Arrows: choose   Enter: make   F / R / Esc: close"
-touch_help = "Tap to make   Tap ! to close"
+touch_help = "Tap to make"
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 2

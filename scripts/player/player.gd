@@ -11,12 +11,17 @@ signal action_pressed
 signal heal_pressed
 ## The phone's Seed button was pressed. The HUD asks which seed.
 signal seed_menu_pressed
+## Storage controls: farming or combat mode changed.
+signal mode_changed
 
 ## Frame order in assets/player/player_idle.png.
 ## To add diagonal poses later, add frames to the sheet and extend this enum and _facing_for().
 enum Facing { DOWN, UP, LEFT, RIGHT }
 ## Keys 1–7 select these, in this order.
 enum Tool { HOE, WATERING_CAN, SEEDS, HAND, HOLY_WATER, BUILD, SWORD }
+## Storage controls: the switch button's modes, in the order a tap steps through them.
+enum Mode { FARM, COMBAT, BUILD }
+const MODE_NAMES := ["Farm", "Combat", "Build"]
 
 const TOOL_NAMES := ["Hoe", "Watering can", "Seeds", "Hand", "Holy water", "Build", "Sword"]
 ## In the same order as Facing.
@@ -32,6 +37,7 @@ const KNOCKBACK_FADE := 900.0
 ## so a workbench beside or behind them doesn't get in the way of farming.
 const FACED_RADIUS := 10.0
 const FACED_DISTANCE := 14.0
+const BOW_SCENE := preload("res://scenes/player/bow.tscn")
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -53,6 +59,8 @@ var seed_index := 0
 var strong_water := false
 ## Index into Inventory.BUILDINGS of the building placed with the Build tool.
 var building_index := 0
+## Storage controls: what the big button does. Not saved: every morning starts in Farm mode.
+var mode := Mode.FARM
 
 var _walk_time: float = 0.0
 var _safe_left := 0.0
@@ -62,6 +70,8 @@ var _faced_query := PhysicsShapeQueryParameters2D.new()
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var reach: Area2D = $Reach
 @onready var sword: Sword = $Sword
+## Added in code, so the player scene stays as it is.
+var bow: Bow
 @onready var _idle_texture: Texture2D = sprite.texture
 ## Where the player wakes after fainting.
 @onready var _home_position: Vector2 = global_position
@@ -73,6 +83,16 @@ func _ready() -> void:
 	_faced_query.shape = circle
 	_faced_query.collide_with_areas = true
 	_faced_query.collide_with_bodies = false
+	bow = BOW_SCENE.instantiate()
+	add_child(bow)
+	# Every morning starts in Farm mode, the most common job.
+	Progress.day_started.connect(func() -> void:
+		if GameState.carry_mode and mode != Mode.FARM:
+			set_mode(Mode.FARM))
+	# Placing the last lantern moves Build mode on to the next building in the set.
+	Inventory.inventory_changed.connect(func() -> void:
+		if in_mode(Mode.BUILD):
+			pick_building())
 
 
 func _physics_process(delta: float) -> void:
@@ -122,6 +142,9 @@ func _walk_texture_for(dir: Facing) -> Texture2D:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameState.carry_mode:
+		_carry_input(event)
+		return
 	for i in Tool.size():
 		if event.is_action_pressed("tool_%d" % (i + 1)):
 			tool = i as Tool
@@ -144,6 +167,46 @@ func _unhandled_input(event: InputEvent) -> void:
 		stop_building()
 	if event.is_action_pressed("interact"):
 		_interact()
+
+
+## Storage controls (docs/28_...): no tools to pick. The big button farms, fights or builds with
+## what the bag page set. C (or tapping the mode button) goes to the next mode, and keys 1-3
+## jump to one. The phone's mode button also opens a wheel when held (TouchControls).
+func _carry_input(event: InputEvent) -> void:
+	if event.is_action_pressed("action"):
+		action_pressed.emit()
+	if event.is_action_pressed("switch_mode"):
+		next_mode()
+	for i in Mode.size():
+		if event.is_action_pressed("tool_%d" % (i + 1)):
+			set_mode(i as Mode)
+	if event.is_action_pressed("interact"):
+		_interact()
+
+
+## Farm, then Combat, so a weapon is one tap away while farming.
+func next_mode() -> void:
+	set_mode(posmod(mode + 1, Mode.size()) as Mode)
+
+
+func set_mode(value: Mode) -> void:
+	mode = value
+	# Build mode uses the Build tool, so the preview, cursor and placing work as before.
+	tool = Tool.BUILD if mode == Mode.BUILD else Tool.HOE
+	pick_building()
+	mode_changed.emit()
+	tool_changed.emit()
+
+
+## Build mode places the first building in the build set that's carried.
+func pick_building() -> void:
+	var ready := Inventory.ready_now(Inventory.build_set)
+	if not ready.is_empty():
+		building_index = Inventory.BUILDINGS.find(Inventory.building_by_id(StringName(String(ready[0]).substr(6))))
+
+
+func in_mode(value: Mode) -> bool:
+	return GameState.carry_mode and mode == value
 
 
 ## Called by creatures on contact. Does nothing during the short safe time after a hit,
@@ -213,6 +276,18 @@ func swing_at(point: Vector2) -> void:
 	else:
 		facing = Facing.DOWN if direction.y > 0.0 else Facing.UP
 	sword.swing(direction)
+
+
+## Turns toward a point and shoots an arrow at it. Returns false with no arrows, or mid-shot.
+func shoot_at(point: Vector2) -> bool:
+	var direction := global_position.direction_to(point)
+	if direction == Vector2.ZERO:
+		direction = FACING_DIRECTIONS[facing]
+	if absf(direction.x) >= absf(direction.y):
+		facing = Facing.RIGHT if direction.x > 0.0 else Facing.LEFT
+	else:
+		facing = Facing.DOWN if direction.y > 0.0 else Facing.UP
+	return bow.shoot(direction)
 
 
 ## What the Action button does with an object. An object with action_interact() can treat

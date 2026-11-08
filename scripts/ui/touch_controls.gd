@@ -66,6 +66,7 @@ const ACTION_ICONS := {
 const ACTION_DIM_COLOR := Color(1, 1, 1, 0.45)
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const TASKS_ICON := preload("res://assets/ui/tasks_icon.png")
+const BOOK_ICON := preload("res://assets/ui/book_icon.png")
 const CANCEL_ICON := preload("res://assets/ui/cancel_icon.png")
 ## Stands for an open menu in _shown_action, where Action shows ACT_ICON.
 const MENU_OPEN := -1
@@ -75,10 +76,14 @@ const ACTION_BUTTONS: Array[Array] = [
 	["", "action", Vector2(596, 296), 68.0, Vector2.ONE],
 	# Well away from Action, so holy water is never spent by accident.
 	["", "heal", Vector2(596, 216), 42.0, Vector2.ONE],
+	# Storage controls: switches the big button between farming and combat, in Heal's spot.
+	["", "switch_mode", Vector2(596, 216), 42.0, Vector2.ONE],
 	["", "seed_menu", Vector2(526, 322), 50.0, Vector2.ONE],
 	["", "inventory", Vector2(526, 262), 42.0, Vector2.ONE],
 	# Under the hearts, away from both thumbs, because it's for reading, not playing.
 	["", "tasks", Vector2(28, 78), 38.0, Vector2.ZERO],
+	# The old book, right under Tasks: the game's rules, story and help, so it should be easy to find.
+	["", "book", Vector2(28, 122), 38.0, Vector2.ZERO],
 	# Leaves Build mode. In Seed's spot: they're never both showing.
 	["", "build_mode", Vector2(526, 322), 50.0, Vector2.ONE],
 	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
@@ -86,6 +91,22 @@ const ACTION_BUTTONS: Array[Array] = [
 ]
 ## The only buttons left showing under an open menu: they're what close it.
 const SHOWN_UNDER_MENUS: Array[String] = ["action", "inventory"]
+## Storage controls (docs/28_...) swap Heal and Seed for the mode button, and Build mode is a
+## mode, so it needs no X.
+const CARRY_HIDDEN: Array[String] = ["heal", "seed_menu", "build_mode"]
+## Holding the mode button this long opens the wheel: one choice per Player.Mode, in an arc up
+## and to the left, where the thumb can slide. Letting go off every choice changes nothing.
+const WHEEL_HOLD_SECONDS := 0.3
+const WHEEL_OFFSETS: Array[Vector2] = [Vector2(-84, 22), Vector2(-80, -32), Vector2(-50, -74)]
+## Storage controls: the Bag is for preparing sets, not for every moment, so it sits small above
+## the mode button, in the right-hand column with pause, clear of the top right icons.
+const CARRY_BAG_CENTER := Vector2(614, 160)
+const CARRY_BAG_SIZE := 34.0
+const WHEEL_SLOT := 44.0
+const WHEEL_PICK_RADIUS := 30.0
+const MODE_ICONS := preload("res://assets/ui/mode_icons.png")
+const MODE_ICON_SIZE := 32.0
+const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -97,6 +118,13 @@ var active := false
 var _buttons: Dictionary[String, TouchScreenButton] = {}
 var _action_icon: Sprite2D
 var _seed_icon: Sprite2D
+var _mode_icon: Sprite2D
+## The mode wheel, the finger holding the mode button, for how long, and the choice under it.
+var _wheel: Node2D
+var _wheel_slots: Array[Sprite2D] = []
+var _mode_finger := -1
+var _mode_held := 0.0
+var _wheel_pick := -1
 ## What Farm says Action would do, and what the button shows now.
 var _action := Farm.Action.NONE
 var _shown_action: int = Farm.Action.NONE
@@ -118,6 +146,7 @@ func _ready() -> void:
 	_add_icon(_buttons["inventory"], BAG_ICON)
 	_add_icon(_buttons["heal"], HOLY_WATER_ICON)
 	_add_icon(_buttons["tasks"], TASKS_ICON)
+	_add_icon(_buttons["book"], BOOK_ICON)
 	_add_icon(_buttons["build_mode"], CANCEL_ICON)
 	var pause_icon := _add_icon(_buttons["ui_cancel"], PAUSE_ICON)
 	pause_icon.scale *= PAUSE_ICON_SIZE
@@ -126,6 +155,17 @@ func _ready() -> void:
 	_buttons["action"].modulate = ACTION_DIM_COLOR
 	_buttons["heal"].modulate = ACTION_DIM_COLOR
 	_seed_icon = _add_icon(_buttons["seed_menu"], player.selected_seed().seed_icon)
+	_mode_icon = _add_icon(_buttons["switch_mode"], mode_icon(Player.Mode.FARM))
+	if GameState.carry_mode:
+		for action: String in CARRY_HIDDEN:
+			_buttons[action].hide()
+		player.mode_changed.connect(_show_mode)
+		# Taps and holds are read in _input(), because a hold must not switch on its own.
+		_buttons["switch_mode"].action = ""
+		_add_wheel()
+		_move_button("inventory", CARRY_BAG_CENTER, CARRY_BAG_SIZE)
+	else:
+		_buttons["switch_mode"].hide()
 	Inventory.inventory_changed.connect(_show_seed)
 	get_viewport().size_changed.connect(_fit_screen)
 	_fit_screen()
@@ -133,9 +173,15 @@ func _ready() -> void:
 	set_active(DisplayServer.is_touchscreen_available())
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	# Taps would go through an open menu to anything under it.
 	var paused := get_tree().paused
+	if _mode_finger != -1:
+		_mode_held += delta
+		if paused:
+			_close_wheel()
+		elif _mode_held >= WHEEL_HOLD_SECONDS and not _wheel.visible:
+			_open_wheel()
 	tool_bar.visible = not paused
 	if stick.visible == paused:
 		stick.visible = not paused
@@ -175,6 +221,12 @@ func _update_action_button() -> void:
 	var icon: Texture2D = ACT_ICON
 	if _shown_action == Farm.Action.PLACE:
 		icon = player.selected_building().preview_texture
+	elif _shown_action == Farm.Action.SHOOT:
+		icon = KeyToolBar.BOW_ICON
+	elif _shown_action == Farm.Action.HEAL:
+		icon = STRONG_WATER_ICON if player.strong_water else HOLY_WATER_ICON
+	elif _shown_action == Farm.Action.PLANT and GameState.carry_mode:
+		icon = player.selected_seed().seed_icon
 	elif ACTION_ICONS.has(_shown_action):
 		icon = tool_icon(ACTION_ICONS[_shown_action])
 	_fit_icon(_action_icon, icon)
@@ -271,14 +323,108 @@ func _release_movement() -> void:
 
 func _show_selected_tool() -> void:
 	var building := player.tool == Player.Tool.BUILD
-	_buttons["build_mode"].visible = building
-	_buttons["seed_menu"].visible = not building
+	_buttons["build_mode"].visible = building and not GameState.carry_mode
+	_buttons["seed_menu"].visible = not building and not GameState.carry_mode
 	# A different building can mean a different icon with the same action.
 	_shown_action = ICON_OUT_OF_DATE
 	_show_seed()
 
 
 ## The seed's picture, dimmed when there are none left: tapping still opens the popup.
+## Storage controls: the mode button shows the mode the big button is in.
+func _show_mode() -> void:
+	_fit_icon(_mode_icon, mode_icon(player.mode))
+	_shown_action = ICON_OUT_OF_DATE
+
+
+## Farm, Combat and Build, side by side in Player.Mode order, unlike any tool icon, so the
+## mode button never shows the same picture as the big button.
+static func mode_icon(mode: Player.Mode) -> Texture2D:
+	var icon := AtlasTexture.new()
+	icon.atlas = MODE_ICONS
+	icon.region = Rect2(mode * MODE_ICON_SIZE, 0, MODE_ICON_SIZE, MODE_ICON_SIZE)
+	return icon
+
+
+## The mode button: a tap goes to the next mode, and a hold opens the wheel to slide to one.
+func _input(event: InputEvent) -> void:
+	if not active or not GameState.carry_mode or get_tree().paused:
+		return
+	var touch := event as InputEventScreenTouch
+	var drag := event as InputEventScreenDrag
+	if touch and touch.pressed and _mode_finger == -1 and _buttons["switch_mode"].is_visible_in_tree() and _on_button("switch_mode", touch.position):
+		_mode_finger = touch.index
+		_mode_held = 0.0
+		_wheel_pick = -1
+	elif touch and not touch.pressed and touch.index == _mode_finger:
+		var wheel_was_open := _wheel.visible
+		var pick := _wheel_pick
+		_close_wheel()
+		if not wheel_was_open:
+			player.next_mode()
+		elif pick >= 0:
+			player.set_mode(pick as Player.Mode)
+	elif drag and drag.index == _mode_finger and _wheel.visible:
+		_wheel_pick = wheel_choice_at(drag.position)
+		_show_wheel_pick()
+
+
+func _move_button(action: String, center: Vector2, size: float) -> void:
+	var button := _buttons[action]
+	button.scale = Vector2.ONE * size / TEXTURE_SIZE
+	for placed: Dictionary in _placed:
+		if placed["control"] == button:
+			placed["at"] = center - Vector2(size, size) / 2.0
+
+
+func _on_button(action: String, at: Vector2) -> bool:
+	var button := _buttons[action]
+	return Rect2(button.global_position, button.texture_normal.get_size() * button.scale).has_point(at)
+
+
+func _add_wheel() -> void:
+	_wheel = Node2D.new()
+	_wheel.name = "ModeWheel"
+	_wheel.hide()
+	add_child(_wheel)
+	for mode in Player.Mode.size():
+		var slot := Sprite2D.new()
+		slot.texture = BUTTON_TEXTURE
+		slot.scale = Vector2.ONE * WHEEL_SLOT / TEXTURE_SIZE
+		slot.position = WHEEL_OFFSETS[mode]
+		var icon := Sprite2D.new()
+		_fit_icon(icon, mode_icon(mode as Player.Mode))
+		slot.add_child(icon)
+		_wheel.add_child(slot)
+		_wheel_slots.append(slot)
+
+
+func _open_wheel() -> void:
+	var button := _buttons["switch_mode"]
+	_wheel.position = button.global_position + button.texture_normal.get_size() * button.scale / 2.0 - global_position
+	_wheel.show()
+	_show_wheel_pick()
+
+
+func _close_wheel() -> void:
+	_mode_finger = -1
+	_wheel_pick = -1
+	_wheel.hide()
+
+
+## The wheel's choice under a screen point, or -1.
+func wheel_choice_at(at: Vector2) -> int:
+	for i in _wheel_slots.size():
+		if _wheel_slots[i].global_position.distance_to(at) <= WHEEL_PICK_RADIUS:
+			return i
+	return -1
+
+
+func _show_wheel_pick() -> void:
+	for i in _wheel_slots.size():
+		_wheel_slots[i].modulate = SELECTED_COLOR if i == _wheel_pick else Color.WHITE
+
+
 func _show_seed() -> void:
 	var crop := player.selected_seed()
 	_fit_icon(_seed_icon, crop.seed_icon)

@@ -28,7 +28,8 @@ func setup(farm: Farm) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not GameState.touch_mode:
+	# Storage controls move buildings in Build mode instead, so walking past one can't grab it.
+	if not GameState.touch_mode or GameState.carry_mode:
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed and _finger == -1:

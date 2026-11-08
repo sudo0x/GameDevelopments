@@ -71,4 +71,40 @@ func _show_selected() -> void:
 
 
 func _update_visible() -> void:
-	visible = not GameState.touch_mode
+	# Storage controls have no tools to pick: the bag page sets what the big button uses.
+	visible = not GameState.touch_mode and not GameState.carry_mode
+
+
+const BOW_ICON := preload("res://assets/items/bow.png")
+const ARROWS_ICON := preload("res://assets/items/arrows.png")
+
+
+## Storage controls (docs/28_...): the picture for a bag item, shared by the bag and storage.
+static func item_icon(item: StringName) -> Texture2D:
+	match item:
+		&"hoe":
+			return TouchControls.tool_icon(Player.Tool.HOE)
+		&"can":
+			return TouchControls.tool_icon(Player.Tool.WATERING_CAN)
+		&"sword":
+			return TouchControls.SWORD_ICON
+		&"bow":
+			return BOW_ICON
+		&"arrows":
+			return ARROWS_ICON
+		&"holy_water":
+			return GameMenu.HOLY_WATER_ICON
+		&"strong_holy_water":
+			return GameMenu.STRONG_WATER_ICON
+	var text := String(item)
+	var id := StringName(text.substr(text.find("_") + 1))
+	if text.begins_with("seed_"):
+		return Inventory.crop_by_id(id).seed_icon
+	if text.begins_with("crop_"):
+		return Inventory.crop_by_id(id).icon
+	if text.begins_with("build_"):
+		return Inventory.building_by_id(id).preview_texture
+	for material in Inventory.MATERIALS:
+		if material.id == id:
+			return material.icon
+	return null

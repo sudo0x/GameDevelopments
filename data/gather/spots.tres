@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="GatherSpotTable" format=3]
+[gd_resource type="Resource" script_class="GatherSpotTable" format=3 uid="uid://3sg0bw4w0olf"]
 
-[ext_resource type="Script" path="res://scripts/farm/gather_spot_table.gd" id="1_table"]
-[ext_resource type="Script" path="res://scripts/farm/gather_spot.gd" id="2_spot"]
-[ext_resource type="Resource" path="res://data/gather/tree.tres" id="tree"]
+[ext_resource type="Script" uid="uid://ddta5luu03oha" path="res://scripts/farm/gather_spot_table.gd" id="1_table"]
+[ext_resource type="Script" uid="uid://8cu5m21r55tl" path="res://scripts/farm/gather_spot.gd" id="2_spot"]
 [ext_resource type="Resource" path="res://data/gather/rock.tres" id="rock"]
+[ext_resource type="Resource" path="res://data/gather/tree.tres" id="tree"]
 
 [sub_resource type="Resource" id="spot_1"]
 script = ExtResource("2_spot")

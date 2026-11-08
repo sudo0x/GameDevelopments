@@ -6,31 +6,32 @@
 [ext_resource type="PackedScene" path="res://scenes/farm/ground.tscn" id="4_ground"]
 [ext_resource type="TileSet" uid="uid://cnq0xev7567av" path="res://data/tilesets/ground_tileset.tres" id="5_tiles"]
 [ext_resource type="Script" uid="uid://qchubhvhgjdn" path="res://scripts/ui/hud.gd" id="6_hud"]
-[ext_resource type="PackedScene" path="res://scenes/farm/shipping_box.tscn" id="box_scene"]
-[ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
-[ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
-[ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
-[ext_resource type="Script" path="res://scripts/creatures/creature_spawner.gd" id="spawner_script"]
-[ext_resource type="Script" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
-[ext_resource type="Script" path="res://scripts/farm/soil_edges.gd" id="soil_edges_script"]
-[ext_resource type="Script" path="res://scripts/farm/wet_edges.gd" id="wet_edges_script"]
-[ext_resource type="Script" path="res://scripts/farm/healing.gd" id="healing_script"]
-[ext_resource type="Script" path="res://scripts/farm/gathering.gd" id="gathering_script"]
-[ext_resource type="Script" path="res://scripts/farm/build_preview.gd" id="preview_script"]
-[ext_resource type="Script" path="res://scripts/farm/builder.gd" id="builder_script"]
-[ext_resource type="Script" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
-[ext_resource type="Texture2D" path="res://assets/items/coin.png" id="coin_icon"]
-[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="touch_script"]
-[ext_resource type="Script" path="res://scripts/ui/thumb_stick.gd" id="stick_script"]
-[ext_resource type="Script" path="res://scripts/ui/key_tool_bar.gd" id="key_bar_script"]
-[ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
-[ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
-[ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
-[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="pause_menu_scene"]
-[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="settings_script"]
-[ext_resource type="PackedScene" path="res://scenes/farm/workbench.tscn" id="workbench_scene"]
-[ext_resource type="PackedScene" path="res://scenes/farm/well.tscn" id="well_scene"]
 [ext_resource type="PackedScene" path="res://scenes/farm/house.tscn" id="7_house"]
+[ext_resource type="PackedScene" path="res://scenes/ui/bag_menu.tscn" id="bag_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/shipping_box.tscn" id="box_scene"]
+[ext_resource type="Script" uid="uid://c6smb6dtf0bv3" path="res://scripts/farm/builder.gd" id="builder_script"]
+[ext_resource type="PackedScene" path="res://scenes/farm/storage_chest.tscn" id="chest_scene"]
+[ext_resource type="Texture2D" uid="uid://bn1hmv1bpie0m" path="res://assets/items/coin.png" id="coin_icon"]
+[ext_resource type="PackedScene" path="res://scenes/ui/crafting_menu.tscn" id="crafting_menu_scene"]
+[ext_resource type="Script" uid="uid://bsexlt1fnv2m4" path="res://scripts/farm/curse_edges.gd" id="edges_script"]
+[ext_resource type="Script" uid="uid://dta1jm4hs5l4e" path="res://scripts/farm/gathering.gd" id="gathering_script"]
+[ext_resource type="Script" uid="uid://csiyw05y3esqj" path="res://scripts/farm/healing.gd" id="healing_script"]
+[ext_resource type="Script" uid="uid://dnoe3o6enmmfh" path="res://scripts/ui/hearts_bar.gd" id="hearts_script"]
+[ext_resource type="Script" uid="uid://chpt2pj5bh4fc" path="res://scripts/ui/key_tool_bar.gd" id="key_bar_script"]
+[ext_resource type="PackedScene" path="res://scenes/farm/lantern_post.tscn" id="lantern_scene"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="pause_menu_scene"]
+[ext_resource type="Script" uid="uid://6ab44co3gbh7" path="res://scripts/farm/build_preview.gd" id="preview_script"]
+[ext_resource type="Script" uid="uid://ctllocirvby5s" path="res://scripts/ui/settings_menu.gd" id="settings_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="shop_menu_scene"]
+[ext_resource type="PackedScene" path="res://scenes/farm/shrine.tscn" id="shrine_scene"]
+[ext_resource type="Script" uid="uid://bypvqvtwcvfe5" path="res://scripts/farm/soil_edges.gd" id="soil_edges_script"]
+[ext_resource type="Script" uid="uid://cmhap6j6fgfug" path="res://scripts/creatures/creature_spawner.gd" id="spawner_script"]
+[ext_resource type="PackedScene" path="res://scenes/farm/shop_stall.tscn" id="stall_scene"]
+[ext_resource type="Script" uid="uid://buroajnjovpk0" path="res://scripts/ui/thumb_stick.gd" id="stick_script"]
+[ext_resource type="Script" uid="uid://ukw1b0g85jba" path="res://scripts/ui/touch_controls.gd" id="touch_script"]
+[ext_resource type="PackedScene" path="res://scenes/farm/well.tscn" id="well_scene"]
+[ext_resource type="Script" uid="uid://f2xbowyxst00" path="res://scripts/farm/wet_edges.gd" id="wet_edges_script"]
+[ext_resource type="PackedScene" path="res://scenes/farm/workbench.tscn" id="workbench_scene"]
 
 [node name="Main" type="Node2D" unique_id=1909061381]
 
@@ -44,10 +45,10 @@ crops_parent_path = NodePath("../World")
 [node name="Soil" type="TileMapLayer" parent="Farm" unique_id=499541455]
 tile_set = ExtResource("5_tiles")
 
-[node name="WetEdges" type="Node2D" parent="Farm"]
+[node name="WetEdges" type="Node2D" parent="Farm" unique_id=1167188572]
 script = ExtResource("wet_edges_script")
 
-[node name="SoilEdges" type="Node2D" parent="Farm"]
+[node name="SoilEdges" type="Node2D" parent="Farm" unique_id=1955088449]
 script = ExtResource("soil_edges_script")
 
 [node name="CurseEdges" type="Node2D" parent="Farm" unique_id=1387645021]
@@ -105,8 +106,11 @@ position = Vector2(816, 624)
 [node name="Workbench" parent="World" unique_id=1093386571 instance=ExtResource("workbench_scene")]
 position = Vector2(976, 384)
 
-[node name="StartingWell" parent="World" instance=ExtResource("well_scene")]
+[node name="StartingWell" parent="World" unique_id=115467853 instance=ExtResource("well_scene")]
 position = Vector2(816, 284)
+
+[node name="StorageChest" parent="World" unique_id=180635275 instance=ExtResource("chest_scene")]
+position = Vector2(784, 372)
 
 [node name="Shrine" parent="World" unique_id=1264790358 instance=ExtResource("shrine_scene")]
 position = Vector2(2224, 412)
@@ -127,6 +131,8 @@ offset_bottom = 30.0
 text = "WASD move  1-7 tools  Space use  F interact  R action  I bag  B book  G tasks"
 
 [node name="HeartsBar" type="Control" parent="HUD" unique_id=1570426893]
+layout_mode = 3
+anchors_preset = 0
 offset_left = 8.0
 offset_top = 32.0
 offset_right = 96.0
@@ -135,6 +141,7 @@ mouse_filter = 2
 script = ExtResource("hearts_script")
 
 [node name="DayLabel" type="Label" parent="HUD" unique_id=2113731855]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -168.0
@@ -145,6 +152,7 @@ text = "Day 1"
 horizontal_alignment = 2
 
 [node name="MoneyRow" type="HBoxContainer" parent="HUD" unique_id=1460275318]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -168.0
@@ -163,6 +171,7 @@ layout_mode = 2
 text = "0"
 
 [node name="StatusRows" type="VBoxContainer" parent="HUD" unique_id=1137790264]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -208.0
@@ -179,6 +188,7 @@ offset_bottom = 76.0
 text = "Tool: Hoe"
 
 [node name="CropStatusLabel" type="Label" parent="HUD" unique_id=1450263987]
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -189,6 +199,7 @@ offset_bottom = -60.0
 horizontal_alignment = 1
 
 [node name="NoticeLabel" type="Label" parent="HUD" unique_id=1697204518]
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -198,7 +209,7 @@ offset_right = -40.0
 offset_bottom = -36.0
 horizontal_alignment = 1
 
-[node name="KeyToolBar" type="Node2D" parent="HUD"]
+[node name="KeyToolBar" type="Node2D" parent="HUD" unique_id=818438997]
 script = ExtResource("key_bar_script")
 player_path = NodePath("../../World/Player")
 
@@ -208,6 +219,8 @@ script = ExtResource("touch_script")
 player_path = NodePath("../../World/Player")
 
 [node name="Joystick" type="Control" parent="HUD/TouchControls" unique_id=1782935406]
+layout_mode = 3
+anchors_preset = 0
 offset_top = 180.0
 offset_right = 190.0
 offset_bottom = 360.0
@@ -221,10 +234,10 @@ script = ExtResource("stick_script")
 
 [node name="CraftingMenu" parent="HUD" unique_id=1825540917 instance=ExtResource("crafting_menu_scene")]
 
-[node name="PauseMenu" parent="HUD" instance=ExtResource("pause_menu_scene")]
+[node name="PauseMenu" parent="HUD" unique_id=2007464857 instance=ExtResource("pause_menu_scene")]
 settings_path = NodePath("../SettingsMenu")
 
-[node name="SettingsMenu" type="PanelContainer" parent="HUD"]
+[node name="SettingsMenu" type="PanelContainer" parent="HUD" unique_id=1679855206]
 process_mode = 3
 visible = false
 custom_minimum_size = Vector2(280, 0)
@@ -238,6 +251,7 @@ grow_vertical = 2
 script = ExtResource("settings_script")
 
 [node name="Fade" type="ColorRect" parent="HUD" unique_id=1803823177]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2

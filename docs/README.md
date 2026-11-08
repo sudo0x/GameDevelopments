@@ -10,6 +10,7 @@ File names follow `NN_YYYY-MM-DD_short-name.md` (order, date created, name). Num
 |---|---|---|
 | 03 | 2026-11-03 | [Game concept: what the game is, and everything in it](03_2026-11-03_game-concept.md) |
 | 24 | 2026-11-07 | [Controls: how they work, and why](24_2026-11-07_controls-comparison.md) |
+| 28 | 2026-11-08 | [Storage controls: a storage chest, a limited bag, Farm, Combat and Build modes (a prototype)](28_2026-11-08_storage-controls.md) |
 
 ## Plans still to do
 

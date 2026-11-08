@@ -13,7 +13,10 @@ var _buttons: Array[Button] = []
 func _ready() -> void:
 	for recipe in Inventory.RECIPES:
 		_add_row(recipe)
-	GameState.crafting_requested.connect(open)
+	# The storage controls use WorkbenchMenu instead.
+	GameState.crafting_requested.connect(func() -> void:
+		if not GameState.carry_mode:
+			open())
 	super()
 	_refresh()
 

@@ -17,7 +17,7 @@ grow_vertical = 2
 script = ExtResource("1_bag")
 close_action = &"inventory"
 keyboard_help = "I / Esc: close"
-touch_help = "Tap the bag to close"
+touch_help = "Tap X to close"
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 2

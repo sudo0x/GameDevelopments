@@ -1,6 +1,8 @@
 extends GameMenu
 ## The shop. One seed row per crop, built from Inventory.CROPS, then holy water.
 
+const BAG_ICON := preload("res://assets/ui/bag.png")
+
 var _labels: Array[Label] = []
 var _buttons: Array[Button] = []
 
@@ -12,7 +14,13 @@ func _ready() -> void:
 	for crop in Inventory.CROPS:
 		_add_row(Inventory.buy_seed.bind(crop), crop.seed_icon)
 	_add_row(Inventory.buy_holy_water, HOLY_WATER_ICON)
-	GameState.shop_requested.connect(open)
+	# Storage controls: a bigger bag is the money goal the limit creates.
+	if GameState.carry_mode:
+		_add_row(Inventory.upgrade_bag, BAG_ICON)
+	# The storage controls use StallMenu instead.
+	GameState.shop_requested.connect(func() -> void:
+		if not GameState.carry_mode:
+			open())
 	super()
 	_refresh()
 
@@ -48,7 +56,13 @@ func _refresh() -> void:
 		_set_price(i, crop.seed_price)
 		if crop.daily_stock > 0 and Inventory.seeds_left_today(crop) <= 0:
 			_set_sold_out(i)
-	var last := _labels.size() - 1
+	var last := Inventory.CROPS.size()
+	if GameState.carry_mode:
+		var bag_row := last + 1
+		_labels[bag_row].text = "Bigger bag: %d of %d kinds" % [Inventory.bag_slots, GameState.BALANCE.bag_max_slots]
+		_set_price(bag_row, GameState.BALANCE.bag_upgrade_price)
+		if not Inventory.can_upgrade_bag():
+			_set_sold_out(bag_row)
 	var left := Inventory.holy_water_left_today()
 	_labels[last].text = "Holy water: %d (%d left)" % [Inventory.holy_water, left]
 	_set_price(last, GameState.BALANCE.holy_water_price)

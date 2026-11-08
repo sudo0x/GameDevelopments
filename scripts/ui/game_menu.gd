@@ -10,6 +10,10 @@ const ICON_SIZE := Vector2(24, 24)
 const MENU_GAP := 4.0
 const HOLY_WATER_ICON := preload("res://assets/items/holy_water.png")
 const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
+const CLOSE_ICON := preload("res://assets/ui/cancel_icon.png")
+const CLOSE_SIZE := 32.0
+## How far the X reaches past the frame's top right corner.
+const CLOSE_OUTSIDE := 12.0
 
 ## The key that closes this menu, besides Esc.
 @export var close_action: StringName = &"interact"
@@ -20,6 +24,29 @@ const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 func _ready() -> void:
 	Inventory.inventory_changed.connect(_refresh)
 	resized.connect(_place)
+	_add_close_button()
+
+
+## An X on the top right corner, so every menu closes the same way, on phones and computers.
+## It sits half outside the frame, so it never covers a menu's own buttons. A container lays out
+## its children, so the X goes in a plain full-size Control that only places it.
+func _add_close_button() -> void:
+	var overlay := Control.new()
+	overlay.name = "CloseOverlay"
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(overlay)
+	var button := Button.new()
+	button.name = "CloseButton"
+	button.icon = CLOSE_ICON
+	button.expand_icon = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	button.offset_left = -CLOSE_SIZE + CLOSE_OUTSIDE
+	button.offset_right = CLOSE_OUTSIDE
+	button.offset_top = -CLOSE_OUTSIDE
+	button.offset_bottom = CLOSE_SIZE - CLOSE_OUTSIDE
+	button.pressed.connect(close)
+	overlay.add_child(button)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -36,6 +63,8 @@ func _is_close(event: InputEvent) -> bool:
 
 func open() -> void:
 	$Margin/Box/Help.text = GameState.controls(keyboard_help, touch_help)
+	# The X closes every menu, so a phone menu with nothing else to say has no help line.
+	$Margin/Box/Help.visible = not $Margin/Box/Help.text.is_empty()
 	show()
 	_refresh()
 	_place()

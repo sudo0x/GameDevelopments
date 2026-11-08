@@ -10,7 +10,7 @@ var _yes := Button.new()
 func _init() -> void:
 	name = "SleepMenu"
 	keyboard_help = "Enter: choose   Esc: close"
-	touch_help = "Tap ! to close"
+	touch_help = ""
 	_build_frame()
 	var question := Label.new()
 	question.text = "Sleep until morning?"

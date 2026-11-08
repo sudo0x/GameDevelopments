@@ -15,6 +15,14 @@ const STEPS: Array[Array] = [
 	["ship", "Goal: press R at the shipping box to sell your harvest.", "Goal: tap the big button at the shipping box to sell your harvest.", "Sell your harvest"],
 	["plant_ward", "Goal: buy a wardthorn seed at the stall, pick it with Q or E, and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, pick it with the seed bag, and plant it by the curse.", "Plant a wardthorn"],
 ]
+## Storage controls (docs/28_...) do some lessons differently: objects are tapped, holy water
+## heals from the farming set, and seeds are picked on the bag page. Keyboard text, then touch.
+const CARRY_TEXT: Dictionary[String, Array] = {
+	"sleep": ["Goal: go to your house door and click it, or press F, to sleep.", "Goal: go to your house door and tap it to sleep."],
+	"heal": ["Goal: face a cursed tile and press R. Holy water heals it.", "Goal: face a cursed tile and tap the big button. Holy water heals it."],
+	"ship": ["Goal: click the shipping box, or press F, to sell your harvest.", "Goal: tap the shipping box to sell your harvest."],
+	"plant_ward": ["Goal: buy a wardthorn seed at the stall, add it to the farming set on the bag page (I), and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, add it to the farming set on the bag page, and plant it by the curse."],
+}
 const SHRINE_GOAL := "Long goal: heal a path east and restore the old shrine."
 const LAST_GOAL := "Long goal: keep healing the island."
 ## A new goal to show for a moment. The HUD draws it.
@@ -50,14 +58,20 @@ func _ready() -> void:
 func current_text() -> String:
 	var step := _next_step()
 	if not step.is_empty():
-		return GameState.controls(step[1], step[2])
+		return _step_text(step)
 	return LAST_GOAL if SaveGame.farm_state.get("shrine", false) else SHRINE_GOAL
 
 
 ## The lesson to do now without its "Goal:", or empty once they're over.
 func lesson_text() -> String:
 	var step := _next_step()
-	return _sentence(GameState.controls(step[1], step[2]).trim_prefix("Goal: ")) if not step.is_empty() else ""
+	return _sentence(_step_text(step).trim_prefix("Goal: ")) if not step.is_empty() else ""
+
+
+func _step_text(step: Array) -> String:
+	if GameState.carry_mode and CARRY_TEXT.has(step[0]):
+		return GameState.controls(CARRY_TEXT[step[0]][0], CARRY_TEXT[step[0]][1])
+	return GameState.controls(step[1], step[2])
 
 
 func long_goal_text() -> String:
