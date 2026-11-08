@@ -41,8 +41,9 @@ const JOB_TEXTS: Dictionary[StringName, String] = {
 	&"harvest": "Picks ripe crops. Off, they stay in the ground for their looks.",
 	&"gather": "Hits trees and rocks for wood and stone.",
 	&"heal": "Heals a cursed tile ahead, with the purifying hoe or holy water.",
-	&"place": "In Build mode, the big button places the first building in the build set.",
-	&"pick_up": "In Build mode, the big button picks up the building in front of you.",
+	&"place": "The big button places the first building in the order below, from the bag.",
+	&"move": "The big button lifts the building in front of you. Walk, then tap again to put it down. It never goes in the bag.",
+	&"pick_up": "The big button puts the building in front of you in the bag, to carry it or keep it in storage.",
 }
 
 

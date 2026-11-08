@@ -80,6 +80,8 @@ func status(cell: Vector2i) -> String:
 	if not placed.has(cell):
 		return ""
 	var how := GameState.controls("press 4, then Space to pick up.", "hold it to move it.")
+	if GameState.carry_mode:
+		how = "Build mode moves or picks it up."
 	return "%s: %s" % [placed[cell]["data"].display_name, how]
 
 

@@ -23,13 +23,13 @@ flowchart LR
 - **Bag:** holds 12 kinds of items, each stacking without limit. The stall sells a bigger bag (+4 kinds for 150, up to 20). Every game starts with a sword in the combat set and a lantern post in the build set (`Inventory.give_starter_kit()`, once per game, older saves too). Holy water isn't shown in the top right corner, since the bag page shows it. New things go into the bag if there's room, or else to storage with a notice. Only carried crops are shipped, and only carried seeds, holy water and buildings can be used. Crafting uses everything owned, because the workbench stands by the chest
 - **Farm jobs:** six switches on the bag page, Till, Plant, Water, Harvest, Gather and Heal (`Inventory.farm_jobs`, `toggle_job()`, `Farm._can_do()`). The big button does only the jobs that are on, so a player can water only, or leave ripe crops in the ground. The hoe, can and holy water just need to be carried. The can holds 100 water (finding 83)
 - **Seeds to plant:** `Inventory.plant_set`, as many as the player picks. The big button plants only these, first first, and new seeds never join on their own. Tools stay in `farm_set`
-- **Bag page** (`SetsMenu`, key I or the Bag button): the same layout as the item menus. It opens on the **Ready** tab, grouped by mode under headings: Farm jobs (one tap flips a job; an off one is dimmed and says Off), Seeds to plant, Combat, Build jobs, and Buildings to place, each in order. `ItemGridMenu` entries take a `section` heading and an `on_tap` action for this. The other tabs show what's carried by kind. The details side says what an item does, with buttons to add it to its set, take it out, or move it sooner (`Inventory.move_sooner()`)
+- **Bag** (`SetsMenu`, key I or the Bag button): the same layout as the item menus, with two pages picked at the top, and it reopens on the last one. **Bag** shows what's carried by kind; the details side says what an item does, with buttons to add it to its set, take it out, or move it sooner (`Inventory.move_sooner()`). **Modes** has a tab per mode (Farm mode, Combat mode, Build mode) and opens on the mode in use. Each tab shows the mode's switches, then its items in order, then carried items it doesn't use yet, which one tap adds (findings 91 and 92). Tiles keep their icon full size: a count sits in the corner, and a switch is plain when on and dark when off. The page buttons sit at the start of the row. `ItemGridMenu` entries take `section`, `on_tap` and `switch` for this
 - **Farm mode:** the big button works like the classic smart Action button, but only with the farming set: harvest and gather always, then water, plant the first seed in the set that fits, till, purify with the hoe, and heal with holy water. **Holy water is only used on a cursed tile straight ahead,** never on a patch beside you while farming (the cursor grows to show the area first). Leave it out of the set to keep it safe
-- **Combat mode:** uses the combat set's first weapon with something left, so when arrows exist the sword takes over as they run out. With no weapon it says so. Kept as its own mode, because later islands are about fighting. The bow (crafted once: 8 wood, 2 curse shards) goes first in the combat set and shoots arrows (crafted 2 wood and 1 stone for 10). A shot draws the bow through its 3 frames (`Bow`, `scenes/player/bow.tscn`, `assets/objects/bow_frames.png` from `tools/build_bow_frames.gd`), then an `Arrow` flies up to `bow_range` (170 px) at `arrow_speed`, hurting the first creature and stopping at trees and houses, but not at the curse. With no arrows the sword is used
-- **Build mode:** the big button picks up the building ahead, or places the build set's first building on the tile ahead, with the ghost preview and guard square showing. Moving is picking up, then placing: a picked-up building goes to the front of the build set. New buildings join the set when crafted. To store one, pick it up and tap Put at the chest. Holding a building to drag it is off with these controls, so walking past one can't grab it. Build jobs (`Inventory.build_jobs`, on the Ready tab) switch Place and Pick up. A picked-up building goes in the bag and is carried, to the chest too
+- **Combat mode:** three combat buttons beside the big button each hold one weapon (`Inventory.combat_item()`, set on the Modes page's Combat tab). Tapping one picks it (`Inventory.combat_pick`, Q/E on computers), and the big button fights with the picked weapon; with none, or a bow with no arrows, it says why (finding 96). New weapons go on the first empty button. Kept as its own mode, because later islands are about fighting. The bow (crafted once: 8 wood, 2 curse shards) shoots arrows (crafted 2 wood and 1 stone for 10). A shot draws the bow through its 3 frames (`Bow`, `scenes/player/bow.tscn`, `assets/objects/bow_frames.png` from `tools/build_bow_frames.gd`), then an `Arrow` flies up to `bow_range` (170 px) at `arrow_speed`, hurting the first creature and stopping at trees and houses, but not at the curse.
+- **Build mode** (finding 93): does one thing at a time, picked with the build tool button beside the big one (V on computers) or on the Modes page: **Place** puts the build set's first building on the tile ahead, with the ghost preview and guard square showing. **Move** lifts the building ahead (it fades and stays put), then puts it down where the preview is green; it never goes through the bag, and leaving Build mode or changing tool puts it back (`Farm.lifted`, `_lift()`, `drop_lifted()`). **Pick up** puts it in the bag, to carry it or keep it at the chest; a full bag refuses. `Inventory.build_tool`, saved. New buildings join the build set when crafted. Holding a building to drag it is off with these controls, so walking past one can't grab it
 - **Mode button** (in the old Heal spot): a tap goes to the next mode, Farm → Combat → Build, so a weapon is one tap away while farming. Holding it for 0.3 seconds opens a wheel of the three modes up and to the left; slide onto one and let go. Letting go elsewhere changes nothing. Computers: C for the next mode, 1, 2 and 3 for each. Every morning starts in Farm mode
 - **Objects are tapped,** or clicked on a computer, standing close: door, stall, box, workbench, wells, shrine and chest. Too far away says "Walk closer". The big button never uses objects. F still works on computers
-- **Phone buttons:** the big button, the mode button, Bag, Tasks, the old book (under Tasks, in both control schemes) and pause. Seed, Heal and the Build X are gone. The Bag is small, above the mode button (finding 74), and every menu closes with an X on its corner (finding 73)
+- **Phone buttons:** the big button, the mode button, Bag, Tasks, the old book (under Tasks, in both control schemes) and pause. Seed, Heal and the Build X are gone. The Bag is small, above the mode button (finding 74), and every menu closes with an X on its corner (finding 73). Menus are centered over the buttons, which wait under them and only work again once the menu closes (finding 90), and Build mode adds the build tool button in the old Seed spot
 - **New kinds join their set:** a kind of item that enters the bag joins its set, so the big button can use it at once (crafted strong holy water, new buildings, the sword). Seeds never do: the player picks which to plant. Something taken out of a set and later used up rejoins when more is gained
 - **Texts:** goals, the book and the shrine and box notices say what to do with these controls (tap the door and box, heal with the big button, add wardthorn on the bag page)
 - **No switch:** the Settings switch was removed on 2026-11-08 (finding 84), so players always have these controls. The classic code stays only for the older tests, which run with `--classic-controls` (unless their name starts with `test_storage_`), until they move over
@@ -59,6 +59,7 @@ flowchart LR
 
 ## Open
 
+- Art: the build tool icons are in (finding 94). Until then Move borrows Pick up's icon, tinted blue
 - Art: the chest and mode icons are in (2026-11-08). The bow, arrow and arrow bundle are shrunk in `assets/items/` and `assets/objects/arrow.png`, ready for when shooting is coded; the bow's 3 frames need cutting then, lined up so the bow doesn't move between frames
 - A shooting sound: the bow uses the swing sound for now (`tools/make_sounds.gd` can make one)
 - On later islands, fighting and healing happen in the same place: if switching feels slow there, let the combat set hold holy water too
@@ -276,4 +277,30 @@ glove pictures already in the game:
    faint shadow left on the ground below it.
 The shapes must be simple, bold and easy to read at a very small size. Each icon
 centered in its half, filling most of it, with a little empty space around it.
+```
+
+**Build tool icons** (findings 93 and 94): a new set of three, replacing `assets/ui/build_job_icons.png` with a 96×32 strip in the order Place, Pick up, Move. The first set looked too alike: each had a lantern post on grass, and Move had no art of its own. This set gives each icon its own shape and arrow colour. Please send the large version.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+Three small action icons in one row, all the same size, with clear empty space
+between them. Each must be easy to tell apart at a glance, even when tiny, by its
+shape and by the color of its big chunky arrow:
+1. Place: a small wooden crate sitting on a square patch of grass, with a big
+   thick muted-green arrow above it pointing straight DOWN onto it.
+2. Pick up: a small brown leather backpack, open at the top, with a big thick
+   muted-amber arrow pointing straight UP out of it, as if things go into the bag.
+3. Move: a small wooden crate on the right, a faint dashed outline of the same
+   crate on the left, and a big thick muted-blue curved arrow going from the
+   outline over to the crate, pointing RIGHT.
+No lantern posts. The arrows are the biggest, boldest part of each icon. Each icon
+centered in its third, filling most of it, with a little empty space around it.
 ```

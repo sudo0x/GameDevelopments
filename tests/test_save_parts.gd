@@ -3,7 +3,7 @@ extends SceneTree
 ## must stay true between them: the same keys as always, nothing lost, nothing left over.
 const KEYS: Array[String] = [
 	"version", "day", "guide_done", "book_pages", "money", "seeds", "harvest", "materials", "buildings",
-	"holy_water", "strong_holy_water", "purifying_hoe", "sword", "bow", "arrows", "bag", "bag_slots", "farm_jobs", "build_jobs", "plant_set", "combat_set", "build_set", "starter_kit", "farm",
+	"holy_water", "strong_holy_water", "purifying_hoe", "sword", "bow", "arrows", "bag", "bag_slots", "farm_jobs", "build_tool", "plant_set", "combat_set", "combat_slot_2", "combat_slot_3", "build_set", "starter_kit", "farm",
 ]
 
 var fails := 0

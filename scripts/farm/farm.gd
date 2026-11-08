@@ -13,11 +13,13 @@ signal heal_changed(heal: Heal)
 signal water_choice_needed
 ## The player chose a ripe ward plant, so the HUD should ask before bursting it.
 signal burst_asked(cell: Vector2i)
+## Move: a building was lifted or put down.
+signal lift_changed
 
 ## Tile source ids in data/tilesets/ground_tileset.tres.
 enum Source { GRASS, CURSED, SOIL_DRY, SOIL_WET }
 ## What the Action button would do, in the order smart_action() checks them.
-enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP, HEAL, SHOOT }
+enum Action { NONE, SWING, INTERACT, HARVEST, WATER, PLANT, GATHER, TILL, PLACE, PICK_UP, HEAL, SHOOT, MOVE, PUT_DOWN }
 ## What the Heal button would do. The hoe's free daily uses come before holy water.
 enum Heal { NONE, PURIFY, HOLY_WATER }
 
@@ -52,7 +54,12 @@ const ACTION_TOOLS := {
 	Action.TILL: Player.Tool.HOE,
 	Action.PLACE: Player.Tool.BUILD,
 	Action.PICK_UP: Player.Tool.BUILD,
+	Action.MOVE: Player.Tool.BUILD,
+	Action.PUT_DOWN: Player.Tool.BUILD,
 }
+
+## A lifted building fades until it's put down.
+const LIFTED_COLOR := Color(1, 1, 1, 0.4)
 
 @export var player_path: NodePath
 ## Y-sorted node that planted crops are added to, so the player can walk behind them.
@@ -76,6 +83,8 @@ var mover := BuildingMover.new()
 var ward_tap := WardTap.new()
 ## Nights each tilled cell has spent with no crop; at soil_idle_nights it turns back into grass.
 var soil_idle: Dictionary[Vector2i, int] = {}
+## Move: the cell of the building lifted and not yet put down, or Builder.NO_CELL.
+var lifted := Builder.NO_CELL
 ## Reused to check whether a solid object stands on a cell.
 var _cell_query := PhysicsShapeQueryParameters2D.new()
 ## The same, but it also sees interact areas and the player, to keep them clear of buildings.
@@ -159,7 +168,7 @@ func _physics_process(delta: float) -> void:
 	# Placing a guard shows what it would protect. In play, light shows that instead.
 	var guard := _placing_guard_radius()
 	if guard > 0:
-		highlight.show_area(rect.grow(tile.x * guard), _can_place(_shown_cell))
+		highlight.show_area(rect.grow(tile.x * guard), _can_move_lifted(_shown_cell) if lifted != Builder.NO_CELL else _can_place(_shown_cell))
 		highlight.visible = true
 	elif by_action:
 		highlight.show_cell(rect, action != Action.NONE)
@@ -265,6 +274,10 @@ static func tiles_apart(a: Vector2i, b: Vector2i) -> int:
 
 ## How far the building about to be placed would guard. 0 when not placing one.
 func _placing_guard_radius() -> int:
+	if lifted != Builder.NO_CELL:
+		return builder.placed[lifted]["data"].guard_radius if builder.placed.has(lifted) else 0
+	if GameState.carry_mode and Inventory.build_tool != &"place":
+		return 0
 	if player.tool != Player.Tool.BUILD or builder.placed.has(_shown_cell) or _nothing_to_build():
 		return 0
 	return player.selected_building().guard_radius
@@ -377,22 +390,19 @@ func _carry_action(cell: Vector2i) -> Action:
 					return Action.NONE
 			return Action.SWING
 		Player.Mode.BUILD:
-			# Build jobs: each of placing and picking up can be switched off.
-			if builder.placed.has(cell):
-				return Action.PICK_UP if Inventory.job_on(&"pick_up") else Action.NONE
-			var can_place := Inventory.job_on(&"place") and not Inventory.ready_now(Inventory.build_set).is_empty()
-			return Action.PLACE if can_place and _can_place(cell) else Action.NONE
+			return _build_tool_action(cell)
 	return _farm_action(cell)
 
 
-## The combat set's weapon in use: the first with something left, so the sword takes over
-## when the arrows run out. Empty when there's none.
-func weapon() -> StringName:
-	for item in Inventory.ready_now(Inventory.combat_set):
-		# A bow with no arrows can't be used.
-		if item != &"bow" or Inventory.carried(&"arrows") > 0:
-			return item
-	return &""
+## The weapon the big button fights with: the picked combat button's, if it can be used now.
+## A bow with no arrows can't. Empty when there's none.
+func weapon(index: int = -1) -> StringName:
+	var item := Inventory.combat_item(Inventory.combat_pick if index < 0 else index)
+	if item == &"" or Inventory.carried(item) <= 0:
+		return &""
+	if item == &"bow" and Inventory.carried(&"arrows") <= 0:
+		return &""
+	return item
 
 
 ## A farm job is switched on, and the tool it needs is carried.
@@ -447,9 +457,9 @@ func _run_carry(action: Action, cell: Vector2i) -> void:
 	match action:
 		Action.NONE:
 			if player.mode == Player.Mode.COMBAT:
-				GameState.notice.emit("No weapon in the combat set. Add one on the bag page.")
-			elif player.mode == Player.Mode.BUILD and Inventory.ready_now(Inventory.build_set).is_empty():
-				GameState.notice.emit("Nothing in the build set. Add a building on the bag page.")
+				GameState.notice.emit(_no_weapon_text())
+			elif player.mode == Player.Mode.BUILD and Inventory.build_tool == &"place" and Inventory.ready_now(Inventory.build_set).is_empty():
+				GameState.notice.emit("Nothing in the build set. Add a building on the Modes page.")
 			return
 		Action.SWING:
 			var creature := _creature_to_swing_at()
@@ -473,6 +483,13 @@ func _run_carry(action: Action, cell: Vector2i) -> void:
 			_use_tool(Player.Tool.HOLY_WATER, cell)
 		Action.PLACE:
 			_use_tool(Player.Tool.BUILD, cell)
+		Action.MOVE:
+			_lift(cell)
+		Action.PUT_DOWN:
+			var from := lifted
+			drop_lifted()
+			if cell != from:
+				move_building(from, cell)
 		Action.PICK_UP:
 			# Moving is picking up, then placing: what was just picked up is placed next.
 			var item := Inventory.building_item(builder.placed[cell]["data"])
@@ -484,6 +501,54 @@ func _run_carry(action: Action, cell: Vector2i) -> void:
 			if Inventory.carried(item) > 0:
 				Inventory.to_front(item)
 				player.pick_building()
+
+
+## Storage controls: Build mode does one thing at a time, picked with the build tool button, so
+## the big button is never a guess between placing and picking up.
+func _build_tool_action(cell: Vector2i) -> Action:
+	match Inventory.build_tool:
+		&"move":
+			if lifted != Builder.NO_CELL:
+				# Putting it down where it was just cancels the move.
+				return Action.PUT_DOWN if cell == lifted or can_move(lifted, cell) else Action.NONE
+			return Action.MOVE if builder.placed.has(cell) else Action.NONE
+		&"pick_up":
+			return Action.PICK_UP if builder.placed.has(cell) else Action.NONE
+	if builder.placed.has(cell) or Inventory.ready_now(Inventory.build_set).is_empty():
+		return Action.NONE
+	return Action.PLACE if _can_place(cell) else Action.NONE
+
+
+## Move: lifts a building. It stays where it is, faded, until it's put down, so leaving Build
+## mode, changing tool or the day ending can't lose it.
+func _lift(cell: Vector2i) -> void:
+	lifted = cell
+	lift_changed.emit()
+	builder.placed[cell]["node"].modulate = LIFTED_COLOR
+	Audio.play(&"pick_up")
+	GameState.notice.emit("Lifted: %s. Walk to a free spot and %s." % [builder.placed[cell]["data"].display_name, GameState.controls("press R", "tap the big button")])
+
+
+## Whether the lifted building could be put down here; its own spot always can.
+func _can_move_lifted(cell: Vector2i) -> bool:
+	return cell == lifted or can_move(lifted, cell)
+
+
+## Puts a lifted building back down where it was.
+func drop_lifted() -> void:
+	if lifted != Builder.NO_CELL and builder.placed.has(lifted):
+		builder.placed[lifted]["node"].modulate = Color.WHITE
+	if lifted != Builder.NO_CELL:
+		lifted = Builder.NO_CELL
+		lift_changed.emit()
+
+
+## Anything that ends a move before it's put down cancels it.
+func _keep_lifted() -> void:
+	if lifted == Builder.NO_CELL:
+		return
+	if not builder.placed.has(lifted) or not player.in_mode(Player.Mode.BUILD) or Inventory.build_tool != &"move":
+		drop_lifted()
 
 
 ## Storage controls: Build mode with an empty build set has nothing to show.
@@ -649,6 +714,14 @@ func harvest(cell: Vector2i) -> void:
 func _update_build_preview() -> void:
 	# The mover draws the preview while it's dragging.
 	if mover.moving:
+		return
+	_keep_lifted()
+	if lifted != Builder.NO_CELL:
+		var to := ground.map_to_local(target_cell) + BUILDING_BASE
+		build_preview.show_at(builder.placed[lifted]["data"], to, target_cell == lifted or can_move(lifted, target_cell))
+		return
+	if GameState.carry_mode and Inventory.build_tool != &"place":
+		build_preview.hide()
 		return
 	if player.tool != Player.Tool.BUILD or _nothing_to_build():
 		build_preview.hide()
@@ -1005,3 +1078,11 @@ func _limit_camera() -> void:
 	camera.limit_top = used.position.y * tile.y
 	camera.limit_right = used.end.x * tile.x
 	camera.limit_bottom = used.end.y * tile.y
+
+
+## Why the picked combat button can't fight.
+func _no_weapon_text() -> String:
+	var item := Inventory.combat_item(Inventory.combat_pick)
+	if item == &"bow" and Inventory.carried(item) > 0:
+		return "No arrows. Make some at the workbench, or pick another combat button."
+	return "No weapon on this combat button. Set one on the Modes page."

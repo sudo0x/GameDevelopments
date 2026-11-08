@@ -1,21 +1,23 @@
 class_name SetsMenu
 extends ItemGridMenu
-## Storage controls (docs/28_...): the bag page, in the same layout as the workbench, stall and
-## storage. The Ready tab shows what the big button uses, in order: the farm jobs, the seeds to
-## plant, the combat set and the build set. The other tabs show what's carried, by kind. The
-## details side says what an item is and does, with buttons to add it to its set, take it out,
-## or move it sooner. Key I or the Bag button opens it.
+## Storage controls (docs/28_...): the bag, in the same layout as the workbench, stall and
+## storage, with two pages picked at the top. Bag shows what's carried, by kind, and what each
+## item is. Modes sets up what the big button does: one tab per mode, each with its switches,
+## then its items in order, then the carried ones it doesn't use yet. Key I or the Bag button
+## opens it, on the page it was last on.
 
-const READY := "Ready"
+const BAG := "Bag"
+const MODES := "Modes"
+## The Modes page's tabs, in Player.Mode order. "mode" in the name keeps them apart from the
+## Bag page's kinds, like Build.
+const MODE_TABS: Array[String] = ["Farm mode", "Combat mode", "Build mode"]
 const JOB_NAMES: Dictionary[StringName, String] = {
 	&"till": "Till", &"plant": "Plant", &"water": "Water", &"harvest": "Harvest", &"gather": "Gather", &"heal": "Heal",
-	&"place": "Place", &"pick_up": "Pick up",
+	&"place": "Place", &"move": "Move", &"pick_up": "Pick up",
 }
 ## The job icons, side by side in Inventory.FARM_JOBS order.
 const JOB_ICONS := preload("res://assets/ui/job_icons.png")
 const JOB_ICON_SIZE := 32.0
-## The build job icons, side by side in Inventory.BUILD_JOBS order.
-const BUILD_JOB_ICONS := preload("res://assets/ui/build_job_icons.png")
 const ORDINALS: Array[String] = ["1st", "2nd", "3rd"]
 
 ## Each part in words, for tests.
@@ -25,6 +27,9 @@ var plant_text := ""
 var combat_text := ""
 var build_text := ""
 
+var _page := BAG
+var _page_buttons: Dictionary[String, Button] = {}
+
 
 func _init() -> void:
 	super()
@@ -32,6 +37,18 @@ func _init() -> void:
 	close_action = &"inventory"
 	keyboard_help = "I / Esc: close"
 	touch_help = ""
+	# The pages sit where the title was; the Bag button says how full the bag is.
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_BEGIN
+	row.add_theme_constant_override("separation", 6)
+	for page: String in [BAG, MODES]:
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(150, 30)
+		button.pressed.connect(show_page.bind(page))
+		row.add_child(button)
+		_page_buttons[page] = button
+	_title.add_sibling(row)
+	_title.hide()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -42,60 +59,123 @@ func _unhandled_input(event: InputEvent) -> void:
 		super(event)
 
 
+## Switches between the Bag and Modes pages.
+func show_page(page: String) -> void:
+	_page = page
+	_tab = _first_tab()
+	_picked = &""
+	_refresh()
+
+
 func _menu_title() -> String:
+	_page_buttons[BAG].text = "Bag: %d of %d" % [Inventory.used_slots(), Inventory.bag_slots]
+	_page_buttons[MODES].text = MODES
+	for page in _page_buttons:
+		_page_buttons[page].modulate = PICKED_COLOR if page == _page else Color.WHITE
 	return "Bag: %d of %d kinds" % [Inventory.used_slots(), Inventory.bag_slots]
 
 
 func _tab_list() -> Array[String]:
-	return [READY, ALL, ItemInfo.SEEDS, ItemInfo.CROPS, ItemInfo.TOOLS, ItemInfo.BUILD, ItemInfo.WEAPONS, ItemInfo.MATERIALS]
+	if _page == MODES:
+		return MODE_TABS
+	return [ALL, ItemInfo.SEEDS, ItemInfo.CROPS, ItemInfo.TOOLS, ItemInfo.BUILD, ItemInfo.WEAPONS, ItemInfo.MATERIALS]
 
 
+## The Modes page opens on the mode the player is in.
 func _first_tab() -> String:
-	return READY
+	if _page == BAG:
+		return ALL
+	var player := get_tree().get_first_node_in_group("player") as Player
+	return MODE_TABS[player.mode] if player else MODE_TABS[0]
 
 
 func _entries() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
-	# Grouped by mode: switches, then the items each mode uses, in order, each under a heading.
 	var words: PackedStringArray = []
-	words.append(_add_jobs(entries, Inventory.FARM_JOBS, "Farm jobs: tap to switch"))
-	plant_text = _add_set(entries, Inventory.plant_set, "Seeds to plant, in order")
-	combat_text = _add_set(entries, Inventory.combat_set, "Combat, in order")
-	words.append(_add_jobs(entries, Inventory.BUILD_JOBS, "Build jobs: tap to switch"))
-	build_text = _add_set(entries, Inventory.build_set, "Buildings to place, in order")
-	jobs_text = ", ".join(words)
-	words.clear()
 	for item in Inventory.bag_items():
-		entries.append({"id": item, "icon": KeyToolBar.item_icon(item), "kind": ItemInfo.kind(item), "count": _count(item)})
 		words.append("%s %d" % [Inventory.item_name(item), Inventory.carried(item)])
 	carried_text = ", ".join(words)
+	if _page == BAG:
+		for item in Inventory.bag_items():
+			entries.append({"id": item, "icon": KeyToolBar.item_icon(item), "kind": ItemInfo.kind(item), "count": _count(item)})
+		return entries
+	var farm := MODE_TABS[0]
+	jobs_text = _add_jobs(entries, farm)
+	plant_text = _add_set(entries, farm, Inventory.plant_set, "Seeds to plant, in order")
+	_add_unused(entries, farm, Inventory.plant_set, ItemInfo.SEEDS, "Not planting: tap one to add it")
+	var combat := MODE_TABS[1]
+	combat_text = _add_combat(entries, combat)
+	var build := MODE_TABS[2]
+	_add_build_tools(entries, build)
+	build_text = _add_set(entries, build, Inventory.build_set, "Buildings to place, in order")
+	_add_unused(entries, build, Inventory.build_set, ItemInfo.BUILD, "Not placing: tap one to add it")
 	return entries
 
 
-## Job switches on the Ready tab: an off one is dimmed and says Off, and a tap flips it.
-func _add_jobs(entries: Array[Dictionary], jobs: Array[StringName], section: String) -> String:
+## Combat mode: one row per combat button (a, b and c beside the big button), each showing every
+## carried weapon. A tap puts that weapon on the button, or takes it off; a button holds one.
+func _add_combat(entries: Array[Dictionary], tab: String) -> String:
+	var summaries: PackedStringArray = []
+	var weapons: Array[StringName] = []
+	for item in Inventory.bag_items():
+		if ItemInfo.kind(item) == ItemInfo.WEAPONS and Inventory.can_set(item):
+			weapons.append(item)
+	for i in Inventory.COMBAT_BUTTONS:
+		var on := Inventory.combat_item(i)
+		if on != &"":
+			summaries.append("%d: %s" % [i + 1, Inventory.item_name(on)])
+		for item in weapons:
+			entries.append({
+				"id": StringName("slot%d_%s" % [i, item]), "icon": KeyToolBar.item_icon(item), "kind": tab,
+				"switch": item == on, "section": "Combat button %d: tap a weapon" % (i + 1),
+				"on_tap": Inventory.toggle_in_combat_slot.bind(item, i),
+			})
+	return " | ".join(summaries)
+
+
+## Farm jobs: each one switches on or off with a tap.
+func _add_jobs(entries: Array[Dictionary], tab: String) -> String:
 	var words: PackedStringArray = []
-	for job in jobs:
+	for job in Inventory.FARM_JOBS:
 		var on := Inventory.job_on(job)
 		entries.append({
-			"id": StringName("job_" + job), "icon": job_icon(job), "kind": READY, "count": "" if on else "Off",
-			"dim": not on, "only_in_tab": true, "section": section, "on_tap": Inventory.toggle_job.bind(job),
+			"id": StringName("job_" + job), "icon": job_icon(job), "kind": tab, "switch": on,
+			"section": "Jobs: tap to switch on or off", "on_tap": Inventory.toggle_job.bind(job),
 		})
 		words.append("%s %s" % [JOB_NAMES[job], "on" if on else "off"])
 	return ", ".join(words)
 
 
-## A set's items on the Ready tab, in order; one that ran out stays, dimmed.
-func _add_set(entries: Array[Dictionary], ready: Array[StringName], section: String) -> String:
+## Build tools: only one is on, and a tap picks it.
+func _add_build_tools(entries: Array[Dictionary], tab: String) -> void:
+	for tool in Inventory.BUILD_TOOLS:
+		entries.append({
+			"id": StringName("job_" + tool), "icon": job_icon(tool), "kind": tab, "switch": Inventory.build_tool == tool,
+			"section": "The big button: pick one", "on_tap": Inventory.set_build_tool.bind(tool),
+		})
+
+
+## A set's items, in order; one that ran out stays, dimmed.
+func _add_set(entries: Array[Dictionary], tab: String, ready: Array[StringName], section: String) -> String:
 	var words: PackedStringArray = []
 	for item in ready:
 		var count := Inventory.carried(item)
 		entries.append({
-			"id": item, "icon": KeyToolBar.item_icon(item), "kind": READY, "count": _count(item),
-			"dim": count == 0, "only_in_tab": true, "section": section,
+			"id": item, "icon": KeyToolBar.item_icon(item), "kind": tab, "count": _count(item),
+			"dim": count == 0, "section": section,
 		})
 		words.append("%s %d" % [Inventory.item_name(item), count])
 	return ", ".join(words)
+
+
+## Carried items of this kind that aren't in the set, so they can be added from here.
+func _add_unused(entries: Array[Dictionary], tab: String, ready: Array[StringName], kind: String, section: String) -> void:
+	for item in Inventory.bag_items():
+		if ItemInfo.kind(item) == kind and Inventory.can_set(item) and not ready.has(item):
+			entries.append({
+				"id": item, "icon": KeyToolBar.item_icon(item), "kind": tab, "count": _count(item),
+				"dim": true, "section": section, "on_tap": Inventory.toggle_in_set.bind(item),
+			})
 
 
 func _count(item: StringName) -> String:
@@ -105,6 +185,8 @@ func _count(item: StringName) -> String:
 func _details(id: StringName) -> Dictionary:
 	if String(id).begins_with("job_"):
 		return _job_details(StringName(String(id).substr(4)))
+	if String(id).begins_with("slot"):
+		return _slot_details(id)
 	var details := {
 		"icon": KeyToolBar.item_icon(id),
 		"name": Inventory.item_name(id),
@@ -113,18 +195,54 @@ func _details(id: StringName) -> Dictionary:
 		"buttons": [],
 	}
 	if Inventory.can_set(id):
-		_set_details(id, details)
+		if id in [&"sword", &"bow"]:
+			_combat_details(id, details)
+		else:
+			_set_details(id, details)
 	else:
 		details["info"] += "\n" + _use_hint(id)
 	return details
 
 
+## A weapon on the Bag page: which combat buttons use it. They're set on the Modes page.
+func _combat_details(id: StringName, details: Dictionary) -> void:
+	var used: PackedStringArray = []
+	for i in 3:
+		if Inventory.combat_slot(i).has(id):
+			used.append(str(i + 1))
+	details["info"] += "\nCombat buttons: %s" % (", ".join(used) if not used.is_empty() else "none")
+	details["info"] += "\nSet them on the Modes page."
+
+
+## A weapon in one combat button's row on the Modes page.
+func _slot_details(id: StringName) -> Dictionary:
+	var index := int(String(id).substr(4, 1))
+	var item := StringName(String(id).substr(6))
+	var on := Inventory.combat_item(index) == item
+	var details := {
+		"icon": KeyToolBar.item_icon(item),
+		"name": "Button %d: %s" % [index + 1, Inventory.item_name(item)],
+		"text": ItemInfo.describe(item),
+		"info": "On this button" if on else "Not on this button",
+		"buttons": [["Take off" if on else "Put on", Inventory.toggle_in_combat_slot.bind(item, index), on or Inventory.carried(item) > 0]],
+	}
+	return details
+
+
 func _job_details(job: StringName) -> Dictionary:
+	if Inventory.BUILD_TOOLS.has(job):
+		var in_use := Inventory.build_tool == job
+		return {
+			"icon": job_icon(job),
+			"name": "Build mode: %s" % JOB_NAMES[job],
+			"text": ItemInfo.JOB_TEXTS[job],
+			"info": "In use" if in_use else "Not in use. The build tool button (V) changes it too.",
+			"buttons": [["Use this", Inventory.set_build_tool.bind(job), not in_use]],
+		}
 	var on := Inventory.job_on(job)
-	var group := "Build job" if Inventory.BUILD_JOBS.has(job) else "Farm job"
 	return {
 		"icon": job_icon(job),
-		"name": "%s: %s" % [group, JOB_NAMES[job]],
+		"name": "Farm job: %s" % JOB_NAMES[job],
 		"text": ItemInfo.JOB_TEXTS[job],
 		"info": "On" if on else "Off",
 		"buttons": [["Turn off" if on else "Turn on", Inventory.toggle_job.bind(job), true]],
@@ -171,10 +289,11 @@ func _use_hint(id: StringName) -> String:
 	return "Farm jobs use it."
 
 
+## Farm jobs come from job_icons.png, and the build tools from the build tool strip.
 static func job_icon(job: StringName) -> Texture2D:
+	if Inventory.BUILD_TOOLS.has(job):
+		return TouchControls.build_tool_icon(job)
 	var icon := AtlasTexture.new()
-	var build := Inventory.BUILD_JOBS.has(job)
-	icon.atlas = BUILD_JOB_ICONS if build else JOB_ICONS
-	var index := Inventory.BUILD_JOBS.find(job) if build else Inventory.FARM_JOBS.find(job)
-	icon.region = Rect2(index * JOB_ICON_SIZE, 0, JOB_ICON_SIZE, JOB_ICON_SIZE)
+	icon.atlas = JOB_ICONS
+	icon.region = Rect2(Inventory.FARM_JOBS.find(job) * JOB_ICON_SIZE, 0, JOB_ICON_SIZE, JOB_ICON_SIZE)
 	return icon

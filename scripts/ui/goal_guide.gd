@@ -21,7 +21,7 @@ const CARRY_TEXT: Dictionary[String, Array] = {
 	"sleep": ["Goal: go to your house door and click it, or press F, to sleep.", "Goal: go to your house door and tap it to sleep."],
 	"heal": ["Goal: face a cursed tile and press R. Holy water heals it.", "Goal: face a cursed tile and tap the big button. Holy water heals it."],
 	"ship": ["Goal: click the shipping box, or press F, to sell your harvest.", "Goal: tap the shipping box to sell your harvest."],
-	"plant_ward": ["Goal: buy a wardthorn seed at the stall, add it to the farming set on the bag page (I), and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, add it to the farming set on the bag page, and plant it by the curse."],
+	"plant_ward": ["Goal: buy a wardthorn seed at the stall, add it to the seeds to plant on the Modes page (I), and plant it by the curse.", "Goal: buy a wardthorn seed at the stall, add it to the seeds to plant on the Modes page (Bag button), and plant it by the curse."],
 }
 const SHRINE_GOAL := "Long goal: heal a path east and restore the old shrine."
 const LAST_GOAL := "Long goal: keep healing the island."

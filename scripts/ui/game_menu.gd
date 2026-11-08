@@ -83,7 +83,8 @@ func close() -> void:
 func _place() -> void:
 	var width := get_viewport_rect().size.x
 	var center := width / 2.0
-	if GameState.touch_mode:
+	# Storage controls keep menus centered over the buttons, which wait under them.
+	if GameState.touch_mode and not GameState.carry_mode:
 		center = minf(center, TouchControls.menu_limit(self) - MENU_GAP - size.x / 2.0)
 	anchor_left = center / width
 	anchor_right = anchor_left

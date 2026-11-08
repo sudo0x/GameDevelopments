@@ -87,6 +87,8 @@ func _ready() -> void:
 	add_child(bow)
 	# Every morning starts in Farm mode, the most common job.
 	Progress.day_started.connect(func() -> void:
+		if GameState.carry_mode and Inventory.combat_pick != 0:
+			Inventory.pick_combat(0)
 		if GameState.carry_mode and mode != Mode.FARM:
 			set_mode(Mode.FARM))
 	# Placing the last lantern moves Build mode on to the next building in the set.
@@ -177,6 +179,13 @@ func _carry_input(event: InputEvent) -> void:
 		action_pressed.emit()
 	if event.is_action_pressed("switch_mode"):
 		next_mode()
+	# Q and E pick the combat button on computers, like tapping a, b or c.
+	if mode == Mode.COMBAT and (event.is_action_pressed("seed_next") or event.is_action_pressed("seed_prev")):
+		var step := 1 if event.is_action_pressed("seed_next") else -1
+		Inventory.pick_combat(posmod(Inventory.combat_pick + step, Inventory.COMBAT_BUTTONS))
+	# V, or the build tool button: Place, Move or Pick up.
+	if event.is_action_pressed("build_tool") and mode == Mode.BUILD:
+		Inventory.next_build_tool()
 	for i in Mode.size():
 		if event.is_action_pressed("tool_%d" % (i + 1)):
 			set_mode(i as Mode)

@@ -73,8 +73,9 @@ func _run() -> void:
 	inv.materials[&"curse_shard"] = 2
 	check("the bow can be crafted", inv.craft(bow_recipe) and inv.has_bow)
 	check("only once", not inv.can_craft(bow_recipe))
-	check("it goes first in the combat set", inv.combat_set == [&"bow", &"sword"])
-	check("with no arrows the sword is used", farm.weapon() == &"sword")
+	check("it goes on the first empty combat button", inv.combat_item(0) == &"sword" and inv.combat_item(1) == &"bow")
+	inv.pick_combat(1)
+	check("with no arrows the bow can't be used", farm.weapon() == &"")
 	check("arrows come in tens", inv.craft(arrow_recipe) and inv.carried(&"arrows") == 10)
 	check("with arrows the bow is used", farm.weapon() == &"bow")
 	check("arrows can't go in a set", not inv.can_set(&"arrows"))
@@ -86,7 +87,7 @@ func _run() -> void:
 	player.set_mode(1)
 	await wait(3)
 	check("Combat mode shoots", farm.smart_action(farm.target_cell_for(player)) == farm.Action.SHOOT)
-	check("the hand line counts arrows", hud.tool_label.text == "Combat: Bow, 10 arrows")
+	check("the hand line counts arrows", hud.tool_label.text == "Combat 2: Bow, 10 arrows")
 	var dummy := make_dummy()
 	main.get_node("World").add_child(dummy)
 	dummy.global_position = player.bow.global_position + Vector2(80, 0)
@@ -113,11 +114,13 @@ func _run() -> void:
 	await wait(60)
 	check("then falls", not is_instance_valid(flying[0]))
 
-	# Out of arrows: the sword takes over.
+	# Out of arrows: the bow does nothing until the sword's button is picked.
 	inv.arrows = 0
 	inv.bag.erase(&"arrows")
 	await wait(2)
-	check("no arrows: the sword", farm.weapon() == &"sword" and farm.smart_action(farm.target_cell_for(player)) == farm.Action.SWING)
+	check("no arrows: the bow does nothing", farm.weapon() == &"" and farm.smart_action(farm.target_cell_for(player)) == farm.Action.NONE)
+	inv.pick_combat(0)
+	check("picking the sword's button swings", farm.smart_action(farm.target_cell_for(player)) == farm.Action.SWING)
 
 	# Saving.
 	var file := ConfigFile.new()

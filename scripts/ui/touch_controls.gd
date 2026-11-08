@@ -74,6 +74,10 @@ const MENU_OPEN := -1
 const ICON_OUT_OF_DATE := -2
 const ACTION_BUTTONS: Array[Array] = [
 	["", "action", Vector2(596, 296), 68.0, Vector2.ONE],
+	# Combat mode: three configurable priority slots in the thumb arc beside Action.
+	["", "combat_slot_1", Vector2(552, 246), 38.0, Vector2.ONE],
+	["", "combat_slot_2", Vector2(526, 286), 38.0, Vector2.ONE],
+	["", "combat_slot_3", Vector2(526, 328), 38.0, Vector2.ONE],
 	# Well away from Action, so holy water is never spent by accident.
 	["", "heal", Vector2(596, 216), 42.0, Vector2.ONE],
 	# Storage controls: switches the big button between farming and combat, in Heal's spot.
@@ -86,6 +90,8 @@ const ACTION_BUTTONS: Array[Array] = [
 	["", "book", Vector2(28, 122), 38.0, Vector2.ZERO],
 	# Leaves Build mode. In Seed's spot: they're never both showing.
 	["", "build_mode", Vector2(526, 322), 50.0, Vector2.ONE],
+	# Storage controls, Build mode only: Place, Move or Pick up, in Seed's spot beside the big button.
+	["", "build_tool", Vector2(526, 322), 50.0, Vector2.ONE],
 	# Pause, in the top right corner: Esc's action, so the pause menu doesn't need to know about touch.
 	["", "ui_cancel", Vector2(614, 24), 34.0, Vector2(1, 0)],
 ]
@@ -107,6 +113,9 @@ const WHEEL_PICK_RADIUS := 30.0
 const MODE_ICONS := preload("res://assets/ui/mode_icons.png")
 const MODE_ICON_SIZE := 32.0
 const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
+## The build tools' icons: Place, then Pick up, then Move, each with its own arrow colour.
+const BUILD_TOOL_ICONS := preload("res://assets/ui/build_job_icons.png")
+const BUILD_TOOL_ATLAS: Dictionary[StringName, int] = {&"place": 0, &"pick_up": 1, &"move": 2}
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -119,6 +128,8 @@ var _buttons: Dictionary[String, TouchScreenButton] = {}
 var _action_icon: Sprite2D
 var _seed_icon: Sprite2D
 var _mode_icon: Sprite2D
+var _build_tool_icon: Sprite2D
+var _combat_slot_icons: Array[Sprite2D] = []
 ## The mode wheel, the finger holding the mode button, for how long, and the choice under it.
 var _wheel: Node2D
 var _wheel_slots: Array[Sprite2D] = []
@@ -156,6 +167,13 @@ func _ready() -> void:
 	_buttons["heal"].modulate = ACTION_DIM_COLOR
 	_seed_icon = _add_icon(_buttons["seed_menu"], player.selected_seed().seed_icon)
 	_mode_icon = _add_icon(_buttons["switch_mode"], mode_icon(Player.Mode.FARM))
+	_build_tool_icon = _add_icon(_buttons["build_tool"], build_tool_icon(&"place"))
+	for i in 3:
+		var button := _buttons["combat_slot_%d" % (i + 1)]
+		# A tap picks this button's weapon for the big button.
+		button.action = ""
+		button.pressed.connect(Inventory.pick_combat.bind(i))
+		_combat_slot_icons.append(_add_icon(button, ACT_ICON))
 	if GameState.carry_mode:
 		for action: String in CARRY_HIDDEN:
 			_buttons[action].hide()
@@ -164,8 +182,17 @@ func _ready() -> void:
 		_buttons["switch_mode"].action = ""
 		_add_wheel()
 		_move_button("inventory", CARRY_BAG_CENTER, CARRY_BAG_SIZE)
+		for action: String in _buttons:
+			_buttons[action].process_mode = Node.PROCESS_MODE_PAUSABLE
+		Inventory.inventory_changed.connect(_show_build_tool)
+		Inventory.inventory_changed.connect(_show_combat_slots)
+		_show_build_tool()
+		_show_combat_slots()
 	else:
 		_buttons["switch_mode"].hide()
+		_buttons["build_tool"].hide()
+		for i in 3:
+			_buttons["combat_slot_%d" % (i + 1)].hide()
 	Inventory.inventory_changed.connect(_show_seed)
 	get_viewport().size_changed.connect(_fit_screen)
 	_fit_screen()
@@ -183,11 +210,15 @@ func _process(delta: float) -> void:
 		elif _mode_held >= WHEEL_HOLD_SECONDS and not _wheel.visible:
 			_open_wheel()
 	tool_bar.visible = not paused
+	# Storage controls: every menu has an X, so the buttons stay put under it, centered on the
+	# screen, and wake when it closes (they're pausable). Hiding them made the menu look off center.
+	if GameState.carry_mode:
+		tool_bar.visible = true
 	if stick.visible == paused:
 		stick.visible = not paused
 		if paused and active:
 			_release_movement()
-	var wanted: int = MENU_OPEN if paused else _action
+	var wanted: int = MENU_OPEN if paused and not GameState.carry_mode else _action
 	if wanted != _shown_action:
 		_shown_action = wanted
 		_update_action_button()
@@ -221,6 +252,13 @@ func _update_action_button() -> void:
 	var icon: Texture2D = ACT_ICON
 	if _shown_action == Farm.Action.PLACE:
 		icon = player.selected_building().preview_texture
+	elif _shown_action == Farm.Action.PUT_DOWN:
+		var farm: Farm = get_parent().farm
+		icon = farm.builder.placed[farm.lifted]["data"].preview_texture
+	elif _shown_action == Farm.Action.MOVE:
+		icon = build_tool_icon(&"move")
+	elif _shown_action == Farm.Action.PICK_UP and GameState.carry_mode:
+		icon = build_tool_icon(&"pick_up")
 	elif _shown_action == Farm.Action.SHOOT:
 		icon = KeyToolBar.BOW_ICON
 	elif _shown_action == Farm.Action.HEAL:
@@ -334,6 +372,8 @@ func _show_selected_tool() -> void:
 ## Storage controls: the mode button shows the mode the big button is in.
 func _show_mode() -> void:
 	_fit_icon(_mode_icon, mode_icon(player.mode))
+	_show_build_tool()
+	_show_combat_slots()
 	_shown_action = ICON_OUT_OF_DATE
 
 
@@ -473,3 +513,40 @@ func _add_button(parent: Node, text: String, action: String, center: Vector2, si
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	button.add_child(label)
 	return button
+
+
+## Storage controls: the build tool button shows only in Build mode, with the tool in use.
+func _show_build_tool() -> void:
+	var tool := Inventory.build_tool
+	_buttons["build_tool"].visible = player.mode == Player.Mode.BUILD
+	_fit_icon(_build_tool_icon, build_tool_icon(tool))
+	_shown_action = ICON_OUT_OF_DATE
+
+
+## Combat buttons show their weapon. The picked one glows; an empty one, or a bow with no
+## arrows, is dimmed.
+func _show_combat_slots() -> void:
+	if not GameState.carry_mode:
+		return
+	var combat := player.mode == Player.Mode.COMBAT
+	for i in Inventory.COMBAT_BUTTONS:
+		var button := _buttons["combat_slot_%d" % (i + 1)]
+		button.visible = combat
+		var item := Inventory.combat_item(i)
+		_fit_icon(_combat_slot_icons[i], KeyToolBar.item_icon(item) if item != &"" else ACT_ICON)
+		_combat_slot_icons[i].visible = item != &""
+		if i == Inventory.combat_pick:
+			button.modulate = SELECTED_COLOR
+		else:
+			var usable := item != &"" and (item != &"bow" or Inventory.carried(&"arrows") > 0)
+			button.modulate = Color.WHITE if usable else ACTION_DIM_COLOR
+	_shown_action = ICON_OUT_OF_DATE
+
+
+## Place, Move or Pick up, from one strip of icons.
+static func build_tool_icon(tool: StringName) -> Texture2D:
+	var index: int = BUILD_TOOL_ATLAS[tool]
+	var icon := AtlasTexture.new()
+	icon.atlas = BUILD_TOOL_ICONS
+	icon.region = Rect2(index * MODE_ICON_SIZE, 0, MODE_ICON_SIZE, MODE_ICON_SIZE)
+	return icon

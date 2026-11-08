@@ -59,6 +59,7 @@ var _notice_left := 0.0
 func _ready() -> void:
 	player.tool_changed.connect(_refresh)
 	player.mode_changed.connect(_refresh)
+	farm.lift_changed.connect(_refresh)
 	Inventory.inventory_changed.connect(_refresh)
 	Progress.day_started.connect(_refresh)
 	GameState.sleep_requested.connect(_sleep)
@@ -238,15 +239,22 @@ func _touch_tool_text() -> String:
 ## Storage controls: the mode, and what the big button can use in it.
 func _held_text() -> String:
 	if player.mode == Player.Mode.BUILD:
+		if Inventory.build_tool == &"move":
+			if farm.builder.placed.has(farm.lifted):
+				return "Move: %s, put it down" % farm.builder.placed[farm.lifted]["data"].display_name
+			return "Move: face a building"
+		if Inventory.build_tool == &"pick_up":
+			return "Pick up: face a building"
 		if Inventory.ready_now(Inventory.build_set).is_empty():
 			return "Build: nothing in the build set"
 		var building := player.selected_building()
 		return "Build: %s, %d" % [building.display_name, Inventory.carried(Inventory.building_item(building))]
 	if player.mode == Player.Mode.COMBAT:
-		var weapon := farm.weapon()
+		var weapon := Inventory.combat_item(Inventory.combat_pick)
+		var which := "Combat %d" % (Inventory.combat_pick + 1)
 		if weapon == &"bow":
-			return "Combat: Bow, %d arrows" % Inventory.carried(&"arrows")
-		return "Combat: %s" % (Inventory.item_name(weapon) if weapon != &"" else "no weapon set")
+			return "%s: Bow, %d arrows" % [which, Inventory.carried(&"arrows")]
+		return "%s: %s" % [which, Inventory.item_name(weapon) if weapon != &"" else "no weapon set"]
 	var text := "Farming"
 	if Inventory.has_purifying_hoe and _farm_ready(&"hoe"):
 		text += "  |  Purify left today: %d" % Inventory.hoe_uses_left

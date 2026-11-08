@@ -170,10 +170,23 @@ func _run() -> void:
 	inv.has_sword = true
 	inv.bag[&"sword"] = 1
 	inv.toggle_in_set(&"sword")
-	check("the sword goes in the combat set", inv.combat_set == [&"sword"] and farm.weapon() == &"sword")
+	check("the sword goes on combat button 1", inv.combat_item(0) == &"sword" and farm.weapon() == &"sword")
+	inv.toggle_in_combat_slot(&"sword", 1)
+	inv.toggle_in_combat_slot(&"sword", 2)
+	check("the same weapon can go on other combat buttons", inv.combat_slot(1) == [&"sword"] and inv.combat_slot(2) == [&"sword"])
 	check("then the button swings", farm.smart_action(ripe) == 1)
 	await press("action")
 	check("a swing happens", player.sword._busy)
+	await wait(20)
+	inv.toggle_in_combat_slot(&"sword", 1)
+	inv.pick_combat(1)
+	check("an empty combat button picked: nothing to fight with", farm.weapon() == &"" and farm.smart_action(ripe) == 0)
+	await press("action")
+	check("and it says so", notices.back().contains("No weapon on this combat button"))
+	await press("seed_next")
+	check("E picks the next combat button", inv.combat_pick == 2 and farm.weapon() == &"sword")
+	inv.toggle_in_combat_slot(&"sword", 1)
+	inv.pick_combat(0)
 	player.set_mode(0)
 	check("back to farming", player.mode == 0)
 	inv.bag.erase(&"sword")
@@ -241,6 +254,7 @@ func _run() -> void:
 	check("it's placed", farm.builder.placed.has(spot) and inv.carried(lantern_item) == 0)
 	check("an empty set says so", hud.tool_label.text.contains("nothing in the build set"))
 	check("no guard square with nothing to place", farm._placing_guard_radius() == 0)
+	inv.set_build_tool(&"pick_up")
 	check("the button would pick it up", farm.smart_action(spot) == 9)
 	var slots: int = inv.bag_slots
 	inv.bag_slots = inv.used_slots()
@@ -251,18 +265,34 @@ func _run() -> void:
 	check("picked up into the bag", not farm.builder.placed.has(spot) and inv.carried(lantern_item) == 1)
 	check("and to the front of the set", inv.build_set[0] == lantern_item)
 
-	# Build jobs switch placing and picking up.
+	# Build mode does one thing at a time: Place, Move or Pick up.
+	inv.set_build_tool(&"place")
 	await press("action")
 	check("it's placed again", farm.builder.placed.has(spot))
-	inv.toggle_job(&"pick_up")
-	check("Pick up off leaves it", farm.smart_action(spot) == 0)
-	inv.toggle_job(&"pick_up")
+	check("Place doesn't pick up", farm.smart_action(spot) == 0)
+	await press("build_tool")
+	check("V goes to Move", inv.build_tool == &"move" and hud.tool_label.text.begins_with("Move"))
+	check("the button would lift it", farm.smart_action(spot) == farm.Action.MOVE)
 	await press("action")
-	check("picked up into the bag again", not farm.builder.placed.has(spot) and inv.carried(lantern_item) == 1)
-	inv.toggle_job(&"place")
-	check("Place off: nothing to place", farm.smart_action(spot) == 0)
-	inv.toggle_job(&"place")
-	check("Place on again", farm.smart_action(spot) == 8)
+	check("lifted, not in the bag", farm.lifted == spot and inv.carried(lantern_item) == 0)
+	var to := spot
+	for offset: Vector2i in [Vector2i(0, 2), Vector2i(0, -2), Vector2i(2, 0), Vector2i(-2, 2), Vector2i(2, 2)]:
+		if to == spot and farm.can_move(spot, spot + offset):
+			to = spot + offset
+	check("there's a free spot to move to", to != spot)
+	check("the button would put it down", farm.smart_action(to) == farm.Action.PUT_DOWN)
+	farm._run_carry(farm.smart_action(to), to)
+	check("moved", farm.builder.placed.has(to) and not farm.builder.placed.has(spot) and farm.lifted == farm.builder.NO_CELL)
+	farm._run_carry(farm.Action.MOVE, to)
+	await press("build_tool")
+	await wait(1)
+	check("changing tool puts a lifted one back", farm.lifted == farm.builder.NO_CELL and inv.build_tool == &"pick_up")
+	check("Pick up picks it up", farm.smart_action(to) == farm.Action.PICK_UP)
+	farm._run_carry(farm.Action.PICK_UP, to)
+	check("picked up into the bag again", not farm.builder.placed.has(to) and inv.carried(lantern_item) == 1)
+	check("Pick up never places", farm.smart_action(spot) == 0)
+	await press("build_tool")
+	check("V wraps round to Place", inv.build_tool == &"place" and farm.smart_action(spot) == 8)
 	await press("tool_1")
 	check("1 jumps back to Farm", player.mode == 0 and player.tool == 0)
 
@@ -302,15 +332,20 @@ func _run() -> void:
 	check("no tool bar", not hud.get_node("KeyToolBar").visible)
 	player.set_mode(1)
 	check("the mode button shows the combat icon", touch._mode_icon.texture.region.position.x == 32.0)
+	check("combat mode shows three ability buttons", touch._buttons["combat_slot_1"].visible and touch._buttons["combat_slot_2"].visible and touch._buttons["combat_slot_3"].visible)
+	touch._buttons["combat_slot_3"].pressed.emit()
+	check("tapping a combat button picks it, and it glows", inv.combat_pick == 2 and touch._buttons["combat_slot_3"].modulate == touch.SELECTED_COLOR)
+	inv.pick_combat(0)
 	player.set_mode(0)
+	check("the combat buttons hide outside combat", not touch._buttons["combat_slot_1"].visible and not touch._buttons["combat_slot_2"].visible and not touch._buttons["combat_slot_3"].visible)
 	check("no Build X with storage controls", not touch._buttons["build_mode"].visible)
 
 	# Holding the mode button opens the wheel; sliding to Build and letting go picks it.
 	var mode_button: TouchScreenButton = touch._buttons["switch_mode"]
 	var center: Vector2 = mode_button.global_position + mode_button.texture_normal.get_size() * mode_button.scale / 2.0
 	touch._input(finger(center, true))
-	for i in 30:
-		await process_frame
+	await create_timer(touch.WHEEL_HOLD_SECONDS + 0.1).timeout
+	await process_frame
 	check("holding opens the wheel", touch._wheel.visible and player.mode == 0)
 	var build_at: Vector2 = touch._wheel_slots[2].global_position
 	var slide := InputEventScreenDrag.new()
@@ -323,16 +358,20 @@ func _run() -> void:
 	touch._input(finger(center, false))
 	check("a quick tap goes to the next mode", player.mode == 0 and not touch._wheel.visible)
 	touch._input(finger(center, true))
-	for i in 30:
-		await process_frame
+	await create_timer(touch.WHEEL_HOLD_SECONDS + 0.1).timeout
+	await process_frame
 	touch._input(finger(center + Vector2(0, 60), false))
 	check("letting go off the wheel changes nothing", player.mode == 0 and not touch._wheel.visible)
 
 	# The bag page lists the carried items and both sets.
 	var sets: Node = hud.get_node("SetsMenu")
 	await press("inventory")
-	check("I opens the bag page", sets.visible and sets.carried_text.contains("Hoe") and sets.plant_text.contains("Radish seeds 9"))
-	check("the combat set shows empty", sets.combat_text.is_empty())
+	check("I opens the bag page", sets.visible and sets.carried_text.contains("Hoe"))
+	await process_frame
+	check("the buttons wait under a menu", touch._buttons["action"].is_visible_in_tree() and touch._buttons["switch_mode"].is_visible_in_tree() and not touch._buttons["action"].can_process())
+	sets.show_page("Modes")
+	check("the Modes page lists the seeds to plant", sets.plant_text.contains("Radish seeds 9"))
+	check("combat buttons stay set when a weapon is put away", sets.combat_text.contains("2: Sword") and sets.combat_text.contains("3: Sword"))
 	check("the build set lists the lantern", sets.build_text.contains("Lantern post 1"))
 	await press("inventory")
 	check("I closes it", not sets.visible)
@@ -358,6 +397,7 @@ func _run() -> void:
 	inv.load_from(file)
 	check("the bag comes back", inv.bag_items() == saved_items and inv.bag_slots == 20)
 	check("the farm jobs come back", inv.farm_jobs == saved_jobs and not inv.farm_jobs.has(&"gather"))
+	check("the three combat button assignments come back", inv.combat_slot(1) == [&"sword"] and inv.combat_slot(2) == [&"sword"])
 	file.erase_section_key("game", "bag")
 	file.set_value("game", "bag_slots", 8)
 	inv.load_from(file)

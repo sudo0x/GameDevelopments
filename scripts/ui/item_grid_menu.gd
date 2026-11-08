@@ -14,6 +14,9 @@ const DETAIL_WIDTH := 190.0
 const BUTTON_HEIGHT := 30.0
 const PICKED_COLOR := Color(1.4, 1.2, 0.8)
 const DIM_COLOR := Color(1, 1, 1, 0.45)
+## A switch that's off: its tile and icon go dark and grey, so on and off read at a glance with
+## no words on the tile.
+const OFF_TINT := Color(0.42, 0.4, 0.4)
 const ALL := "All"
 
 ## Every tile and the details, in words, for tests.
@@ -53,7 +56,15 @@ func _init() -> void:
 	_list.add_theme_constant_override("separation", 2)
 	scroll.add_child(_list)
 	body.add_child(scroll)
-	body.add_child(_detail_panel())
+	# The details scroll too, so an item with many buttons can never push the menu off the screen.
+	var detail_scroll := ScrollContainer.new()
+	detail_scroll.custom_minimum_size = Vector2(DETAIL_WIDTH + 8.0, GRID_SIZE.y)
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var panel := _detail_panel()
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.add_child(panel)
+	body.add_child(detail_scroll)
 	_add_above_help(body)
 	$Margin/Box/Help.add_theme_font_size_override("font_size", 16)
 
@@ -108,10 +119,11 @@ func _first_tab() -> String:
 	return ALL
 
 
-## Override: one Dictionary per tile, in order: id, icon, kind (a tab name), count (short
-## text on the tile) and dim (true for something that can't be used now). only_in_tab keeps a
+## Override: one Dictionary per tile, in order: id, icon, kind (a tab name), count (a number in the
+## corner) and dim (true for something that can't be used now). only_in_tab keeps a
 ## tile out of All, for a tab that repeats tiles in another order. section puts the tile under a
-## heading; on_tap is a Callable a tap runs first, for switches.
+## heading; on_tap is a Callable a tap runs first, and switch (true or false) shows a
+## switch, dark when off.
 func _entries() -> Array[Dictionary]:
 	return []
 
@@ -172,16 +184,7 @@ func _fill_grid(shown: Array) -> void:
 				heading.modulate = Color(1.0, 0.9, 0.6)
 				_list.add_child(heading)
 			grid = _new_grid()
-		var tile := Button.new()
-		tile.icon = entry["icon"]
-		tile.expand_icon = true
-		tile.custom_minimum_size = TILE_SIZE
-		tile.text = entry.get("count", "")
-		tile.add_theme_font_size_override("font_size", 16)
-		if entry["id"] == _picked:
-			tile.modulate = PICKED_COLOR
-		elif entry.get("dim", false):
-			tile.modulate = DIM_COLOR
+		var tile := _new_tile(entry)
 		var id: StringName = entry["id"]
 		var on_tap: Callable = entry.get("on_tap", Callable())
 		tile.pressed.connect(func() -> void:
@@ -194,6 +197,38 @@ func _fill_grid(shown: Array) -> void:
 		_tiles.append(tile)
 		words.append(String(id))
 	tiles_text = ", ".join(words)
+
+
+## A tile: the icon fills it, and a count sits on top in the corner, so it never shrinks the icon.
+## A switch is plain when on, and dark when off.
+func _new_tile(entry: Dictionary) -> Button:
+	var tile := Button.new()
+	tile.icon = entry["icon"]
+	tile.expand_icon = true
+	tile.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tile.custom_minimum_size = TILE_SIZE
+	var count: String = entry.get("count", "")
+	if not count.is_empty():
+		_add_count(tile, count)
+	# Darkening only the tile itself keeps its count readable.
+	if not entry.get("switch", true):
+		tile.self_modulate = OFF_TINT
+	elif entry.get("dim", false):
+		tile.self_modulate = DIM_COLOR
+	if entry["id"] == _picked:
+		tile.modulate = PICKED_COLOR
+	return tile
+
+
+func _add_count(tile: Button, text: String) -> void:
+	var words := Label.new()
+	words.text = text
+	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	words.add_theme_font_size_override("font_size", 16)
+	words.add_theme_constant_override("outline_size", 4)
+	words.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.04))
+	tile.add_child(words)
+	words.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 3)
 
 
 func _new_grid() -> GridContainer:

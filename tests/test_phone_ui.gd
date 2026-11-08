@@ -133,7 +133,7 @@ func _run() -> void:
 	await wait(2)
 	var bar: Node2D = controls.get_node("ToolBar")
 	# Heal, Seed, Tasks, Book, X and pause, and the hidden mode button of storage controls.
-	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 7)
+	check("everything but Action and Bag hides under a menu", not bar.visible and bar.get_child_count() == 11)
 	craft.close()
 	await wait(2)
 

@@ -97,17 +97,25 @@ var bag_slots: int = BALANCE.bag_start_slots
 ## need to be carried.
 const FARM_JOBS: Array[StringName] = [&"till", &"plant", &"water", &"harvest", &"gather", &"heal"]
 var farm_jobs: Array[StringName] = FARM_JOBS.duplicate()
-## Build jobs: what the big button does in Build mode. A picked-up building goes in the bag,
-## and the player carries it wherever it goes next, the chest included.
-const BUILD_JOBS: Array[StringName] = [&"place", &"pick_up"]
-const START_BUILD_JOBS: Array[StringName] = [&"place", &"pick_up"]
-var build_jobs: Array[StringName] = START_BUILD_JOBS.duplicate()
+## Build tools: what the big button does in Build mode, one at a time so it is never a guess.
+## Place puts the build set's first building down, Move lifts one and puts it down somewhere
+## else, and Pick up puts one in the bag, to carry wherever it goes next, the chest included.
+const BUILD_TOOLS: Array[StringName] = [&"place", &"move", &"pick_up"]
+var build_tool: StringName = &"place"
 ## Seeds to plant: as many as the player picks. The big button plants only these, first first,
 ## so seeds the player wants to keep are never planted by accident. New seeds never join on
 ## their own.
 const START_PLANT_SET: Array[StringName] = [&"seed_radish", &"seed_carrot", &"seed_pumpkin"]
 var plant_set: Array[StringName] = START_PLANT_SET.duplicate()
+## The three combat buttons (a, b and c beside the big button) each hold one weapon. Tapping one
+## picks it, and the big button fights with the picked one: no fallback order, so the player
+## always knows what a tap does. Button 1 keeps the old combat_set name for older saves.
+const COMBAT_BUTTONS := 3
 var combat_set: Array[StringName] = []
+var combat_slot_2: Array[StringName] = []
+var combat_slot_3: Array[StringName] = []
+## The combat button picked now. Not saved: each morning starts on button 1.
+var combat_pick := 0
 ## Storage controls: whether this game got its sword and lantern post, so loading never gives
 ## them twice.
 var starter_given := false
@@ -296,22 +304,78 @@ func set_for(item: StringName) -> Array[StringName]:
 	return none
 
 
+## The weapon list behind one combat button (at most one weapon).
+func combat_slot(index: int) -> Array[StringName]:
+	match index:
+		1:
+			return combat_slot_2
+		2:
+			return combat_slot_3
+	return combat_set
+
+
+## The weapon on a combat button, or empty.
+func combat_item(index: int) -> StringName:
+	var slot := combat_slot(index)
+	return slot[0] if not slot.is_empty() else &""
+
+
+## Puts a weapon on a combat button, or takes it off if it's already there.
+func toggle_in_combat_slot(item: StringName, index: int) -> bool:
+	if item not in [&"sword", &"bow"]:
+		return false
+	var slot := combat_slot(index)
+	if slot.has(item):
+		slot.clear()
+	elif carried(item) > 0:
+		slot.assign([item])
+	else:
+		return false
+	inventory_changed.emit()
+	return true
+
+
+## Picks the combat button the big button fights with.
+func pick_combat(index: int) -> void:
+	combat_pick = clampi(index, 0, COMBAT_BUTTONS - 1)
+	inventory_changed.emit()
+
+
+## A new weapon goes on the first empty combat button, so it can be picked at once.
+func _give_combat_button(item: StringName) -> void:
+	for i in COMBAT_BUTTONS:
+		if combat_slot(i).has(item):
+			return
+	for i in COMBAT_BUTTONS:
+		if combat_slot(i).is_empty():
+			combat_slot(i).assign([item])
+			return
+
+
+## Older saves listed several weapons on a button: each keeps its first, and the rest move to
+## empty buttons.
+func _fit_combat_buttons() -> void:
+	var extra: Array[StringName] = []
+	for i in COMBAT_BUTTONS:
+		var slot := combat_slot(i)
+		while slot.size() > 1:
+			extra.append(slot.pop_back())
+	for item in extra:
+		_give_combat_button(item)
+
+
 func job_on(job: StringName) -> bool:
-	return not GameState.carry_mode or _jobs_for(job).has(job)
+	return not GameState.carry_mode or farm_jobs.has(job)
 
 
-## Farm or build jobs: switches a job on or off.
+## Switches a farm job on or off.
 func toggle_job(job: StringName) -> void:
-	var jobs := _jobs_for(job)
+	var jobs := farm_jobs
 	if jobs.has(job):
 		jobs.erase(job)
 	else:
 		jobs.append(job)
 	inventory_changed.emit()
-
-
-func _jobs_for(job: StringName) -> Array[StringName]:
-	return build_jobs if BUILD_JOBS.has(job) else farm_jobs
 
 
 func can_set(item: StringName) -> bool:
@@ -342,6 +406,9 @@ func to_front(item: StringName) -> void:
 func toggle_in_set(item: StringName) -> bool:
 	if not can_set(item):
 		return false
+	# Weapons live on the combat buttons: the Bag page's button uses the first one.
+	if item in [&"sword", &"bow"]:
+		return toggle_in_combat_slot(item, 0)
 	var ready := set_for(item)
 	if ready.has(item):
 		ready.erase(item)
@@ -392,9 +459,8 @@ func give_starter_kit() -> void:
 func _join_set(item: StringName) -> void:
 	if not can_set(item) or set_for(item).has(item) or String(item).begins_with("seed_"):
 		return
-	# Arrows first, the sword once they run out: the bow goes to the front.
-	if item == &"bow":
-		combat_set.push_front(item)
+	if item in [&"sword", &"bow"]:
+		_give_combat_button(item)
 		return
 	set_for(item).append(item)
 
@@ -529,8 +595,7 @@ func craft(recipe: RecipeData) -> bool:
 		RecipeData.Result.SWORD:
 			has_sword = true
 			_carry(&"sword", 1)
-			if not combat_set.has(&"sword"):
-				combat_set.append(&"sword")
+			_give_combat_button(&"sword")
 		RecipeData.Result.STRONG_HOLY_WATER:
 			strong_holy_water += recipe.result_amount
 			_carry(&"strong_holy_water", recipe.result_amount)
@@ -722,9 +787,12 @@ func reset() -> void:
 	bag = START_BAG.duplicate()
 	bag_slots = BALANCE.bag_start_slots
 	farm_jobs = FARM_JOBS.duplicate()
-	build_jobs = START_BUILD_JOBS.duplicate()
+	build_tool = &"place"
 	plant_set = START_PLANT_SET.duplicate()
 	combat_set = []
+	combat_slot_2 = []
+	combat_slot_3 = []
+	combat_pick = 0
 	build_set = []
 	starter_given = false
 
@@ -750,9 +818,11 @@ func save_to(file: ConfigFile) -> void:
 	file.set_value("game", "bag", pairs)
 	file.set_value("game", "bag_slots", bag_slots)
 	file.set_value("game", "farm_jobs", farm_jobs)
-	file.set_value("game", "build_jobs", build_jobs)
+	file.set_value("game", "build_tool", build_tool)
 	file.set_value("game", "plant_set", plant_set)
 	file.set_value("game", "combat_set", combat_set)
+	file.set_value("game", "combat_slot_2", combat_slot_2)
+	file.set_value("game", "combat_slot_3", combat_slot_3)
 	file.set_value("game", "build_set", build_set)
 	file.set_value("game", "starter_kit", starter_given)
 
@@ -779,11 +849,13 @@ func load_from(file: ConfigFile) -> void:
 	else:
 		_fill_bag_for_old_save()
 	farm_jobs.assign(file.get_value("game", "farm_jobs", FARM_JOBS))
-	build_jobs.assign(file.get_value("game", "build_jobs", START_BUILD_JOBS))
-	# A job tried and removed on 2026-11-08.
-	build_jobs.erase(&"to_storage")
+	build_tool = StringName(file.get_value("game", "build_tool", &"place"))
+	if not BUILD_TOOLS.has(build_tool):
+		build_tool = &"place"
 	if file.has_section_key("game", "combat_set"):
 		combat_set.assign(file.get_value("game", "combat_set", []))
+		combat_slot_2.assign(file.get_value("game", "combat_slot_2", []))
+		combat_slot_3.assign(file.get_value("game", "combat_slot_3", []))
 		build_set.assign(file.get_value("game", "build_set", []))
 		plant_set.assign(file.get_value("game", "plant_set", []))
 	else:
@@ -794,6 +866,7 @@ func load_from(file: ConfigFile) -> void:
 		for item in bag:
 			if can_set(item):
 				set_for(item).append(item)
+	_fit_combat_buttons()
 	# Saves from before kept seeds in a farming set: they move to the seeds to plant.
 	for item: StringName in file.get_value("game", "farm_set", []):
 		if String(item).begins_with("seed_") and not plant_set.has(item):
@@ -818,3 +891,14 @@ func _fill_bag_for_old_save() -> void:
 func _refill_hoe() -> void:
 	if has_purifying_hoe:
 		hoe_uses_left = BALANCE.hoe_daily_uses
+
+
+## Picks what the big button does in Build mode.
+func set_build_tool(value: StringName) -> void:
+	build_tool = value
+	inventory_changed.emit()
+
+
+## The next build tool, for the button that cycles them.
+func next_build_tool() -> void:
+	set_build_tool(BUILD_TOOLS[(BUILD_TOOLS.find(build_tool) + 1) % BUILD_TOOLS.size()])
