@@ -46,7 +46,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var lantern = inv.BUILDINGS[0]
+	var lantern: Variant = inv.BUILDINGS[0]
 	var cell := Vector2i(16, 12)
 
 	await press("tool_6")

@@ -14,6 +14,14 @@ const DETAIL_WIDTH := 190.0
 const BUTTON_HEIGHT := 30.0
 const PICKED_COLOR := Color(1.4, 1.2, 0.8)
 const DIM_COLOR := Color(1, 1, 1, 0.45)
+## Choice tiles across the details side: four fit its width.
+const CHOICE_COLUMNS := 4
+## The plus on an empty place.
+const PLUS_LENGTH := 14.0
+const PLUS_WIDTH := 4.0
+const PLUS_COLOR := Color(1.0, 0.9, 0.6, 0.8)
+## Choice tiles have the name under the picture, so they're taller.
+const CHOICE_SIZE := Vector2(46, 52)
 ## A switch that's off: its tile and icon go dark and grey, so on and off read at a glance with
 ## no words on the tile.
 const OFF_TINT := Color(0.42, 0.4, 0.4)
@@ -39,6 +47,8 @@ var _detail_name := Label.new()
 var _detail_text := Label.new()
 var _detail_info := Label.new()
 var _detail_buttons := VBoxContainer.new()
+## Choice tiles sit right under the words, and the action buttons at the bottom.
+var _detail_choices := VBoxContainer.new()
 
 
 func _init() -> void:
@@ -82,12 +92,13 @@ func _detail_panel() -> VBoxContainer:
 	_detail_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(_detail_name)
 	panel.add_child(top)
-	for label in [_detail_text, _detail_info]:
+	for label: Label in [_detail_text, _detail_info]:
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.custom_minimum_size.x = DETAIL_WIDTH
 		label.add_theme_font_size_override("font_size", 16)
 		panel.add_child(label)
 	_detail_info.modulate = Color(1.0, 0.9, 0.6)
+	panel.add_child(_detail_choices)
 	# The buttons sit at the bottom, where the thumb expects them.
 	var gap := Control.new()
 	gap.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -210,6 +221,8 @@ func _new_tile(entry: Dictionary) -> Button:
 	var count: String = entry.get("count", "")
 	if not count.is_empty():
 		_add_count(tile, count)
+	if entry.get("plus", false):
+		_add_plus(tile)
 	# Darkening only the tile itself keeps its count readable.
 	if not entry.get("switch", true):
 		tile.self_modulate = OFF_TINT
@@ -218,6 +231,21 @@ func _new_tile(entry: Dictionary) -> Button:
 	if entry["id"] == _picked:
 		tile.modulate = PICKED_COLOR
 	return tile
+
+
+## An empty place: a plus in the exact middle, for "tap to add". Two bars instead of a "+"
+## letter, because the font draws its plus low.
+func _add_plus(tile: Button) -> void:
+	for bar: Vector2 in [Vector2(PLUS_LENGTH, PLUS_WIDTH), Vector2(PLUS_WIDTH, PLUS_LENGTH)]:
+		var rect := ColorRect.new()
+		rect.color = PLUS_COLOR
+		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.add_child(rect)
+		rect.set_anchors_preset(Control.PRESET_CENTER)
+		rect.offset_left = -bar.x / 2.0
+		rect.offset_right = bar.x / 2.0
+		rect.offset_top = -bar.y / 2.0
+		rect.offset_bottom = bar.y / 2.0
 
 
 func _add_count(tile: Button, text: String) -> void:
@@ -242,24 +270,46 @@ func _new_grid() -> GridContainer:
 
 func _fill_details() -> void:
 	_clear(_detail_buttons)
+	_clear(_detail_choices)
 	var detail := _details(_picked) if _picked != &"" else {}
 	_detail_icon.texture = detail.get("icon")
 	_detail_name.text = detail.get("name", "Nothing here yet")
 	_detail_text.text = detail.get("text", "")
 	_detail_info.text = detail.get("info", "")
 	var words: PackedStringArray = [_detail_name.text, _detail_text.text, _detail_info.text]
+	var choices: GridContainer = null
 	for spec: Array in detail.get("buttons", []):
 		var button := Button.new()
-		button.text = spec[0]
-		button.custom_minimum_size = Vector2(DETAIL_WIDTH, BUTTON_HEIGHT)
 		button.disabled = not spec[2]
+		if spec.size() > 3:
+			# A fourth value, a picture, makes a choice tile instead: many fit side by side, so a
+			# long list of choices never needs scrolling.
+			button.icon = spec[3]
+			button.expand_icon = true
+			button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			button.text = spec[0]
+			button.add_theme_font_size_override("font_size", 16)
+			button.custom_minimum_size = CHOICE_SIZE
+			if choices == null:
+				choices = GridContainer.new()
+				choices.columns = CHOICE_COLUMNS
+				choices.add_theme_constant_override("h_separation", 2)
+				choices.add_theme_constant_override("v_separation", 2)
+				_detail_choices.add_child(choices)
+		else:
+			button.text = spec[0]
+			button.custom_minimum_size = Vector2(DETAIL_WIDTH, BUTTON_HEIGHT)
 		var press: Callable = spec[1]
 		button.pressed.connect(func() -> void:
 			_keep_picked = true
 			press.call()
 			_refresh()
 			_keep_picked = false)
-		_detail_buttons.add_child(button)
+		if choices and spec.size() > 3:
+			choices.add_child(button)
+		else:
+			_detail_buttons.add_child(button)
 		words.append("[%s%s]" % [spec[0], "" if spec[2] else " off"])
 	details_text = "\n".join(words)
 
@@ -273,8 +323,8 @@ func pick(id: StringName) -> void:
 ## Presses the details button with this text, as a tap would. Returns false if it's missing
 ## or can't be used.
 func press_button(text: String) -> bool:
-	for button: Button in _detail_buttons.get_children():
-		if button.text == text and not button.disabled:
+	for button: Button in _detail_buttons.find_children("*", "Button", true, false) + _detail_choices.find_children("*", "Button", true, false):
+		if (button.text == text or button.tooltip_text == text) and not button.disabled:
 			button.pressed.emit()
 			return true
 	return false

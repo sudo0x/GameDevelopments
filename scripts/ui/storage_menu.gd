@@ -37,7 +37,7 @@ func _entries() -> Array[Dictionary]:
 			"id": item,
 			"icon": KeyToolBar.item_icon(item),
 			"kind": ItemInfo.kind(item),
-			"count": str(Inventory.total(item)) if item not in [&"hoe", &"can", &"sword", &"bow"] else "",
+			"count": str(Inventory.total(item)) if Inventory.shows_count(item) else "",
 		})
 		lines.append("%s: bag %d, stored %d" % [Inventory.item_name(item), Inventory.carried(item), Inventory.stored(item)])
 	rows_text = "\n".join(lines)

@@ -84,9 +84,9 @@ func sound_cleanse() -> float:
 
 ## The shrine: a big slow chord, then the same chord an octave up, ringing out.
 func sound_shrine() -> float:
-	for note in [C4, E4, G4, C5]:
+	for note: Variant in [C4, E4, G4, C5]:
 		layer(0.0, 2.2, note, note, "sine", 0.22, 0.25, 1.2)
-	for note in [C5, E5, G5, C6]:
+	for note: Variant in [C5, E5, G5, C6]:
 		layer(0.6, 1.8, note, note, "sine", 0.16, 0.2, 1.5)
 	_sparkles(0.6, 2.0, 14, 0.1)
 	return 0.8

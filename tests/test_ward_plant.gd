@@ -27,7 +27,7 @@ func _run() -> void:
 	var progress: Node = root.get_node("Progress")
 	inv.holy_water = 10
 	progress.day = 5
-	var ward = load("res://data/crops/wardthorn.tres")
+	var ward: Variant = load("res://data/crops/wardthorn.tres")
 	inv.seeds[&"wardthorn"] = 5
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
@@ -39,7 +39,7 @@ func _run() -> void:
 	main.get_node("World/Player")._safe_left = 9999.0
 	var notices: Array = []
 	gs.notice.connect(func(text: String) -> void: notices.append(text))
-	var radish = inv.CROPS[0]
+	var radish: Variant = inv.CROPS[0]
 	check("the shop sells it", inv.CROPS.has(ward) and ward.seed_price > radish.seed_price)
 
 	# A food crop on a marked tile is blighted, but the land stays clean.
@@ -64,7 +64,7 @@ func _run() -> void:
 	check("it explains itself", farm.crop_status(cell).contains("Blighted"))
 
 	# Harvesting gives a little money and a curse shard, never a crop to sell.
-	var shard = inv.MATERIALS.filter(func(m: Resource) -> bool: return m.id == &"curse_shard")[0]
+	var shard: Variant = inv.MATERIALS.filter(func(m: Resource) -> bool: return m.id == &"curse_shard")[0]
 	var money: int = inv.money
 	farm.harvest(cell)
 	check("a shard", inv.material_count(shard) == 1)

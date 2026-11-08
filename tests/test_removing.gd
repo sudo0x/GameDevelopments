@@ -42,7 +42,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var lantern = inv.BUILDINGS[0]
+	var lantern: Variant = inv.BUILDINGS[0]
 	var cell := Vector2i(16, 12)
 	player.global_position = g.to_global(g.map_to_local(cell + Vector2i(-1, 0))) + Vector2(0, 8)
 	player.facing = 3
@@ -77,7 +77,7 @@ func _run() -> void:
 	check("can place it again", farm.builder.placed.has(cell) and inv.building_count(lantern) == 0)
 
 	# The map's lanterns can move now (test_moving.gd); the house and shop stall can't.
-	for path in ["House", "ShopStall"]:
+	for path: Variant in ["House", "ShopStall"]:
 		var own: Node2D = main.get_node("World/" + path)
 		var own_cell: Vector2i = g.local_to_map(g.to_local(own.global_position) - Vector2(0, 12))
 		check(path + " stays", not farm.can_use(3, own_cell))

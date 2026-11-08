@@ -49,7 +49,7 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
 	var preview: Sprite2D = farm.build_preview
-	var lantern = inv.BUILDINGS[0]
+	var lantern: Variant = inv.BUILDINGS[0]
 	var BUILD := 5
 
 	var key := InputEventKey.new()
@@ -71,7 +71,7 @@ func _run() -> void:
 	check("preview red", preview.modulate == preview.INVALID_COLOR)
 
 	# Crafting one.
-	var recipe = inv.RECIPES[2]
+	var recipe: Variant = inv.RECIPES[2]
 	inv.add_material(inv.MATERIALS[0], 5)
 	inv.add_material(inv.MATERIALS[1], 3)
 	inv.add_material(inv.CURSE_SHARD, 2)
@@ -111,7 +111,7 @@ func _run() -> void:
 		farm.gathering.hit(Vector2i(18, 7))
 	await physics_frame
 	check("rubble: the rock will grow back", not farm.can_build(Vector2i(18, 7)))
-	for path in ["House", "ShippingBox", "ShopStall", "Workbench", "LanternDoor", "Shrine"]:
+	for path: Variant in ["House", "ShippingBox", "ShopStall", "Workbench", "LanternDoor", "Shrine"]:
 		var thing: Node2D = main.get_node("World/" + path)
 		check(path + " itself", not farm.can_build(g.local_to_map(g.to_local(thing.global_position + Vector2(0, -5)))))
 	var door: Node2D = main.get_node("World/House/Door")

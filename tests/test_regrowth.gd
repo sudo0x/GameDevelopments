@@ -27,7 +27,7 @@ func _run() -> void:
 	for i in 3:
 		await physics_frame
 	var farm: Node = main.get_node("Farm")
-	var wood = inv.MATERIALS[0]
+	var wood: Variant = inv.MATERIALS[0]
 	var tree_cell := Vector2i(22, 6)
 	var rock_cell := Vector2i(18, 7)
 	var tree: Node2D = farm.gathering.spots[tree_cell]

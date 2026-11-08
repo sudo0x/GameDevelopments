@@ -54,7 +54,7 @@ func _run() -> void:
 			seen_spots[a.global_position] = true
 			var cell: Vector2i = g.local_to_map(g.to_local(a.global_position))
 			var touches := false
-			for side in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+			for side: Variant in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
 				touches = touches or g.get_cell_source_id(cell + side) == 1
 			ok_edge = ok_edge and touches and g.get_cell_source_id(cell) == 0
 			ok_reachable = ok_reachable and cell.x < 40

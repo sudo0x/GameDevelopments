@@ -36,7 +36,7 @@ var _crops: Array[Resource] = []
 func _init() -> void:
 	_ground = (load("res://scenes/farm/ground.tscn") as PackedScene).instantiate()
 	_balance = load("res://data/balance.tres")
-	for id in ["radish", "carrot", "pumpkin"]:
+	for id: Variant in ["radish", "carrot", "pumpkin"]:
 		_crops.append(load("res://data/crops/%s.tres" % id))
 	var path := _cheapest_path()
 	var uses := ceili(float(path.size()) / TILES_PER_USE)

@@ -52,8 +52,8 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var player: Node2D = main.get_node("World/Player")
 	var menu: Node = main.get_node("HUD/CraftingMenu")
-	var shard = inv.MATERIALS[2]
-	var recipe = inv.RECIPES[6]
+	var shard: Variant = inv.MATERIALS[2]
+	var recipe: Variant = inv.RECIPES[6]
 	player._safe_left = 9999.0
 
 	# Drops.

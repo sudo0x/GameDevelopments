@@ -44,14 +44,14 @@ func _run() -> void:
 	var bench: Node2D = main.get_node("World/Workbench")
 	var menu: Control = main.get_node("HUD/CraftingMenu")
 	var bag: Control = main.get_node("HUD/BagMenu")
-	var recipe = inv.RECIPES[0]
-	var radish = inv.CROPS[0]
-	var stone = inv.MATERIALS[1]
+	var recipe: Variant = inv.RECIPES[0]
+	var radish: Variant = inv.CROPS[0]
+	var stone: Variant = inv.MATERIALS[1]
 	var cell: Vector2i = g.local_to_map(g.to_local(bench.global_position + Vector2(0, -5)))
 	check("stands on grass", g.get_cell_source_id(cell) == 0)
 	check("can't till under it", not farm.can_use(0, cell))
 
-	for offset in [Vector2(0, 16), Vector2(-44, -6), Vector2(44, -6), Vector2(0, -22)]:
+	for offset: Variant in [Vector2(0, 16), Vector2(-44, -6), Vector2(44, -6), Vector2(0, -22)]:
 		player.global_position = bench.global_position + offset
 		for i in 6:
 			await physics_frame

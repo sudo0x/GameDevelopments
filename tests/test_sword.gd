@@ -85,7 +85,7 @@ func _run() -> void:
 	check("no swing without it", dummy.hits == 0)
 
 	# Crafting it, once only.
-	var recipe = inv.RECIPES[5]
+	var recipe: Variant = inv.RECIPES[5]
 	inv.add_material(inv.MATERIALS[0], 5)
 	inv.add_material(inv.MATERIALS[1], 3)
 	gs.request_crafting()

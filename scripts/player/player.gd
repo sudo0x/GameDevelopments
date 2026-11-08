@@ -38,6 +38,8 @@ const KNOCKBACK_FADE := 900.0
 const FACED_RADIUS := 10.0
 const FACED_DISTANCE := 14.0
 const BOW_SCENE := preload("res://scenes/player/bow.tscn")
+## Thrown pebbles fly like arrows, with their own picture and numbers.
+const PEBBLE_SCENE := preload("res://scenes/player/arrow.tscn")
 
 @export var speed: float = 90.0
 ## Walk animations: 4 frames each (step, pass, step, pass). Side art faces left; right is mirrored.
@@ -64,6 +66,8 @@ var mode := Mode.FARM
 
 var _walk_time: float = 0.0
 var _safe_left := 0.0
+## Seconds until the next throw.
+var _throw_wait := 0.0
 var _knockback := Vector2.ZERO
 var _faced_query := PhysicsShapeQueryParameters2D.new()
 
@@ -98,6 +102,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_throw_wait = maxf(_throw_wait - delta, 0.0)
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input * speed + _knockback
 	_knockback = _knockback.move_toward(Vector2.ZERO, KNOCKBACK_FADE * delta)
@@ -276,7 +281,31 @@ func _change_selection(step: int) -> void:
 
 
 ## Turns to a point and swings straight at it, because a creature can come from any side.
-func swing_at(point: Vector2) -> void:
+func swing_at(point: Vector2, weapon: StringName = &"sword") -> bool:
+	return sword.swing(_turn_to(point), weapon)
+
+
+## Turns toward a point and throws a pebble at it with the sling or by hand, spending a carried
+## stone. Returns false with no stone, or while the last throw is still cooling down.
+func throw_at(point: Vector2, weapon: StringName) -> bool:
+	if _throw_wait > 0.0 or not Inventory.use_stone():
+		return false
+	var stats: Dictionary = BasicWeapons.STATS[weapon]
+	_throw_wait = stats["cooldown"]
+	var direction := _turn_to(point)
+	Audio.play(&"swing")
+	var pebble: Arrow = PEBBLE_SCENE.instantiate()
+	pebble.direction = direction
+	pebble.speed = stats["speed"]
+	pebble.reach = stats["range"]
+	pebble.texture = BasicWeapons.PEBBLE
+	get_parent().add_child(pebble)
+	pebble.global_position = bow.global_position + direction * Bow.HAND
+	return true
+
+
+## Faces the closest of the four ways toward a point, and returns the exact direction.
+func _turn_to(point: Vector2) -> Vector2:
 	var direction := global_position.direction_to(point)
 	if direction == Vector2.ZERO:
 		direction = FACING_DIRECTIONS[facing]
@@ -284,7 +313,7 @@ func swing_at(point: Vector2) -> void:
 		facing = Facing.RIGHT if direction.x > 0.0 else Facing.LEFT
 	else:
 		facing = Facing.DOWN if direction.y > 0.0 else Facing.UP
-	sword.swing(direction)
+	return direction
 
 
 ## Turns toward a point and shoots an arrow at it. Returns false with no arrows, or mid-shot.

@@ -47,8 +47,8 @@ func _run() -> void:
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
 	var gather: Node = farm.gathering
-	var wood = inv.MATERIALS[0]
-	var stone = inv.MATERIALS[1]
+	var wood: Variant = inv.MATERIALS[0]
+	var stone: Variant = inv.MATERIALS[1]
 
 	# Every spot is placed sensibly.
 	check("15 spots", gather.spots.size() == 15)

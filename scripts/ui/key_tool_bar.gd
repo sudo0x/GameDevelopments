@@ -58,7 +58,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _press(action: String) -> void:
-	for pressed in [true, false]:
+	for pressed: bool in [true, false]:
 		var event := InputEventAction.new()
 		event.action = action
 		event.pressed = pressed
@@ -81,6 +81,8 @@ const ARROWS_ICON := preload("res://assets/items/arrows.png")
 
 ## Storage controls (docs/28_...): the picture for a bag item, shared by the bag and storage.
 static func item_icon(item: StringName) -> Texture2D:
+	if BasicWeapons.has(item):
+		return BasicWeapons.icon(item)
 	match item:
 		&"hoe":
 			return TouchControls.tool_icon(Player.Tool.HOE)

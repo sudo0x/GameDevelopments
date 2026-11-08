@@ -135,7 +135,7 @@ func _open_story() -> void:
 	box.add_child(words)
 	box.add_child(start)
 	var margin := MarginContainer.new()
-	for side in ["left", "top", "right", "bottom"]:
+	for side: String in ["left", "top", "right", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, STORY_MARGIN)
 	margin.add_child(box)
 	_story.add_child(margin)

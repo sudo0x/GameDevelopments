@@ -116,6 +116,19 @@ const STRONG_WATER_ICON := preload("res://assets/items/strong_holy_water.png")
 ## The build tools' icons: Place, then Pick up, then Move, each with its own arrow colour.
 const BUILD_TOOL_ICONS := preload("res://assets/ui/build_job_icons.png")
 const BUILD_TOOL_ATLAS: Dictionary[StringName, int] = {&"place": 0, &"pick_up": 1, &"move": 2}
+## An empty combat button's look: lighter than a dimmed one, since it can be tapped to set it.
+const EMPTY_SLOT_COLOR := Color(1, 1, 1, 0.8)
+## The big button's picture in Combat mode. Until its art exists, the "!" stands in: the mode
+## button already shows the combat mode icon.
+const ATTACK_ICON_PATH := "res://assets/ui/attack_icon.png"
+## The dots on a combat button, in the button's own 64-pixel space.
+const DOT_SIZE := 10.0
+const DOT_BORDER := 2.0
+const DOT_GAP := 3.0
+const DOT_Y := 47.0
+const DOT_BORDER_COLOR := Color(0.1, 0.07, 0.06)
+const DOT_ON_COLOR := Color(1.0, 0.85, 0.4)
+const DOT_OFF_COLOR := Color(0.55, 0.5, 0.45)
 const MOVE_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"move_up", &"move_down"]
 
 @export var player_path: NodePath
@@ -130,6 +143,9 @@ var _seed_icon: Sprite2D
 var _mode_icon: Sprite2D
 var _build_tool_icon: Sprite2D
 var _combat_slot_icons: Array[Sprite2D] = []
+var _combat_plus: Array[Label] = []
+## Dots under each combat button's weapon: one per weapon on it, the active one bright.
+var _combat_dots: Array[Array] = []
 ## The mode wheel, the finger holding the mode button, for how long, and the choice under it.
 var _wheel: Node2D
 var _wheel_slots: Array[Sprite2D] = []
@@ -170,10 +186,13 @@ func _ready() -> void:
 	_build_tool_icon = _add_icon(_buttons["build_tool"], build_tool_icon(&"place"))
 	for i in 3:
 		var button := _buttons["combat_slot_%d" % (i + 1)]
-		# A tap picks this button's weapon for the big button.
+		# A tap picks this button, or goes to its next weapon if it was picked already. An empty
+		# one shows a plus, and a tap opens the Modes page to put a weapon on it.
 		button.action = ""
-		button.pressed.connect(Inventory.pick_combat.bind(i))
+		button.pressed.connect(_on_combat_button.bind(i))
 		_combat_slot_icons.append(_add_icon(button, ACT_ICON))
+		_combat_plus.append(_add_plus(button))
+		_combat_dots.append(_add_dots(button))
 	if GameState.carry_mode:
 		for action: String in CARRY_HIDDEN:
 			_buttons[action].hide()
@@ -248,9 +267,16 @@ func show_heal(heal: Farm.Heal) -> void:
 func _update_action_button() -> void:
 	_buttons["action"].modulate = ACTION_DIM_COLOR if _shown_action == Farm.Action.NONE else Color.WHITE
 	if _shown_action == Farm.Action.NONE:
+		# Nothing to do here: storage controls show the mode's own picture, dimmed, so a picture
+		# from another mode (the attack slashes in Farm mode) never stays behind.
+		if GameState.carry_mode:
+			_fit_icon(_action_icon, _idle_icon())
 		return
 	var icon: Texture2D = ACT_ICON
-	if _shown_action == Farm.Action.PLACE:
+	if GameState.carry_mode and _shown_action in [Farm.Action.SWING, Farm.Action.SHOOT]:
+		# One fixed picture: the small buttons show the weapons, so the big one never repeats them.
+		icon = attack_icon()
+	elif _shown_action == Farm.Action.PLACE:
 		icon = player.selected_building().preview_texture
 	elif _shown_action == Farm.Action.PUT_DOWN:
 		var farm: Farm = get_parent().farm
@@ -531,14 +557,19 @@ func _show_combat_slots() -> void:
 	var combat := player.mode == Player.Mode.COMBAT
 	for i in Inventory.COMBAT_BUTTONS:
 		var button := _buttons["combat_slot_%d" % (i + 1)]
-		button.visible = combat
 		var item := Inventory.combat_item(i)
+		# An empty combat button isn't shown in play: weapons go on buttons on the Modes page.
+		button.visible = combat and item != &""
 		_fit_icon(_combat_slot_icons[i], KeyToolBar.item_icon(item) if item != &"" else ACT_ICON)
 		_combat_slot_icons[i].visible = item != &""
-		if i == Inventory.combat_pick:
+		_combat_plus[i].visible = item == &""
+		_show_dots(i)
+		if item == &"":
+			button.modulate = EMPTY_SLOT_COLOR
+		elif i == Inventory.combat_pick:
 			button.modulate = SELECTED_COLOR
 		else:
-			var usable := item != &"" and (item != &"bow" or Inventory.carried(&"arrows") > 0)
+			var usable := item != &"" and (item != &"bow" or Inventory.carried(&"arrows") > 0) and (not BasicWeapons.throws(item) or Inventory.carried(&"mat_stone") > 0)
 			button.modulate = Color.WHITE if usable else ACTION_DIM_COLOR
 	_shown_action = ICON_OUT_OF_DATE
 
@@ -550,3 +581,78 @@ static func build_tool_icon(tool: StringName) -> Texture2D:
 	icon.atlas = BUILD_TOOL_ICONS
 	icon.region = Rect2(index * MODE_ICON_SIZE, 0, MODE_ICON_SIZE, MODE_ICON_SIZE)
 	return icon
+
+
+static func attack_icon() -> Texture2D:
+	if ResourceLoader.exists(ATTACK_ICON_PATH):
+		return load(ATTACK_ICON_PATH)
+	return ACT_ICON
+
+
+func _add_plus(button: TouchScreenButton) -> Label:
+	var plus := Label.new()
+	plus.text = "+"
+	plus.add_theme_font_size_override("font_size", 48)
+	plus.size = Vector2(TEXTURE_SIZE, TEXTURE_SIZE)
+	plus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	plus.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	plus.hide()
+	button.add_child(plus)
+	return plus
+
+
+## An empty combat button opens the Modes page's Combat tab to put a weapon on it.
+func _on_combat_button(index: int) -> void:
+	if Inventory.combat_item(index) == &"":
+		get_parent().get_node("SetsMenu").open_on("Modes", "Combat mode")
+		return
+	Inventory.tap_combat(index)
+
+
+## The big button's dimmed picture when there's nothing to do: one per mode.
+func _idle_icon() -> Texture2D:
+	match player.mode:
+		Player.Mode.COMBAT:
+			return attack_icon()
+		Player.Mode.BUILD:
+			# The same picture as when it can act, only dimmed, so walking past spots that are
+			# taken never swaps the picture back and forth.
+			var farm: Farm = get_parent().farm
+			if farm.builder.placed.has(farm.lifted):
+				return farm.builder.placed[farm.lifted]["data"].preview_texture
+			if Inventory.build_tool == &"place" and not Inventory.ready_now(Inventory.build_set).is_empty():
+				return player.selected_building().preview_texture
+			return build_tool_icon(Inventory.build_tool)
+	return tool_icon(Player.Tool.HOE)
+
+
+func _add_dots(button: TouchScreenButton) -> Array[ColorRect]:
+	var dots: Array[ColorRect] = []
+	for i in Inventory.WEAPONS_PER_BUTTON:
+		# A dark square with the coloured dot inside, so it shows on any background.
+		var border := ColorRect.new()
+		border.size = Vector2(DOT_SIZE, DOT_SIZE)
+		border.color = DOT_BORDER_COLOR
+		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		border.hide()
+		var dot := ColorRect.new()
+		dot.position = Vector2(DOT_BORDER, DOT_BORDER)
+		dot.size = Vector2(DOT_SIZE - DOT_BORDER * 2.0, DOT_SIZE - DOT_BORDER * 2.0)
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		border.add_child(dot)
+		button.add_child(border)
+		dots.append(border)
+	return dots
+
+
+## Shows one dot per weapon on a combat button, centred near its bottom edge, the active one
+## bright, so a player can see what the next tap will switch to. A button with one weapon has none.
+func _show_dots(index: int) -> void:
+	var count := Inventory.combat_slot(index).size()
+	var active := Inventory.combat_turn[index] % maxi(count, 1)
+	var width := count * DOT_SIZE + (count - 1) * DOT_GAP
+	for i in Inventory.WEAPONS_PER_BUTTON:
+		var dot: ColorRect = _combat_dots[index][i]
+		dot.visible = count > 1 and i < count
+		dot.position = Vector2((TEXTURE_SIZE - width) / 2.0 + i * (DOT_SIZE + DOT_GAP), DOT_Y)
+		(dot.get_child(0) as ColorRect).color = DOT_ON_COLOR if i == active else DOT_OFF_COLOR

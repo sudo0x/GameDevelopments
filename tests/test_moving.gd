@@ -51,7 +51,7 @@ func _run() -> void:
 	var builder: Node = farm.builder
 	var left: Array = builder.starting_left()
 	check("6 movable objects", left.size() == 6)
-	for name in ["ShippingBox", "Workbench", "LanternDoor", "LanternStall", "LanternSouthWest", "LanternSouthEast"]:
+	for name: Variant in ["ShippingBox", "Workbench", "LanternDoor", "LanternStall", "LanternSouthWest", "LanternSouthEast"]:
 		check(name + " is movable", left.has(name))
 	check("house and stall aren't", not left.has("House") and not left.has("ShopStall"))
 	check("the box is right under it", farm.ground.local_to_map(farm.ground.to_local(main.get_node("World/ShippingBox").global_position)) == cell_of(builder, "ShippingBox"))

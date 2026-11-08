@@ -383,12 +383,10 @@ func run_action() -> void:
 func _carry_action(cell: Vector2i) -> Action:
 	match player.mode:
 		Player.Mode.COMBAT:
-			match weapon():
-				&"bow":
-					return Action.SHOOT
-				&"":
-					return Action.NONE
-			return Action.SWING
+			var using := weapon()
+			if using == &"":
+				return Action.NONE
+			return Action.SHOOT if using == &"bow" or BasicWeapons.throws(using) else Action.SWING
 		Player.Mode.BUILD:
 			return _build_tool_action(cell)
 	return _farm_action(cell)
@@ -401,6 +399,9 @@ func weapon(index: int = -1) -> StringName:
 	if item == &"" or Inventory.carried(item) <= 0:
 		return &""
 	if item == &"bow" and Inventory.carried(&"arrows") <= 0:
+		return &""
+	# The sling and throwing stones throw carried stones.
+	if BasicWeapons.throws(item) and Inventory.carried(&"mat_stone") <= 0:
 		return &""
 	return item
 
@@ -464,11 +465,18 @@ func _run_carry(action: Action, cell: Vector2i) -> void:
 		Action.SWING:
 			var creature := _creature_to_swing_at()
 			var at := creature.global_position if creature else player.global_position + Player.FACING_DIRECTIONS[player.facing]
-			player.swing_at(at)
+			var using := weapon()
+			if player.swing_at(at, using) and using == &"torch":
+				Inventory.burn_torch()
 		Action.SHOOT:
-			var target := spawner.nearest_within(player.global_position, GameState.BALANCE.bow_range)
+			var using := weapon()
+			var reach: float = GameState.BALANCE.bow_range if using == &"bow" else BasicWeapons.STATS[using]["range"]
+			var target := spawner.nearest_within(player.global_position, reach)
 			var aim := target.global_position if target else player.global_position + Player.FACING_DIRECTIONS[player.facing]
-			player.shoot_at(aim)
+			if using == &"bow":
+				player.shoot_at(aim)
+			else:
+				player.throw_at(aim, using)
 		Action.HARVEST, Action.GATHER:
 			_use_tool(Player.Tool.HAND, cell)
 		Action.WATER:
@@ -570,7 +578,7 @@ func _build_action(cell: Vector2i) -> Action:
 
 
 func _creature_to_swing_at() -> Creature:
-	if not Inventory.has_sword:
+	if not Inventory.has_sword and not GameState.carry_mode:
 		return null
 	return spawner.nearest_within(player.global_position, GameState.BALANCE.action_swing_distance)
 
@@ -1085,4 +1093,6 @@ func _no_weapon_text() -> String:
 	var item := Inventory.combat_item(Inventory.combat_pick)
 	if item == &"bow" and Inventory.carried(item) > 0:
 		return "No arrows. Make some at the workbench, or pick another combat button."
+	if BasicWeapons.throws(item) and Inventory.carried(item) > 0:
+		return "No stones in the bag. Break rocks, or take some from storage."
 	return "No weapon on this combat button. Set one on the Modes page."

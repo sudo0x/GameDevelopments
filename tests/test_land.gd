@@ -40,7 +40,7 @@ func _run() -> void:
 	check("clearing is grass and farmable", farm.can_use(HOE, Vector2i(58, 18)))
 
 	# No tilling under anything solid.
-	for path in ["ShippingBox", "ShopStall", "House", "LanternDoor", "LanternStall", "LanternSouthWest", "LanternSouthEast"]:
+	for path: Variant in ["ShippingBox", "ShopStall", "House", "LanternDoor", "LanternStall", "LanternSouthWest", "LanternSouthEast"]:
 		var obj: Node2D = main.get_node("World/" + path)
 		var cell: Vector2i = g.local_to_map(g.to_local(obj.global_position + Vector2(0, -5)))
 		check(path + " cell blocked " + str(cell), not farm.can_use(HOE, cell))

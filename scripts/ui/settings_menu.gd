@@ -16,9 +16,9 @@ var _first_button: Button
 
 func _ready() -> void:
 	var margin := MarginContainer.new()
-	for side in ["left", "right"]:
+	for side: String in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 14)
-	for side in ["top", "bottom"]:
+	for side: String in ["top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 10)
 	add_child(margin)
 	var box := VBoxContainer.new()
@@ -66,7 +66,7 @@ func _add_row(box: VBoxContainer, label_text: String, set_volume: Callable, get_
 	var value := Label.new()
 	value.custom_minimum_size = Vector2(60, 0)
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	for step in [-STEP, STEP]:
+	for step: float in [-STEP, STEP]:
 		var button := Button.new()
 		button.name = "%s%s" % [label_text, "Down" if step < 0 else "Up"]
 		button.text = "-" if step < 0 else "+"

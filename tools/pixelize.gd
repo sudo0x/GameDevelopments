@@ -19,6 +19,8 @@ extends SceneTree
 ##   drawn on a base ring it doesn't need).
 ##   Optional: --outline true reads each whole art pixel instead of only its center, and keeps thin
 ##   dark lines. For art shrunk a lot, where center samples would lose the outline (wardthorn).
+##   Optional: --middle true centers each sprite up and down too, instead of on the frame's bottom.
+##   For icons, where a short one (a pile of stones) would otherwise sit low.
 
 const OUTLINE_DARKNESS := 0.22
 const OUTLINE_MIN_DARK := 0.2
@@ -69,7 +71,7 @@ func _init() -> void:
 		var w := int(round(box.size.x / scale))
 		var h := int(round(box.size.y / scale))
 		var ox := i * frame_w + (frame_w - w) / 2
-		var oy := frame_h - h
+		var oy := (frame_h - h) / 2 if args.get("middle", "") == "true" else frame_h - h
 		if w > frame_w or h > frame_h:
 			push_warning("Sprite %d is %dx%d, larger than the frame" % [i, w, h])
 		for y in h:

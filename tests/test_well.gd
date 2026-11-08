@@ -23,7 +23,7 @@ func _run() -> void:
 	for i in 3:
 		await physics_frame
 	var farm: Node = main.get_node("Farm")
-	var well = inv.building_by_id(&"well")
+	var well: Variant = inv.building_by_id(&"well")
 	check("well exists", well != null and well.water_radius == 2)
 
 	inv.add_material(inv.MATERIALS[0], 5)
@@ -35,7 +35,7 @@ func _run() -> void:
 	var near := center + Vector2i(1, 0)
 	var edge := center + Vector2i(2, 2)
 	var outside := center + Vector2i(3, 0)
-	for cell in [near, edge, outside]:
+	for cell: Variant in [near, edge, outside]:
 		farm.till(cell)
 	farm.plant(near, inv.CROPS[0])
 	farm.builder.place(center, well)

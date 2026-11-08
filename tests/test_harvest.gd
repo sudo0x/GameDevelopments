@@ -45,7 +45,7 @@ func _run() -> void:
 	await press("tool_3")
 	await press("use_tool")
 	check("planted", farm.crops.has(cell))
-	var radish = inv.CROPS[0]
+	var radish: Variant = inv.CROPS[0]
 	check("seed used", inv.seed_count(radish) == 9)
 
 	await press("tool_4")

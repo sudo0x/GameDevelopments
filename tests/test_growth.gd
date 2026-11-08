@@ -46,7 +46,7 @@ func _run() -> void:
 	}
 	var cell := Vector2i(16, 12)
 	for x in 3:
-		var data = inv.CROPS[x]
+		var data: Variant = inv.CROPS[x]
 		var c := cell + Vector2i(x, 0)
 		farm.till(c)
 		farm.plant(c, data)

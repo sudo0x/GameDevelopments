@@ -40,9 +40,9 @@ func _run() -> void:
 	var stall: Node2D = main.get_node("World/ShopStall")
 	var hud: Node = main.get_node("HUD")
 	var menu: Control = main.get_node("HUD/ShopMenu")
-	var radish = inv.CROPS[0]
-	var carrot = inv.CROPS[1]
-	var pumpkin = inv.CROPS[2]
+	var radish: Variant = inv.CROPS[0]
+	var carrot: Variant = inv.CROPS[1]
+	var pumpkin: Variant = inv.CROPS[2]
 	print("prices: ", radish.seed_price, "/", radish.sell_price, " ", carrot.seed_price, "/", carrot.sell_price, " ", pumpkin.seed_price, "/", pumpkin.sell_price)
 
 	# Shipping, reached from each side of the box.
@@ -56,7 +56,7 @@ func _run() -> void:
 	var expected: int = radish.sell_price * 2 + pumpkin.sell_price
 	check("shipped value", inv.shipped_value() == expected)
 	check("HUD shows shipping", hud.status_text.contains("Shipping: %d" % expected))
-	for offset in [Vector2(-30, -2), Vector2(30, -2), Vector2(0, -16)]:
+	for offset: Variant in [Vector2(-30, -2), Vector2(30, -2), Vector2(0, -16)]:
 		inv.harvest[&"carrot"] = 1
 		await stand(player, box.global_position + offset)
 		await press("interact")

@@ -30,7 +30,7 @@ var _style := StyleBoxTexture.new()
 
 func _ready() -> void:
 	_style.texture = CURSOR
-	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+	for side: int in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
 		_style.set_texture_margin(side, CORNER)
 
 

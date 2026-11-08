@@ -2,7 +2,7 @@ class_name RecipeData
 extends Resource
 ## One crafting recipe. Instances live in data/recipes/.
 
-enum Result { HOLY_WATER, PURIFYING_HOE, BUILDING, SWORD, STRONG_HOLY_WATER, BOW, ARROWS }
+enum Result { HOLY_WATER, PURIFYING_HOE, BUILDING, SWORD, STRONG_HOLY_WATER, BOW, ARROWS, BASIC_WEAPON }
 
 @export var display_name: String
 @export var icon: Texture2D
@@ -15,3 +15,5 @@ enum Result { HOLY_WATER, PURIFYING_HOE, BUILDING, SWORD, STRONG_HOLY_WATER, BOW
 @export var made_text_touch: String
 ## Which building, for Result.BUILDING.
 @export var building: BuildingData
+## Which basic weapon (BasicWeapons.IDS), for Result.BASIC_WEAPON.
+@export var weapon: StringName

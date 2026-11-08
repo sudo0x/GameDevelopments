@@ -112,24 +112,26 @@ func _entries() -> Array[Dictionary]:
 	return entries
 
 
-## Combat mode: one row per combat button (a, b and c beside the big button), each showing every
-## carried weapon. A tap puts that weapon on the button, or takes it off; a button holds one.
+## Combat mode: one row per combat button (a, b and c beside the big button), with its three
+## places in the order a tap goes through them. A weapon's place offers Take off and Use sooner;
+## an empty place shows a plus, and offers the carried weapons to add.
 func _add_combat(entries: Array[Dictionary], tab: String) -> String:
 	var summaries: PackedStringArray = []
-	var weapons: Array[StringName] = []
-	for item in Inventory.bag_items():
-		if ItemInfo.kind(item) == ItemInfo.WEAPONS and Inventory.can_set(item):
-			weapons.append(item)
 	for i in Inventory.COMBAT_BUTTONS:
-		var on := Inventory.combat_item(i)
-		if on != &"":
-			summaries.append("%d: %s" % [i + 1, Inventory.item_name(on)])
-		for item in weapons:
-			entries.append({
-				"id": StringName("slot%d_%s" % [i, item]), "icon": KeyToolBar.item_icon(item), "kind": tab,
-				"switch": item == on, "section": "Combat button %d: tap a weapon" % (i + 1),
-				"on_tap": Inventory.toggle_in_combat_slot.bind(item, i),
-			})
+		var slot := Inventory.combat_slot(i)
+		var names: PackedStringArray = []
+		for place in Inventory.WEAPONS_PER_BUTTON:
+			var section := "Combat button %d" % (i + 1)
+			if place < slot.size():
+				names.append(Inventory.item_name(slot[place]))
+				entries.append({
+					"id": StringName("slot%d_%d" % [i, place]), "icon": KeyToolBar.item_icon(slot[place]),
+					"kind": tab, "section": section,
+				})
+			else:
+				entries.append({"id": StringName("slot%d_%d" % [i, place]), "icon": null, "kind": tab, "section": section, "plus": true})
+		if not names.is_empty():
+			summaries.append("%d: %s" % [i + 1, ", ".join(names)])
 	return " | ".join(summaries)
 
 
@@ -179,7 +181,7 @@ func _add_unused(entries: Array[Dictionary], tab: String, ready: Array[StringNam
 
 
 func _count(item: StringName) -> String:
-	return "" if item in [&"hoe", &"can", &"sword", &"bow"] else str(Inventory.carried(item))
+	return str(Inventory.carried(item)) if Inventory.shows_count(item) else ""
 
 
 func _details(id: StringName) -> Dictionary:
@@ -195,7 +197,7 @@ func _details(id: StringName) -> Dictionary:
 		"buttons": [],
 	}
 	if Inventory.can_set(id):
-		if id in [&"sword", &"bow"]:
+		if Inventory.is_weapon(id):
 			_combat_details(id, details)
 		else:
 			_set_details(id, details)
@@ -217,16 +219,31 @@ func _combat_details(id: StringName, details: Dictionary) -> void:
 ## A weapon in one combat button's row on the Modes page.
 func _slot_details(id: StringName) -> Dictionary:
 	var index := int(String(id).substr(4, 1))
-	var item := StringName(String(id).substr(6))
-	var on := Inventory.combat_item(index) == item
-	var details := {
+	var place := int(String(id).substr(6))
+	var slot := Inventory.combat_slot(index)
+	if place >= slot.size():
+		# An empty place: a tile for each carried weapon that isn't on any button yet, since a
+		# weapon goes on one button only.
+		var buttons: Array = []
+		for item in Inventory.bag_items():
+			if Inventory.is_weapon(item) and Inventory.combat_button_of(item) < 0:
+				buttons.append([Inventory.short_name(item), Inventory.toggle_in_combat_slot.bind(item, index), true, KeyToolBar.item_icon(item)])
+		return {
+			"name": "Add to button %d" % (index + 1),
+			"text": "Pick a free weapon:" if not buttons.is_empty() else "No free weapons. Each weapon goes on one button, so take one off another button first, or make one at the workbench.",
+			"buttons": buttons,
+		}
+	var item := slot[place]
+	return {
 		"icon": KeyToolBar.item_icon(item),
 		"name": "Button %d: %s" % [index + 1, Inventory.item_name(item)],
 		"text": ItemInfo.describe(item),
-		"info": "On this button" if on else "Not on this button",
-		"buttons": [["Take off" if on else "Put on", Inventory.toggle_in_combat_slot.bind(item, index), on or Inventory.carried(item) > 0]],
+		"info": "%s of %d on this button" % [ORDINALS[place], slot.size()],
+		"buttons": [
+			["Take off", Inventory.toggle_in_combat_slot.bind(item, index), true],
+			["Use sooner", Inventory.move_combat_sooner.bind(item, index), place > 0],
+		],
 	}
-	return details
 
 
 func _job_details(job: StringName) -> Dictionary:
@@ -297,3 +314,11 @@ static func job_icon(job: StringName) -> Texture2D:
 	icon.atlas = JOB_ICONS
 	icon.region = Rect2(Inventory.FARM_JOBS.find(job) * JOB_ICON_SIZE, 0, JOB_ICON_SIZE, JOB_ICON_SIZE)
 	return icon
+
+
+## Opens straight on one page and tab, for the empty combat buttons.
+func open_on(page: String, tab: String) -> void:
+	_page = page
+	open()
+	_tab = tab
+	_refresh()

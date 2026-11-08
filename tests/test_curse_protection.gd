@@ -28,8 +28,8 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var healing: Node = farm.healing
 	main.get_node("World/Player")._safe_left = 9999.0
-	var lantern = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"lantern_post")[0]
-	var fence = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
+	var lantern: Variant = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"lantern_post")[0]
+	var fence: Variant = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
 
 	# A lantern guards a square, corners included.
 	var at := Vector2i(34, 13)

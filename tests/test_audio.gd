@@ -37,7 +37,7 @@ func _run() -> void:
 	var saves: Node = root.get_node("SaveGame")
 	var audio: Node = root.get_node("Audio")
 	await process_frame
-	for bus in ["Music", "Effects"]:
+	for bus: Variant in ["Music", "Effects"]:
 		check(bus + " channel exists", AudioServer.get_bus_index(bus) > 0)
 	var missing: Array = audio.missing()
 	print("sounds with no file yet: ", missing.size())

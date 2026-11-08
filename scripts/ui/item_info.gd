@@ -57,7 +57,7 @@ static func kind(item: StringName) -> String:
 		return MATERIALS
 	if text.begins_with("build_"):
 		return BUILD
-	if item in [&"sword", &"bow", &"arrows"]:
+	if item in [&"sword", &"bow", &"arrows"] or BasicWeapons.has(item):
 		return WEAPONS
 	return TOOLS
 
@@ -65,6 +65,8 @@ static func kind(item: StringName) -> String:
 static func describe(item: StringName) -> String:
 	if TEXTS.has(item):
 		return TEXTS[item]
+	if BasicWeapons.has(item):
+		return BasicWeapons.TEXTS[item]
 	var text := String(item)
 	if text.begins_with("seed_") or text.begins_with("crop_"):
 		var crop := Inventory.crop_by_id(StringName(text.substr(5)))
@@ -93,4 +95,6 @@ static func recipe_item(recipe: RecipeData) -> StringName:
 			return &"bow"
 		RecipeData.Result.ARROWS:
 			return &"arrows"
+		RecipeData.Result.BASIC_WEAPON:
+			return recipe.weapon
 	return &""

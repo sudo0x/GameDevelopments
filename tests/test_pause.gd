@@ -26,7 +26,7 @@ func press(action: String) -> void:
 
 
 func tap(at: Vector2) -> void:
-	for pressed in [true, false]:
+	for pressed: Variant in [true, false]:
 		var e := InputEventScreenTouch.new()
 		e.index = 1
 		e.position = root.get_final_transform() * at

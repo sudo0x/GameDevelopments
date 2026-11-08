@@ -93,7 +93,7 @@ func _run() -> void:
 	check("tilling a marked tile works", farm.is_tilled(save_me))
 	check("bare soil keeps its mark", healing._marks._rects.size() == 3)
 	farm.untill(save_me)
-	var fence = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
+	var fence: Variant = inv.BUILDINGS.filter(func(b: Resource) -> bool: return b.id == &"fence")[0]
 	farm.builder.place(save_me, fence)
 	healing.refresh_marks(farm._can_curse_take)
 	check("its mark goes", healing._marks._rects.size() == 2)

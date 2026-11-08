@@ -41,12 +41,12 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
 	var player: Node = main.get_node("World/Player")
-	var fence = inv.building_by_id(&"fence")
+	var fence: Variant = inv.building_by_id(&"fence")
 	check("fence exists", fence != null and fence.heal_radius == 0)
 
 	# Crafting by wood alone.
 	inv.add_material(inv.MATERIALS[0], 6)
-	var recipe = inv.RECIPES[3]
+	var recipe: Variant = inv.RECIPES[3]
 	check("recipe is the fence", recipe.building == fence)
 	for i in 6:
 		inv.craft(recipe)

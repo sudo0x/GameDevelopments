@@ -25,7 +25,7 @@ flowchart LR
 - **Seeds to plant:** `Inventory.plant_set`, as many as the player picks. The big button plants only these, first first, and new seeds never join on their own. Tools stay in `farm_set`
 - **Bag** (`SetsMenu`, key I or the Bag button): the same layout as the item menus, with two pages picked at the top, and it reopens on the last one. **Bag** shows what's carried by kind; the details side says what an item does, with buttons to add it to its set, take it out, or move it sooner (`Inventory.move_sooner()`). **Modes** has a tab per mode (Farm mode, Combat mode, Build mode) and opens on the mode in use. Each tab shows the mode's switches, then its items in order, then carried items it doesn't use yet, which one tap adds (findings 91 and 92). Tiles keep their icon full size: a count sits in the corner, and a switch is plain when on and dark when off. The page buttons sit at the start of the row. `ItemGridMenu` entries take `section`, `on_tap` and `switch` for this
 - **Farm mode:** the big button works like the classic smart Action button, but only with the farming set: harvest and gather always, then water, plant the first seed in the set that fits, till, purify with the hoe, and heal with holy water. **Holy water is only used on a cursed tile straight ahead,** never on a patch beside you while farming (the cursor grows to show the area first). Leave it out of the set to keep it safe
-- **Combat mode:** three combat buttons beside the big button each hold one weapon (`Inventory.combat_item()`, set on the Modes page's Combat tab). Tapping one picks it (`Inventory.combat_pick`, Q/E on computers), and the big button fights with the picked weapon; with none, or a bow with no arrows, it says why (finding 96). New weapons go on the first empty button. Kept as its own mode, because later islands are about fighting. The bow (crafted once: 8 wood, 2 curse shards) shoots arrows (crafted 2 wood and 1 stone for 10). A shot draws the bow through its 3 frames (`Bow`, `scenes/player/bow.tscn`, `assets/objects/bow_frames.png` from `tools/build_bow_frames.gd`), then an `Arrow` flies up to `bow_range` (170 px) at `arrow_speed`, hurting the first creature and stopping at trees and houses, but not at the curse.
+- **Combat mode:** three combat buttons beside the big button each hold up to three weapons (set on the Modes page's Combat tab, in the order they go round). Each weapon is on one button only, and empty buttons are hidden in play (finding 103). Tapping a button picks it, and tapping the picked one again goes to its next weapon (`Inventory.tap_combat()`, `combat_pick`, `combat_turn`, `combat_item()`; Q/E pick a button on computers; finding 97), and the big button fights with the picked weapon; with none, or a bow with no arrows, it says why (finding 96). New weapons go on the first empty button. Kept as its own mode, because later islands are about fighting. The bow (crafted once: 8 wood, 2 curse shards) shoots arrows (crafted 2 wood and 1 stone for 10). A shot draws the bow through its 3 frames (`Bow`, `scenes/player/bow.tscn`, `assets/objects/bow_frames.png` from `tools/build_bow_frames.gd`), then an `Arrow` flies up to `bow_range` (170 px) at `arrow_speed`, hurting the first creature and stopping at trees and houses, but not at the curse.
 - **Build mode** (finding 93): does one thing at a time, picked with the build tool button beside the big one (V on computers) or on the Modes page: **Place** puts the build set's first building on the tile ahead, with the ghost preview and guard square showing. **Move** lifts the building ahead (it fades and stays put), then puts it down where the preview is green; it never goes through the bag, and leaving Build mode or changing tool puts it back (`Farm.lifted`, `_lift()`, `drop_lifted()`). **Pick up** puts it in the bag, to carry it or keep it at the chest; a full bag refuses. `Inventory.build_tool`, saved. New buildings join the build set when crafted. Holding a building to drag it is off with these controls, so walking past one can't grab it
 - **Mode button** (in the old Heal spot): a tap goes to the next mode, Farm → Combat → Build, so a weapon is one tap away while farming. Holding it for 0.3 seconds opens a wheel of the three modes up and to the left; slide onto one and let go. Letting go elsewhere changes nothing. Computers: C for the next mode, 1, 2 and 3 for each. Every morning starts in Farm mode
 - **Objects are tapped,** or clicked on a computer, standing close: door, stall, box, workbench, wells, shrine and chest. Too far away says "Walk closer". The big button never uses objects. F still works on computers
@@ -303,4 +303,80 @@ shape and by the color of its big chunky arrow:
    outline over to the crate, pointing RIGHT.
 No lantern posts. The arrows are the biggest, boldest part of each icon. Each icon
 centered in its third, filling most of it, with a little empty space around it.
+```
+
+**Six basic weapons** (finding 98, built 2026-11-08; numbers in `scripts/farm/basic_weapons.gd`, art in `assets/items/basic_weapons.png` and `assets/objects/pebble.png`): early, cheap and weaker than the sword and bow, so the combat buttons have something to switch between. Every hit still does 1 heart (creatures are small), so each is weaker in reach, speed or ammo instead. All are made at the workbench from wood, stone and a few curse shards.
+
+| Weapon | How it works | Weaker because | Made from |
+|---|---|---|---|
+| Wooden club | Swings like the sword | Slow swing, short reach | 3 wood |
+| Pitchfork | A straight jab ahead | Long reach, but narrow and slow | 4 wood, 1 stone |
+| Sickle | A quick small swing | Fast, but very short reach | 2 wood, 2 stone |
+| Torch | A swing that pushes creatures back hard | Short reach; burns out after 20 swings | 2 wood, 1 curse shard |
+| Sling | Throws a pebble, like the bow | Shorter range than the bow; uses stone as ammo | 2 wood, 1 curse shard |
+| Throwing stones | Thrown by hand | Shortest range; one stone each | 1 stone, once |
+
+**Basic weapon icons:** six in one row, each pointing up with the handle at the bottom, like the sword, so the same picture can swing. They become `assets/items/basic_weapons.png`, six 32×32 pieces in this order. Please send the large version, and attach the sword and bow icons as the reference.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+Six small, simple, poor-looking farm-made weapons in one row, all the same size,
+with clear empty space between them. Each stands upright, handle at the bottom,
+tip or head at the top, so it could be swung like a sword. They must look cheap
+and homemade, plainer than a real sword, and each must be easy to tell apart by
+its outline:
+1. Wooden club: a rough knobbly branch, thick at the top, with a cloth-wrapped grip.
+2. Pitchfork: a long wooden pole with a rusty three-pronged iron fork on top.
+3. Sickle: a short wooden handle with a small curved rusty blade at the top.
+4. Torch: a wooden stick with oily rags wrapped at the top and a small orange
+   flame (painted flat, no glow).
+5. Sling: a simple leather strap with a small pouch in the middle, hanging in a
+   loose upside-down U shape, with a grey pebble in the pouch.
+6. Throwing stones: three rough grey stones in a small pile.
+Each weapon centered in its sixth, filling most of its height, with a little empty
+space around it.
+```
+
+**Pebble** (the sling's and throwing stones' flying shot, about 8×8): one small picture, attach the arrow as the reference.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+One tiny rough grey pebble, roundish with a few chipped edges and a darker outline,
+centered, filling most of the picture. It will be drawn very small while flying.
+```
+
+**Attack icon** (finding 99): the big button's one fixed picture in Combat mode, so it never repeats the weapon on a small button. Art in 2026-11-08 (`assets/ui/attack_icon.png`, master in `art_source/ui/`). Attach the mode icons as the reference. Please send the large version.
+
+```
+Match the style of the attached reference exactly.
+
+Pixel art game asset for a 2D top-down farming game, seen straight on.
+Designed for a 32x32 pixel grid: chunky, clearly visible pixels, no anti-aliasing,
+no blur. Moody dark-fantasy style: muted, desaturated earthy colors, deep purples
+and teals in the shadows. 3-tone shading, light from the top-left, neutral
+daylight (not night, no glow effects). Fully transparent background, with no glow
+or shadow around the object. No text, no letters, no numbers.
+
+One bold "attack" icon for a big round action button: three thick parallel diagonal
+slash marks, like claw strikes, in pale worn steel with a dark outline, going from
+the top right down to the bottom left, with a few small sharp chips flying off the
+ends. No weapon is shown, so it means "strike" whatever weapon is used. The shape
+must be simple, bold and easy to read at a very small size, centered, filling most
+of the picture, with a little empty space around it.
 ```

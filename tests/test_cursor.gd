@@ -11,7 +11,7 @@ func check(name: String, ok: bool) -> void:
 
 
 func press(action: String) -> void:
-	for pressed in [true, false]:
+	for pressed: Variant in [true, false]:
 		var e := InputEventAction.new()
 		e.action = action
 		e.pressed = pressed

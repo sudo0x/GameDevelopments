@@ -254,6 +254,10 @@ func _held_text() -> String:
 		var which := "Combat %d" % (Inventory.combat_pick + 1)
 		if weapon == &"bow":
 			return "%s: Bow, %d arrows" % [which, Inventory.carried(&"arrows")]
+		if BasicWeapons.throws(weapon):
+			return "%s: %s, %d stones" % [which, Inventory.item_name(weapon), Inventory.carried(&"mat_stone")]
+		if weapon == &"torch":
+			return "%s: Torch, %d swings left" % [which, Inventory.torch_left]
 		return "%s: %s" % [which, Inventory.item_name(weapon) if weapon != &"" else "no weapon set"]
 	var text := "Farming"
 	if Inventory.has_purifying_hoe and _farm_ready(&"hoe"):

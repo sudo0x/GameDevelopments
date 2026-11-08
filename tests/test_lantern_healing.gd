@@ -29,7 +29,7 @@ func _run() -> void:
 	var farm: Node = main.get_node("Farm")
 	var g: TileMapLayer = farm.ground
 	var hud: Node = main.get_node("HUD")
-	var lantern = inv.BUILDINGS[0]
+	var lantern: Variant = inv.BUILDINGS[0]
 	var healing: Node = farm.healing
 	# All messages, because only the newest one stays on screen.
 	var notices: Array = []

@@ -17,10 +17,10 @@ func _run() -> void:
 	var inv: Node = root.get_node("Inventory")
 	var theme: Theme = load("res://data/ui/game_theme.tres")
 	check("the project uses it", ProjectSettings.get_setting("gui/theme/custom") == "res://data/ui/game_theme.tres")
-	for style in ["normal", "hover", "pressed", "disabled", "focus"]:
+	for style: Variant in ["normal", "hover", "pressed", "disabled", "focus"]:
 		check("buttons have a %s look" % style, theme.has_stylebox(style, "Button"))
 	check("panels", theme.has_stylebox("panel", "PanelContainer"))
-	for style in ["normal_joystick", "normal_tip", "pressed_joystick", "pressed_tip"]:
+	for style: Variant in ["normal_joystick", "normal_tip", "pressed_joystick", "pressed_tip"]:
 		check("joystick " + style, theme.has_stylebox(style, "VirtualJoystick"))
 	check("the pixel font is the default", theme.default_font != null and theme.default_font.resource_path.ends_with("m5x7.ttf"))
 	check("drawn crisp, with no smoothing", (theme.default_font as FontFile).antialiasing == TextServer.FONT_ANTIALIASING_NONE)
@@ -36,7 +36,7 @@ func _run() -> void:
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
-	for path in ["HUD/ShopMenu", "HUD/BagMenu", "HUD/CraftingMenu"]:
+	for path: Variant in ["HUD/ShopMenu", "HUD/BagMenu", "HUD/CraftingMenu"]:
 		var menu: Control = main.get_node(path)
 		check(path + " panel comes from the theme", menu.get_theme_stylebox("panel") == theme.get_stylebox("panel", "PanelContainer"))
 	var shop: Control = main.get_node("HUD/ShopMenu")

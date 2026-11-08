@@ -46,9 +46,9 @@ func _run() -> void:
 	var menu: Node = main.get_node("HUD/CraftingMenu")
 	var bag: Node = main.get_node("HUD/BagMenu")
 	var player: Node = main.get_node("World/Player")
-	var wood = inv.MATERIALS[0]
-	var stone = inv.MATERIALS[1]
-	var recipe = inv.RECIPES[1]
+	var wood: Variant = inv.MATERIALS[0]
+	var stone: Variant = inv.MATERIALS[1]
+	var recipe: Variant = inv.RECIPES[1]
 
 	# Before crafting, the hoe does nothing to the curse.
 	check("recipe needs", menu._buttons.size() == inv.RECIPES.size() and recipe.needs.size() == 2)

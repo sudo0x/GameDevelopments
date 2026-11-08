@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="RecipeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/farm/recipe_data.gd" id="1_recipe"]
+[ext_resource type="Script" path="res://scripts/farm/recipe_need.gd" id="2_need"]
+[ext_resource type="Texture2D" path="res://assets/items/basic_weapons.png" id="3_icons"]
+[ext_resource type="Resource" path="res://data/materials/wood.tres" id="4_wood"]
+
+[sub_resource type="AtlasTexture" id="icon"]
+atlas = ExtResource("3_icons")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="Resource" id="need_wood"]
+script = ExtResource("2_need")
+material = ExtResource("4_wood")
+amount = 3
+
+[resource]
+script = ExtResource("1_recipe")
+display_name = "Wooden club"
+icon = SubResource("icon")
+needs = Array[ExtResource("2_need")]([SubResource("need_wood")])
+result = 7
+weapon = &"club"
+made_text = "Made. It's on a combat button."
+made_text_touch = "Made. It's on a combat button."

@@ -25,10 +25,10 @@ func _run() -> void:
 	# Border stays cursed, or a player could leave the map once land heals nearby.
 	var border_ok := true
 	for x in 76:
-		for y in [0, 25]:
+		for y: Variant in [0, 25]:
 			border_ok = border_ok and g.get_cell_source_id(Vector2i(x, y)) == 1
 	for y in 26:
-		for x in [0, 75]:
+		for x: Variant in [0, 75]:
 			border_ok = border_ok and g.get_cell_source_id(Vector2i(x, y)) == 1
 	check("whole map border is cursed", border_ok)
 	# Flood fill from the player: nothing east of the shore is reachable yet.
@@ -37,7 +37,7 @@ func _run() -> void:
 	var todo: Array[Vector2i] = [start]
 	while not todo.is_empty():
 		var c: Vector2i = todo.pop_back()
-		for d in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		for d: Variant in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
 			var n: Vector2i = c + d
 			if used.has_point(n) and not seen.has(n) and g.get_cell_source_id(n) != 1:
 				seen[n] = true

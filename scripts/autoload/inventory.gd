@@ -34,6 +34,12 @@ const RECIPES: Array[RecipeData] = [
 	preload("res://data/recipes/strong_holy_water.tres"),
 	preload("res://data/recipes/bow.tres"),
 	preload("res://data/recipes/arrows.tres"),
+	preload("res://data/recipes/club.tres"),
+	preload("res://data/recipes/pitchfork.tres"),
+	preload("res://data/recipes/sickle.tres"),
+	preload("res://data/recipes/torch.tres"),
+	preload("res://data/recipes/sling.tres"),
+	preload("res://data/recipes/stones.tres"),
 ]
 
 ## Loaded when the game starts, not preloaded: the shipping box script uses Inventory,
@@ -72,6 +78,9 @@ var has_sword := false
 ## The bow shoots arrows, the first weapon in the combat set once made (storage controls).
 var has_bow := false
 var arrows := 0
+## The basic weapons made (BasicWeapons), and how many swings the torch has left.
+var basic_weapons: Array[StringName] = []
+var torch_left := 0
 ## Purifying uses left today. Full every morning, so only owning the hoe is saved.
 var hoe_uses_left := 0
 ## Waters left in the can. Full every morning, so it isn't saved.
@@ -107,15 +116,19 @@ var build_tool: StringName = &"place"
 ## their own.
 const START_PLANT_SET: Array[StringName] = [&"seed_radish", &"seed_carrot", &"seed_pumpkin"]
 var plant_set: Array[StringName] = START_PLANT_SET.duplicate()
-## The three combat buttons (a, b and c beside the big button) each hold one weapon. Tapping one
-## picks it, and the big button fights with the picked one: no fallback order, so the player
-## always knows what a tap does. Button 1 keeps the old combat_set name for older saves.
+## The three combat buttons (a, b and c beside the big button) each hold up to three weapons.
+## Tapping a button picks it; tapping the picked one again goes to its next weapon, round and
+## round. The big button fights with the picked button's weapon: no fallback order, so the
+## player always knows what a tap does. Button 1 keeps the old combat_set name for older saves.
 const COMBAT_BUTTONS := 3
+const WEAPONS_PER_BUTTON := 3
 var combat_set: Array[StringName] = []
 var combat_slot_2: Array[StringName] = []
 var combat_slot_3: Array[StringName] = []
 ## The combat button picked now. Not saved: each morning starts on button 1.
 var combat_pick := 0
+## Which of its weapons each combat button is on now. Not saved either.
+var combat_turn: Array[int] = [0, 0, 0]
 ## Storage controls: whether this game got its sword and lantern post, so loading never gives
 ## them twice.
 var starter_given := false
@@ -156,6 +169,7 @@ static func building_item(building: BuildingData) -> StringName:
 ## Every item that can go in the bag, in the order storage lists them.
 func all_items() -> Array[StringName]:
 	var items: Array[StringName] = [&"hoe", &"can", &"sword", &"bow", &"arrows", &"holy_water", &"strong_holy_water"]
+	items.append_array(BasicWeapons.IDS)
 	for crop in CROPS:
 		items.append(seed_item(crop))
 	for crop in CROPS:
@@ -177,6 +191,8 @@ func total(item: StringName) -> int:
 			return 1 if has_sword else 0
 		&"bow":
 			return 1 if has_bow else 0
+		&"club", &"pitchfork", &"sickle", &"torch", &"sling", &"stones":
+			return 1 if basic_weapons.has(item) else 0
 		&"arrows":
 			return arrows
 		&"holy_water":
@@ -197,6 +213,8 @@ func total(item: StringName) -> int:
 
 
 func item_name(item: StringName) -> String:
+	if BasicWeapons.has(item):
+		return BasicWeapons.STATS[item]["name"]
 	match item:
 		&"hoe":
 			return "Purifying hoe" if has_purifying_hoe else "Hoe"
@@ -294,7 +312,7 @@ func upgrade_bag() -> bool:
 ## Which ready set an item can go in: the seeds to plant, the combat set or the build set, or
 ## none. Tools, holy water, crops and materials are just carried: farm jobs say what's used.
 func set_for(item: StringName) -> Array[StringName]:
-	if item == &"sword" or item == &"bow":
+	if is_weapon(item):
 		return combat_set
 	if String(item).begins_with("seed_"):
 		return plant_set
@@ -304,7 +322,7 @@ func set_for(item: StringName) -> Array[StringName]:
 	return none
 
 
-## The weapon list behind one combat button (at most one weapon).
+## The weapons on one combat button, in the order a tap goes through them.
 func combat_slot(index: int) -> Array[StringName]:
 	match index:
 		1:
@@ -314,23 +332,39 @@ func combat_slot(index: int) -> Array[StringName]:
 	return combat_set
 
 
-## The weapon on a combat button, or empty.
+## The weapon a combat button is on now, or empty.
 func combat_item(index: int) -> StringName:
 	var slot := combat_slot(index)
-	return slot[0] if not slot.is_empty() else &""
+	return slot[combat_turn[index] % slot.size()] if not slot.is_empty() else &""
 
 
-## Puts a weapon on a combat button, or takes it off if it's already there.
+## A tap on a combat button: picks it, or, if it's already picked, goes to its next weapon.
+func tap_combat(index: int) -> void:
+	if combat_pick != index:
+		combat_pick = index
+	elif combat_slot(index).size() > 1:
+		combat_turn[index] = (combat_turn[index] + 1) % combat_slot(index).size()
+	inventory_changed.emit()
+
+
+## Adds a weapon to a combat button (up to three), or takes it off if it's already there. A
+## weapon is on one button at most, so adding it moves it off any other.
 func toggle_in_combat_slot(item: StringName, index: int) -> bool:
-	if item not in [&"sword", &"bow"]:
+	if not is_weapon(item):
 		return false
 	var slot := combat_slot(index)
 	if slot.has(item):
-		slot.clear()
-	elif carried(item) > 0:
-		slot.assign([item])
+		slot.erase(item)
+		combat_turn[index] = 0
+	elif carried(item) > 0 and slot.size() < WEAPONS_PER_BUTTON:
+		for i in COMBAT_BUTTONS:
+			if combat_slot(i).has(item):
+				combat_slot(i).erase(item)
+				combat_turn[i] = 0
+		slot.append(item)
 	else:
 		return false
+	_fix_combat_pick()
 	inventory_changed.emit()
 	return true
 
@@ -338,6 +372,7 @@ func toggle_in_combat_slot(item: StringName, index: int) -> bool:
 ## Picks the combat button the big button fights with.
 func pick_combat(index: int) -> void:
 	combat_pick = clampi(index, 0, COMBAT_BUTTONS - 1)
+	_fix_combat_pick()
 	inventory_changed.emit()
 
 
@@ -352,13 +387,20 @@ func _give_combat_button(item: StringName) -> void:
 			return
 
 
-## Older saves listed several weapons on a button: each keeps its first, and the rest move to
-## empty buttons.
+## Older saves could list more weapons on a button than it holds: the rest move to empty buttons.
 func _fit_combat_buttons() -> void:
 	var extra: Array[StringName] = []
+	# A weapon on several buttons (older saves) stays on the first only.
+	var seen: Array[StringName] = []
+	for i in COMBAT_BUTTONS:
+		for item: StringName in combat_slot(i).duplicate():
+			if seen.has(item):
+				combat_slot(i).erase(item)
+			else:
+				seen.append(item)
 	for i in COMBAT_BUTTONS:
 		var slot := combat_slot(i)
-		while slot.size() > 1:
+		while slot.size() > WEAPONS_PER_BUTTON:
 			extra.append(slot.pop_back())
 	for item in extra:
 		_give_combat_button(item)
@@ -379,7 +421,7 @@ func toggle_job(job: StringName) -> void:
 
 
 func can_set(item: StringName) -> bool:
-	return item in [&"sword", &"bow"] or String(item).begins_with("seed_") or String(item).begins_with("build_")
+	return is_weapon(item) or String(item).begins_with("seed_") or String(item).begins_with("build_")
 
 
 ## Moves an item one place up its set, so it's used sooner.
@@ -407,7 +449,7 @@ func toggle_in_set(item: StringName) -> bool:
 	if not can_set(item):
 		return false
 	# Weapons live on the combat buttons: the Bag page's button uses the first one.
-	if item in [&"sword", &"bow"]:
+	if is_weapon(item):
 		return toggle_in_combat_slot(item, 0)
 	var ready := set_for(item)
 	if ready.has(item):
@@ -459,7 +501,7 @@ func give_starter_kit() -> void:
 func _join_set(item: StringName) -> void:
 	if not can_set(item) or set_for(item).has(item) or String(item).begins_with("seed_"):
 		return
-	if item in [&"sword", &"bow"]:
+	if is_weapon(item):
 		_give_combat_button(item)
 		return
 	set_for(item).append(item)
@@ -475,7 +517,7 @@ func _spend_carried(item: StringName, amount: int) -> void:
 
 ## After totals drop some other way (crafting), the bag can't hold more than is owned.
 func _tidy_bag() -> void:
-	for item in bag.keys():
+	for item: StringName in bag.keys():
 		bag[item] = mini(bag[item], total(item))
 		if bag[item] <= 0:
 			bag.erase(item)
@@ -560,6 +602,8 @@ func already_made(recipe: RecipeData) -> bool:
 			return has_sword
 		RecipeData.Result.BOW:
 			return has_bow
+		RecipeData.Result.BASIC_WEAPON:
+			return basic_weapons.has(recipe.weapon)
 	return false
 
 
@@ -605,6 +649,12 @@ func craft(recipe: RecipeData) -> bool:
 		RecipeData.Result.ARROWS:
 			arrows += recipe.result_amount
 			_carry(&"arrows", recipe.result_amount)
+		RecipeData.Result.BASIC_WEAPON:
+			basic_weapons.append(recipe.weapon)
+			if recipe.weapon == &"torch":
+				torch_left = BasicWeapons.TORCH_SWINGS
+			_carry(recipe.weapon, 1)
+			_give_combat_button(recipe.weapon)
 	_tidy_bag()
 	inventory_changed.emit()
 	return true
@@ -782,6 +832,8 @@ func reset() -> void:
 	has_sword = false
 	has_bow = false
 	arrows = 0
+	basic_weapons = []
+	torch_left = 0
 	hoe_uses_left = 0
 	can_water = BALANCE.can_capacity
 	bag = START_BAG.duplicate()
@@ -793,6 +845,7 @@ func reset() -> void:
 	combat_slot_2 = []
 	combat_slot_3 = []
 	combat_pick = 0
+	combat_turn = [0, 0, 0]
 	build_set = []
 	starter_given = false
 
@@ -810,6 +863,8 @@ func save_to(file: ConfigFile) -> void:
 	file.set_value("game", "sword", has_sword)
 	file.set_value("game", "bow", has_bow)
 	file.set_value("game", "arrows", arrows)
+	file.set_value("game", "basic_weapons", basic_weapons)
+	file.set_value("game", "torch_left", torch_left)
 	# A list of [item, count] pairs, because a saved dictionary comes back sorted, and the
 	# order is the bag page's.
 	var pairs: Array = []
@@ -839,6 +894,8 @@ func load_from(file: ConfigFile) -> void:
 	has_sword = file.get_value("game", "sword", has_sword)
 	has_bow = file.get_value("game", "bow", has_bow)
 	arrows = file.get_value("game", "arrows", arrows)
+	basic_weapons.assign(file.get_value("game", "basic_weapons", []))
+	torch_left = file.get_value("game", "torch_left", 0)
 	# A bigger starting bag reaches older saves too.
 	bag_slots = maxi(file.get_value("game", "bag_slots", bag_slots), BALANCE.bag_start_slots)
 	starter_given = file.get_value("game", "starter_kit", false)
@@ -867,6 +924,7 @@ func load_from(file: ConfigFile) -> void:
 			if can_set(item):
 				set_for(item).append(item)
 	_fit_combat_buttons()
+	_fix_combat_pick()
 	# Saves from before kept seeds in a farming set: they move to the seeds to plant.
 	for item: StringName in file.get_value("game", "farm_set", []):
 		if String(item).begins_with("seed_") and not plant_set.has(item):
@@ -902,3 +960,80 @@ func set_build_tool(value: StringName) -> void:
 ## The next build tool, for the button that cycles them.
 func next_build_tool() -> void:
 	set_build_tool(BUILD_TOOLS[(BUILD_TOOLS.find(build_tool) + 1) % BUILD_TOOLS.size()])
+
+
+## The sword, the bow, and the basic weapons: what goes on combat buttons.
+func is_weapon(item: StringName) -> bool:
+	return item in [&"sword", &"bow"] or BasicWeapons.has(item)
+
+
+## Tools and weapons are one of a kind, so menus show no count for them.
+func shows_count(item: StringName) -> bool:
+	return item not in [&"hoe", &"can"] and not is_weapon(item)
+
+
+## One swing of the torch. When it burns out it's gone, off its buttons too, and a new one can
+## be made.
+func burn_torch() -> void:
+	torch_left -= 1
+	if torch_left > 0:
+		inventory_changed.emit()
+		return
+	torch_left = 0
+	basic_weapons.erase(&"torch")
+	_spend_carried(&"torch", 1)
+	for i in COMBAT_BUTTONS:
+		if combat_slot(i).has(&"torch"):
+			combat_slot(i).erase(&"torch")
+			combat_turn[i] = 0
+	_fix_combat_pick()
+	GameState.notice.emit("The torch burned out. Make another at the workbench.")
+	inventory_changed.emit()
+
+
+## The sling and throwing stones throw a carried stone. Returns false with none.
+func use_stone() -> bool:
+	if not _has_carried(&"mat_stone"):
+		return false
+	materials[&"stone"] -= 1
+	_spend_carried(&"mat_stone", 1)
+	inventory_changed.emit()
+	return true
+
+
+## Moves a weapon one place sooner on its combat button.
+func move_combat_sooner(item: StringName, index: int) -> void:
+	var slot := combat_slot(index)
+	var at := slot.find(item)
+	if at <= 0:
+		return
+	slot[at] = slot[at - 1]
+	slot[at - 1] = item
+	combat_turn[index] = 0
+	inventory_changed.emit()
+
+
+## The picked combat button must have a weapon: empty ones are hidden in play. Falls back to the
+## first button that has one.
+func _fix_combat_pick() -> void:
+	if not combat_slot(combat_pick).is_empty():
+		return
+	for i in COMBAT_BUTTONS:
+		if not combat_slot(i).is_empty():
+			combat_pick = i
+			return
+
+
+## A short name that fits under a small picture.
+func short_name(item: StringName) -> String:
+	if BasicWeapons.has(item):
+		return BasicWeapons.STATS[item].get("short", BasicWeapons.STATS[item]["name"])
+	return item_name(item)
+
+
+## The combat button a weapon is on, or -1.
+func combat_button_of(item: StringName) -> int:
+	for i in COMBAT_BUTTONS:
+		if combat_slot(i).has(item):
+			return i
+	return -1

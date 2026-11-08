@@ -37,7 +37,7 @@ func _run() -> void:
 	var g: TileMapLayer = farm.ground
 	var player: Node2D = main.get_node("World/Player")
 	var spawner: Node = farm.spawner
-	var shard = inv.MATERIALS[2]
+	var shard: Variant = inv.MATERIALS[2]
 	var HOLLOW := "res://data/creatures/hollow.tres"
 	var SHADE := "res://data/creatures/shade.tres"
 	var open := Vector2(600, 500)
